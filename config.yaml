@@ -1,0 +1,31 @@
+# gamegen configuration
+# All LLM traffic goes through a locally installed, subscription-authenticated CLI.
+# No API keys are read or required anywhere in this pipeline.
+
+backend: codex          # codex | claude  (see gamegen/backend.py)
+model: gpt-5.5          # passed to `codex exec -m` / `claude --model`
+reasoning_effort: high  # codex only: model_reasoning_effort override (null = CLI default)
+
+llm:
+  timeout_seconds: 900  # per call; design/engineering calls can think for a while
+  max_retries: 2        # retries per call on timeout / nonzero exit / missing output
+
+seed: 42                # global RNG seed (inspiration sampler + playtest harness)
+
+limits:
+  revision_cycles: 4    # max critic->designer revision loops before run is marked failed
+  repair_rounds: 3      # max rules-engineer repair rounds per revision
+  format_retries: 2     # re-asks when an agent's output fails strict parsing
+
+validation:
+  random_playouts: 1000 # all must terminate under move_cap
+  move_cap: 400         # plies; hitting the cap counts as non-termination in validation
+  illegal_move_samples: 200
+
+playtest:
+  random_vs_random_games: 200
+  mc_vs_random_games: 40     # per color assignment (so 80 total)
+  mc_vs_mc_games: 20
+  mc_simulations_per_move: 24
+  mc_simulation_move_cap: 200
+  move_cap: 400              # a game hitting this in playtest is scored as a draw

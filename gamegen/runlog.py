@@ -16,14 +16,27 @@ from typing import Any, Optional
 
 
 class RunLog:
-    def __init__(self, root: Path, run_seed: int, runs_dir: str = "runs"):
-        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y%m%dT%H%M%SZ"
-        )
-        self.dir = root / runs_dir / f"{timestamp}_seed{run_seed}"
-        self.dir.mkdir(parents=True, exist_ok=False)
-        (self.dir / "calls").mkdir()
-        self._call_counter = 0
+    def __init__(self, root: Path, run_seed: int, runs_dir: str = "runs",
+                 resume_dir: Optional[Path] = None):
+        if resume_dir is not None:
+            # crash recovery: keep logging into an existing run directory,
+            # continuing the call numbering
+            self.dir = Path(resume_dir)
+            if not (self.dir / "calls").is_dir():
+                raise FileNotFoundError(f"{self.dir} is not a run directory")
+            existing = [
+                int(p.name.split("_")[0])
+                for p in (self.dir / "calls").glob("*.prompt.txt")
+            ]
+            self._call_counter = max(existing, default=0)
+        else:
+            timestamp = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%SZ"
+            )
+            self.dir = root / runs_dir / f"{timestamp}_seed{run_seed}"
+            self.dir.mkdir(parents=True, exist_ok=False)
+            (self.dir / "calls").mkdir()
+            self._call_counter = 0
         self._current_agent = "pipeline"
         self.events: list[dict[str, Any]] = []
 

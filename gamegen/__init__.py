@@ -1,5 +1,6 @@
 """gamegen — multi-agent LLM pipeline that invents new two-player
-symmetric abstract board games, validates them mechanically, playtests
+asymmetric abstract board games (two structurally different roles,
+rough balance as the target), validates them mechanically, playtests
 them, and writes human-readable rulebooks.
 
 All LLM calls go through a locally installed, subscription-authenticated

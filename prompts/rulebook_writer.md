@@ -16,8 +16,10 @@ The spec's rule `text` fields, edge cases, and win conditions are the
 authoritative rules: convey ALL of them — a rules lawyer must be able to
 resolve any situation from your rulebook alone — but rewrite them in
 natural teaching language; never quote the JSON, never mention the spec,
-fields, players "0 and 1" (use e.g. Black and White, matching the
-pieces' physical description), or anything about how the game was made.
+fields, players "0 and 1" (this is an asymmetric game — call the players
+by their role names from the spec's `roles`, e.g. "the Flock" and "the
+Wardens", and describe pieces by their physical descriptions), or
+anything about how the game was made.
 
 Required structure, in this order (the bold labels below describe the
 required CONTENT — write natural rulebook headings like "## Overview" or
@@ -25,7 +27,9 @@ required CONTENT — write natural rulebook headings like "## Overview" or
 your headings):
 
 1. **Title and overview** — the game's name, one-sentence pitch, and a
-   short paragraph of what playing it feels like and how you win.
+   short paragraph of what playing it feels like: introduce both roles,
+   what each side is trying to do, and how each side wins. Make clear
+   the two sides play by different rules.
 2. **Components** — exactly what to gather or print, with counts.
 3. **Setup** — where every piece starts, WITH an ASCII diagram of the
    initial board in a fenced code block, using a legend (e.g. `B`/`W`

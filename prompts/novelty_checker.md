@@ -27,7 +27,12 @@ Work like a reviewer building a rejection case:
    TwixT, ConHex), the GIPF project, modern abstracts (Hive, Amazons,
    Arimaa, Tak, Santorini, Onitama, Yavalath, Slither, Symple, ...), and
    traditional regional games (Fanorona, Konane, Surakarta, Bagh-Chal
-   and other hunt games, Seega, Choko, ...).
+   and other hunt games, Seega, Choko, ...). The games you receive are
+   ASYMMETRIC-role designs, so weigh the asymmetric canon heavily: the
+   tafl family, Fox and Geese and the wider fox-game family, Bagh-Chal
+   and other tiger/leopard hunt games, Hare and Hounds, Asalto and other
+   siege games — an asymmetric skeleton that matches any of these is the
+   most likely rejection case.
 3. For each plausible match, compare rule by rule and identify the
    decisive overlaps AND the genuine differences. A difference only
    counts if it changes strategy, not presentation.

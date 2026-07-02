@@ -14,6 +14,14 @@ turn structure, the win/draw conditions, and the edge-case rulings are
 the authoritative rules — implement exactly what they say. Where the
 structured `parameters` disagree with the `text`, the `text` wins.
 
+The game is ASYMMETRIC: players 0 and 1 play different roles (the spec's
+`roles` field; player 0 always moves first). `pieces[].counts` gives each
+player's count of a piece — a count of 0 means that side never has it. A
+`player` field of `0` or `1` on a move rule, win condition, or loss
+condition scopes it to that player alone; a missing `player` field or
+`"both"` means it applies to both players. Never give one role's moves,
+captures, or goals to the other.
+
 ## Engine contract (fixed — the validator checks all of it)
 
 Your module must define EXACTLY ONE class implementing all of these
@@ -34,10 +42,6 @@ class Engine:
     def result(self, state):
         # only called on terminal states:
         # {"winner": 0 | 1 | None, "reason": "<short string>"}
-    def mirror_state(self, state):
-        # the color-swap symmetry map: swap the two players' pieces,
-        # reserves, counters AND the side to move. Must be an involution:
-        # mirror_state(mirror_state(s)) == s. Used to verify symmetry.
     def render(self, state):            # ASCII picture of the state
 ```
 
@@ -71,13 +75,6 @@ Hard requirements:
    written can loop forever and the spec declares a repetition rule, the
    repetition rule must actually catch the loops (it applies to repeated
    POSITIONS, so implement it exactly).
-7. **mirror_state must flip the side to move** and swap every
-   player-indexed component. For spatial games, colors swap but
-   coordinates DO NOT move unless the spec's symmetry is explicitly
-   geometric (e.g. connection games where each player targets different
-   board sides: there, mirror the geometry so that the swapped player
-   targets their correct sides — apply the map stated in the spec's
-   symmetry_statement).
 
 ## Common engine bugs — avoid all of these
 
@@ -85,6 +82,10 @@ Hard requirements:
   by `id()`.
 - `legal_moves(state, player)` ignoring the `player` argument, or
   returning moves for the wrong side.
+- Ignoring a rule's `player` scope: generating one role's moves for the
+  other role, or checking a role-scoped win condition for both players.
+  The two sides have DIFFERENT rules — implement each side's turn from
+  its own rule set.
 - Forgetting mandatory captures/actions the spec text declares
   ("must", "is mandatory") and offering quiet moves alongside them.
 - Checking win conditions only for the mover — some specs let a move
@@ -92,8 +93,6 @@ Hard requirements:
 - Off-by-one in board coordinates; mixing (row, col) and (col, row);
   breaking the spec's cell notation (columns a.., rows 1.., a1 bottom
   left for square boards).
-- mirror_state that swaps colors but not the side to move, or is not an
-  involution.
 - Repetition tracking that includes the full history in the position key
   (then no position ever repeats).
 - Duplicate entries in `legal_moves`: when two different choices (e.g.
@@ -109,15 +108,18 @@ Write focused pytest tests importing the engine with
 
 - initial state: correct piece placement/reserves, player 0 to move,
   expected number and shape of opening moves;
+- the FIRST TURN OF EACH ROLE: both roles' opening moves have the
+  expected count and shape under their own (different) rules, and
+  neither role is ever offered a move belonging to the other;
 - 2-3 hand-computed short sequences: apply specific moves, assert the
   exact resulting board features (piece positions, captures, reserves);
 - each win condition triggered by a constructed or played-out sequence
-  where feasible;
+  where feasible — cover EACH role's win condition;
 - each edge case from the spec's `edge_cases` that can be reached or
   constructed;
-- illegal moves raise `IllegalMoveError` (wrong player's piece, occupied
-  destination, malformed move);
-- `mirror_state` involution and hashability of states and moves.
+- illegal moves raise `IllegalMoveError` (wrong player's piece, the
+  other role's move type, occupied destination, malformed move);
+- hashability of states and moves.
 
 Construct test positions ONLY by replaying move sequences through
 `apply` from `initial_state()` — never by hand-building raw state tuples.

@@ -24,14 +24,21 @@ Rules for revising:
   most common failure of revision passes — sweep the whole spec.
 - Stay the same game. Fix the flaws; do not pivot to a new design unless
   a revision explicitly requires it. The mechanic seeds still apply.
-- Keep all hard constraints from the original brief: symmetric up to
-  color swap (player 0 moving first is the only asymmetry), perfect
-  information, no chance, guaranteed termination, no variant/re-skin of
-  any forbidden game, physically playable, every situation ruled
-  (including no-legal-move).
+- Keep all hard constraints from the original brief: two structurally
+  distinct asymmetric roles (role "0" always moves first), both roles
+  genuinely winnable with rough balance as the target (a modest lean is
+  acceptable; a forced win for either role is not), perfect information,
+  no chance, guaranteed termination, no variant/re-skin of any forbidden
+  game, physically playable, every situation ruled (including
+  no-legal-move, for both roles).
+- When a revision targets balance, prefer tuning a role's numbers (piece
+  counts, capture targets, ranges, reserve sizes) or adding/removing one
+  power over making the two roles more alike — converging the roles
+  toward symmetry defeats the design brief, and the critic scores role
+  contrast.
 - If a revision asks for something that would break a hard constraint,
   satisfy its INTENT another way and explain how in `design_rationale`.
-- Update `example_turn`, `edge_cases`, `symmetry_statement`, and
+- Update `example_turn`, `edge_cases`, `asymmetry_statement`, and
   `design_rationale` to match the revised rules — stale text from the
   previous revision is treated as an error.
 

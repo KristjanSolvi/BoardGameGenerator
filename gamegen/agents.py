@@ -158,8 +158,8 @@ def run_rules_engineer(backend, runlog, spec: dict, format_retries: int,
     )
 
 
-CRITIC_DIMENSIONS = ("balance", "decisiveness", "clarity", "novelty",
-                     "depth_potential")
+CRITIC_DIMENSIONS = ("balance", "decisiveness", "role_contrast", "clarity",
+                     "novelty", "depth_potential")
 
 
 def run_critic(backend, runlog, spec: dict,

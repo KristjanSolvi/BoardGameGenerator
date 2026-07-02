@@ -34,23 +34,24 @@ def test_reference_engine_passes_validation(tmp_path):
                              random_playouts=100, move_cap=30,
                              illegal_move_samples=50)
     assert report.ok, report.failure_message
-    assert report.checks["symmetry"]["opening_moves_per_player"] == 9
+    assert report.checks["playouts"]["branching_max"] == 9
     assert report.checks["playouts"]["length_max"] <= 9
 
 
-def test_asymmetric_engine_fails_symmetry(tmp_path):
-    # break mirror_state: stop flipping the side to move
+def test_wrong_first_player_fails(tmp_path):
+    # player 1 to move in the initial state -> clean 'playouts' failure
     engine_path = _copy_fixture(
         tmp_path,
         mutate=lambda code: code.replace(
-            "return tuple(swap[c] for c in state[:9]) + (1 - state[9],)",
-            "return tuple(swap[c] for c in state[:9]) + (state[9],)",
+            "return (None,) * 9 + (0,)  # 9 cells + side to move",
+            "return (None,) * 9 + (1,)  # 9 cells + side to move",
         ),
     )
     report = validate_engine(engine_path, test_path=None, spec={}, seed=7,
                              random_playouts=20, move_cap=30)
     assert not report.ok
-    assert report.failed_check == "symmetry"
+    assert report.failed_check == "playouts"
+    assert "player 0 must be to move" in report.failure_message
 
 
 def test_unsound_apply_fails(tmp_path):
@@ -120,8 +121,10 @@ def test_playtest_report_shape_and_reproducibility(tmp_path):
     r2 = run_playtests(engine, seed=11, cfg=dict(PLAYTEST_CFG))
     assert r1 == r2  # same seed -> byte-identical report
     head = r1["headline"]
-    assert 0.0 <= head["first_player_win_rate_random"] <= 1.0
+    assert 0.0 <= head["p0_role_win_rate_random"] <= 1.0
     assert 0.0 <= head["decisiveness_mc_vs_random"] <= 1.0
+    assert 0.0 <= head["decisiveness_as_p0"] <= 1.0
+    assert 0.0 <= head["decisiveness_as_p1"] <= 1.0
     assert r1["random_vs_random"]["games"] == 40
     assert r1["branching_factor"]["max"] == 9
 

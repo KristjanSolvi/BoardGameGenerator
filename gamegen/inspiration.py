@@ -1,8 +1,9 @@
 """Inspiration sampler (no LLM).
 
-Samples 2-3 mechanic seeds from a curated list to force diversity across
-runs, plus the forbidden list of famous abstract games that every agent
-receives. Deterministic given the run RNG.
+Samples 3-4 mechanic seeds from a curated list to force diversity across
+runs (always including an asymmetry style — every generated game is
+asymmetric), plus the forbidden list of famous abstract games that every
+agent receives. Deterministic given the run RNG.
 """
 
 from __future__ import annotations
@@ -11,6 +12,16 @@ import random
 from dataclasses import dataclass
 
 MECHANIC_SEEDS: dict[str, list[str]] = {
+    "asymmetry_style": [
+        "attacker vs defender: one side assaults a target the other side protects",
+        "swarm vs elite: many weak pieces against a few strong pieces",
+        "escape vs pursuit: one side tries to bring pieces to safety while the other hunts them down",
+        "builder vs breaker: one side constructs a pattern or structure, the other dismantles or blocks it",
+        "static vs mobile: one side places or grows fixed material, the other maneuvers a small mobile force",
+        "different action economies: the two sides get a different number or kind of actions per turn",
+        "different goals: each side pursues a win condition of a completely different type",
+        "different capture powers: only one side can capture, or the two sides capture in unrelated ways",
+    ],
     "movement_style": [
         "single-step moves to adjacent cells",
         "sliding any distance along a line until blocked",
@@ -68,6 +79,9 @@ FORBIDDEN_GAMES: list[str] = [
     "DVONN", "YINSH", "ZERTZ", "PUNCT", "Abalone", "Fanorona", "Konane",
     "Camelot", "Halma/Chinese Checkers", "Quoridor", "Isolation",
     "Quarto", "Pentago", "Tak", "Arimaa", "Backgammon", "Mancala/Oware",
+    "Fox and Geese (and the fox-game family)",
+    "Bagh-Chal (and other tiger/leopard hunt games)", "Hare and Hounds",
+    "Asalto",
 ]
 
 
@@ -87,14 +101,16 @@ class Inspiration:
 
 
 def sample_inspiration(rng: random.Random) -> Inspiration:
-    """Sample 2-3 mechanic seeds from distinct categories.
+    """Sample 3-4 mechanic seeds from distinct categories.
 
-    goal_type is always included (a game needs a goal); the remaining 1-2
+    asymmetry_style and goal_type are always included (every game in this
+    pipeline is asymmetric, and a game needs a goal); the remaining 1-2
     seeds come from other categories, so different runs are pushed toward
     genuinely different design regions.
     """
     n_extra = rng.choice([1, 2])
-    other_categories = [c for c in MECHANIC_SEEDS if c != "goal_type"]
-    chosen = ["goal_type"] + rng.sample(other_categories, n_extra)
+    fixed = ["asymmetry_style", "goal_type"]
+    other_categories = [c for c in MECHANIC_SEEDS if c not in fixed]
+    chosen = fixed + rng.sample(other_categories, n_extra)
     seeds = {cat: rng.choice(MECHANIC_SEEDS[cat]) for cat in sorted(chosen)}
     return Inspiration(seeds=seeds, forbidden_games=list(FORBIDDEN_GAMES))

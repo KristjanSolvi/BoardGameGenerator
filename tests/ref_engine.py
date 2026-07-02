@@ -52,10 +52,6 @@ class RefEngine:
             return {"winner": winner, "reason": "alignment"}
         return {"winner": None, "reason": "board_full"}
 
-    def mirror_state(self, state):
-        swap = {None: None, 0: 1, 1: 0}
-        return tuple(swap[c] for c in state[:9]) + (1 - state[9],)
-
     def render(self, state):
         symbols = {None: ".", 0: "X", 1: "O"}
         rows = [

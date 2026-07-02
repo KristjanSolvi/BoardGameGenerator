@@ -182,15 +182,25 @@ def run_playtests(engine, seed: int, cfg: dict[str, Any]) -> dict[str, Any]:
                + sum(1 for g in mc_as_p1 if g["winner"] == 1))
     mc_games = len(mc_as_p0) + len(mc_as_p1)
 
+    rvr_tally = _tally(rvr)
+    mc_p0_tally = _tally(mc_as_p0)
+    mc_p1_tally = _tally(mc_as_p1)
+    mvm_tally = _tally(mvm)
+
     report = {
         "config": {**cfg, "seed": seed},
-        "random_vs_random": _tally(rvr),
+        "random_vs_random": rvr_tally,
         "mc_vs_random": {
-            "mc_as_p0": _tally(mc_as_p0),
-            "mc_as_p1": _tally(mc_as_p1),
+            "mc_as_p0": mc_p0_tally,
+            "mc_as_p1": mc_p1_tally,
             "decisiveness_mc_win_rate": round(mc_wins / mc_games, 3),
+            # per-role skill signal: MC's win rate playing each role
+            # against a random opponent (compare each to that role's
+            # win rate under random_vs_random)
+            "decisiveness_as_p0": mc_p0_tally["p0_win_rate"],
+            "decisiveness_as_p1": mc_p1_tally["p1_win_rate"],
         },
-        "mc_vs_mc": _tally(mvm),
+        "mc_vs_mc": mvm_tally,
         "branching_factor": {
             "mean": round(statistics.mean(branching), 2),
             "max": max(branching),
@@ -198,12 +208,14 @@ def run_playtests(engine, seed: int, cfg: dict[str, Any]) -> dict[str, Any]:
             "p90": sorted(branching)[int(len(branching) * 0.9)],
         },
         "headline": {
-            "first_player_win_rate_random": _tally(rvr)["p0_win_rate"],
-            "first_player_win_rate_mc": _tally(mvm)["p0_win_rate"],
-            "draw_rate_random": _tally(rvr)["draw_rate"],
-            "draw_rate_mc": _tally(mvm)["draw_rate"],
+            "p0_role_win_rate_random": rvr_tally["p0_win_rate"],
+            "p0_role_win_rate_mc": mvm_tally["p0_win_rate"],
+            "draw_rate_random": rvr_tally["draw_rate"],
+            "draw_rate_mc": mvm_tally["draw_rate"],
             "decisiveness_mc_vs_random": round(mc_wins / mc_games, 3),
-            "avg_game_length_random": _tally(rvr)["length"]["mean"],
+            "decisiveness_as_p0": mc_p0_tally["p0_win_rate"],
+            "decisiveness_as_p1": mc_p1_tally["p1_win_rate"],
+            "avg_game_length_random": rvr_tally["length"]["mean"],
         },
     }
     return report

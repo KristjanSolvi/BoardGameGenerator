@@ -56,14 +56,34 @@ def test_off_board_placement_rejected():
         validate_spec(spec)
 
 
-def test_asymmetric_setup_rejected():
+def test_setup_exceeding_declared_counts_rejected():
+    # the example declares 2 wardens for player 1; placing a third must fail
     spec = load_example_spec()
-    spec["setup"]["initial_placements"] = [
-        {"player": 0, "piece": "stone", "cell": "a1"},
-        {"player": 0, "piece": "stone", "cell": "b1"},
-        {"player": 1, "piece": "stone", "cell": "e5"},
-    ]
-    with pytest.raises(SpecError, match="asymmetric"):
+    spec["setup"]["initial_placements"].append(
+        {"player": 1, "piece": "warden", "cell": "c3"}
+    )
+    with pytest.raises(SpecError, match="declared count"):
+        validate_spec(spec)
+
+
+def test_missing_roles_rejected():
+    spec = load_example_spec()
+    del spec["roles"]
+    with pytest.raises(SpecError, match="roles"):
+        validate_spec(spec)
+
+
+def test_identical_role_names_rejected():
+    spec = load_example_spec()
+    spec["roles"]["1"]["name"] = spec["roles"]["0"]["name"]
+    with pytest.raises(SpecError, match="different names"):
+        validate_spec(spec)
+
+
+def test_bad_player_scope_rejected():
+    spec = load_example_spec()
+    spec["move_rules"][0]["player"] = 2
+    with pytest.raises(SpecError, match="player"):
         validate_spec(spec)
 
 

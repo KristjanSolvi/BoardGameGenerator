@@ -1,9 +1,11 @@
 # gamegen
 
 A research pipeline that uses a multi-agent LLM workflow to invent
-completely new two-player **symmetric abstract board games**, compile
-them into executable engines, validate and playtest them mechanically,
-and produce human-readable rulebooks. Built for reproducibility: every
+completely new two-player **asymmetric abstract board games** — the two
+players pilot structurally different roles (different pieces, powers, or
+goals), with rough balance as the design target — compile them into
+executable engines, validate and playtest them mechanically, and produce
+human-readable rulebooks. Built for reproducibility: every
 prompt, response, spec revision, engine attempt, and metric of every run
 is archived.
 
@@ -20,7 +22,7 @@ inspiration sampler (no LLM: mechanic seeds + forbidden-games list)
         │    ▲
         ▼    │ traceback feedback (max 3 repair rounds)
   VALIDATOR (no LLM: pytest, 1000 random playouts, termination,
-             move soundness, symmetry via color-swap mirror, hashing)
+             move soundness, deterministic hashing)
         │
         ▼
  PLAYTEST HARNESS (no LLM: random & flat-Monte-Carlo matches
@@ -37,14 +39,14 @@ inspiration sampler (no LLM: mechanic seeds + forbidden-games list)
 
 | Agent | LLM | Prompt file | Job |
 |---|---|---|---|
-| Inspiration sampler | no | — | Samples 2–3 mechanic seeds (goal type always included) and the forbidden list of ~40 famous abstracts; forces design diversity across runs. |
-| Designer | yes | `prompts/designer.md` | Invents a complete symmetric game as strict spec JSON, with a design rationale arguing non-equivalence to known games. |
+| Inspiration sampler | no | — | Samples 3–4 mechanic seeds (asymmetry style and goal type always included) and the forbidden list of ~45 famous abstracts; forces design diversity across runs. |
+| Designer | yes | `prompts/designer.md` | Invents a complete asymmetric game (two named roles with structurally different rules) as strict spec JSON, with a design rationale arguing non-equivalence to known games. |
 | Designer (revision) | yes | `prompts/designer_revision.md` | Re-issues the full spec addressing the critic's numbered revisions. |
 | Rules engineer | yes | `prompts/rules_engineer.md` | Compiles the spec into a pure, deterministic Python engine + pytest tests. |
 | Rules engineer (repair) | yes | `prompts/rules_engineer_repair.md` | Fixes the engine given the validator's failure report. |
-| Validator | no | — | Hard checks: import, tests, 1000 terminating playouts, legal/illegal move soundness, symmetry isomorphism on move one, deterministic state hashing. |
-| Playtest harness | no | — | Random vs random, flat-MC vs random (both colors), MC vs MC; length distribution, first-player win rate, draw rate, decisiveness, branching factor. |
-| Critic | yes | `prompts/critic.md` | Scores balance/decisiveness/clarity/novelty/depth 1–10 with justifications; ACCEPT or concrete numbered revisions. |
+| Validator | no | — | Hard checks: import, tests, 1000 terminating playouts, legal/illegal move soundness, deterministic state hashing. |
+| Playtest harness | no | — | Random vs random, flat-MC vs random (both roles), MC vs MC; length distribution, per-role win rates, draw rate, decisiveness overall and per role, branching factor. |
+| Critic | yes | `prompts/critic.md` | Scores balance/decisiveness/role-contrast/clarity/novelty/depth 1–10 with justifications; ACCEPT or concrete numbered revisions. Tolerates a modest role imbalance by design. |
 | Novelty checker | yes | `prompts/novelty_checker.md` | Adversarial reviewer; sees only anonymized rules; names closest known games with similarity scores. Logged for manual review, never auto-fails a run. |
 | Rulebook writer | yes | `prompts/rulebook_writer.md` | Markdown rulebook for human participants: components, ASCII setup diagram, every rule with a worked example, edge-case Q&A, strategy hints. |
 

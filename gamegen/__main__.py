@@ -20,7 +20,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="gamegen",
         description="Multi-agent LLM pipeline that invents new two-player "
-                    "symmetric abstract board games.",
+                    "asymmetric abstract board games.",
     )
     parser.add_argument("--config", default="config.yaml",
                         help="path to config.yaml (default: ./config.yaml)")

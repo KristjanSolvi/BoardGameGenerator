@@ -19,7 +19,10 @@ natural teaching language; never quote the JSON, never mention the spec,
 fields, players "0 and 1" (use e.g. Black and White, matching the
 pieces' physical description), or anything about how the game was made.
 
-Required structure, in this order:
+Required structure, in this order (the bold labels below describe the
+required CONTENT — write natural rulebook headings like "## Overview" or
+"## Components", do not copy these list labels or their numbering into
+your headings):
 
 1. **Title and overview** — the game's name, one-sentence pitch, and a
    short paragraph of what playing it feels like and how you win.
@@ -45,7 +48,14 @@ Failure modes to avoid: coordinates in examples that are impossible on
 the board or inconsistent with the diagram; examples that silently break
 another rule; paraphrases that weaken a rule ("may" vs "must" — mandatory
 actions must stay mandatory); leaving any spec rule or edge case
-uncovered; jargon like "state", "legal move set", or "player 0".
+uncovered; jargon like "state", "legal move set", or "player 0";
+**deliberation leaking into the document** — the rulebook must contain no
+self-corrections, no "actually...", no mid-sentence questions: verify
+every example's coordinates during your reasoning phase, BEFORE writing
+the rulebook, and write only the final, checked version; if a partial
+board snippet illustrates a count (like a group or column size), every
+piece contributing to that count must be visible in the snippet or
+explicitly said to be elsewhere.
 
 ## Output format
 

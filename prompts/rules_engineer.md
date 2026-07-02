@@ -96,6 +96,10 @@ Hard requirements:
   involution.
 - Repetition tracking that includes the full history in the position key
   (then no position ever repeats).
+- Duplicate entries in `legal_moves`: when two different choices (e.g.
+  two directions) produce moves that compare equal, either encode the
+  distinguishing choice in the move tuple or deduplicate — the list must
+  never contain the same move twice.
 
 ## Tests
 
@@ -115,9 +119,14 @@ Write focused pytest tests importing the engine with
   destination, malformed move);
 - `mirror_state` involution and hashability of states and moves.
 
-Construct positions by replaying move sequences through `apply` wherever
-possible (never by poking private fields), so the tests stay valid if
-internals change.
+Construct test positions ONLY by replaying move sequences through
+`apply` from `initial_state()` — never by hand-building raw state tuples.
+Hand-built states couple the tests to the representation, and in practice
+you will build positions that are unreachable or subtly inconsistent
+(wrong side to move, stale counters) and then assert wrong expectations
+against them. If a scenario is hard to reach by replay, test the rule on
+a reachable position instead, and recompute every expected outcome by
+hand from the spec text.
 
 ## Output format
 

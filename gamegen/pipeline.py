@@ -55,9 +55,10 @@ def _engineer_until_valid(backend, runlog: RunLog, spec: dict, cfg: Config,
             previous_tests=test_code,
         )
         engine_code, test_code = files["ENGINE"], files["TESTS"]
+        # each attempt gets its own dir so tests can always `import engine`
         stem = f"rev{revision}_attempt{attempt}"
-        engine_path = runlog.save_text(f"engine/engine_{stem}.py", engine_code)
-        test_path = runlog.save_text(f"engine/test_engine_{stem}.py", test_code)
+        engine_path = runlog.save_text(f"engine/{stem}/engine.py", engine_code)
+        test_path = runlog.save_text(f"engine/{stem}/test_engine.py", test_code)
 
         report = validate_engine(
             engine_path=engine_path,
@@ -68,14 +69,11 @@ def _engineer_until_valid(backend, runlog: RunLog, spec: dict, cfg: Config,
             move_cap=int(cfg.validation["move_cap"]),
             illegal_move_samples=int(cfg.validation["illegal_move_samples"]),
         )
-        runlog.save_json(f"engine/validation_{stem}.json", report.as_dict())
+        runlog.save_json(f"engine/{stem}/validation.json", report.as_dict())
         runlog.event("validation", revision=revision, attempt=attempt,
                      ok=report.ok, failed_check=report.failed_check)
 
         if report.ok:
-            # promote to canonical names for this revision
-            runlog.save_text(f"engine/engine_rev{revision}.py", engine_code)
-            runlog.save_text(f"engine/test_engine_rev{revision}.py", test_code)
             return engine_path, report.as_dict()
 
         feedback = (
@@ -173,8 +171,9 @@ def run_one(cfg: Config, run_seed: int, root: Path) -> dict[str, Any]:
 
         # canonical final artifacts
         runlog.save_json("spec_final.json", spec)
-        runlog.save_text("engine/engine.py",
-                         Path(engine_path).read_text())
+        runlog.save_text("engine/engine.py", Path(engine_path).read_text())
+        runlog.save_text("engine/test_engine.py",
+                         (Path(engine_path).parent / "test_engine.py").read_text())
         runlog.save_json("playtest_report.json", playtest_report)
 
         # 7. novelty checker (logged only; never auto-fails the run)
@@ -227,7 +226,7 @@ def replay(run_dir: Path, cfg: Config) -> dict[str, Any]:
     Writes replay_playtest_report.json next to the original."""
     engine_path = run_dir / "engine" / "engine.py"
     if not engine_path.exists():
-        candidates = sorted((run_dir / "engine").glob("engine_rev*.py"))
+        candidates = sorted((run_dir / "engine").glob("rev*_attempt*/engine.py"))
         if not candidates:
             raise FileNotFoundError(f"no engine found under {run_dir}/engine/")
         engine_path = candidates[-1]

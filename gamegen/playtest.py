@@ -36,10 +36,13 @@ class RandomAgent:
 class FlatMCAgent:
     name = "flat_mc"
 
-    def __init__(self, rng: random.Random, simulations_per_move: int = 24,
+    def __init__(self, rng: random.Random, rollout_budget: int = 96,
                  simulation_move_cap: int = 200):
+        # rollout_budget is the TOTAL rollouts per decision, split evenly
+        # across candidate moves (min 1 each), so the cost of a decision
+        # is bounded regardless of branching factor
         self.rng = rng
-        self.simulations_per_move = simulations_per_move
+        self.rollout_budget = rollout_budget
         self.simulation_move_cap = simulation_move_cap
 
     def _rollout_value(self, engine, state, player) -> float:
@@ -58,8 +61,7 @@ class FlatMCAgent:
         moves = engine.legal_moves(state, player)
         if len(moves) == 1:
             return moves[0]
-        # split the simulation budget across moves, at least 2 each
-        per_move = max(2, self.simulations_per_move)
+        per_move = max(1, self.rollout_budget // len(moves))
         best_move, best_value = None, float("-inf")
         for move in moves:
             succ = engine.apply(state, move)
@@ -132,7 +134,7 @@ def run_playtests(engine, seed: int, cfg: dict[str, Any]) -> dict[str, Any]:
     """Run all matchups and return the playtest report dict."""
     move_cap = int(cfg["move_cap"])
     mc_kwargs = dict(
-        simulations_per_move=int(cfg["mc_simulations_per_move"]),
+        rollout_budget=int(cfg["mc_rollout_budget"]),
         simulation_move_cap=int(cfg["mc_simulation_move_cap"]),
     )
 

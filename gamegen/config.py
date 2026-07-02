@@ -25,7 +25,7 @@ DEFAULTS: dict[str, Any] = {
         "random_vs_random_games": 200,
         "mc_vs_random_games": 40,
         "mc_vs_mc_games": 20,
-        "mc_simulations_per_move": 24,
+        "mc_rollout_budget": 96,
         "mc_simulation_move_cap": 200,
         "move_cap": 400,
     },

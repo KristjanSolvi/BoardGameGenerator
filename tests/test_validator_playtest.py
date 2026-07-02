@@ -13,7 +13,7 @@ PLAYTEST_CFG = {
     "random_vs_random_games": 40,
     "mc_vs_random_games": 6,
     "mc_vs_mc_games": 4,
-    "mc_simulations_per_move": 8,
+    "mc_rollout_budget": 64,
     "mc_simulation_move_cap": 30,
     "move_cap": 30,
 }

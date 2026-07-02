@@ -192,6 +192,16 @@ def _random_playout(engine, rng: random.Random, move_cap: int,
 
 def _check_playouts(engine, report, seed, n_playouts, move_cap):
     rng = random.Random(seed ^ 0x5EED)
+    initial = engine.initial_state()
+    if engine.is_terminal(initial):
+        raise ValidationFailure(
+            "playouts",
+            "initial_state() is already terminal (result: "
+            f"{engine.result(initial)!r}). The game must start playable — "
+            "this usually means legal move generation is broken for the "
+            "starting position, or the terminal check misfires on it.\n"
+            f"{engine.render(initial)}",
+        )
     lengths = []
     reasons: Counter = Counter()
     collect = {"branching": [], "move_universe": set()}

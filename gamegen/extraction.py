@@ -88,6 +88,19 @@ def extract_labeled_python(text: str, labels: tuple[str, ...]) -> dict[str, str]
     return result
 
 
+def extract_section_text(text: str, label: str) -> str | None:
+    """Return the plain text after the last '### <label>' header, up to
+    the next '### ' header or end of text; None if the header is absent."""
+    headers = [m.end() for m in re.finditer(
+        rf"^###\s*{re.escape(label)}\s*$", text, re.MULTILINE
+    )]
+    if not headers:
+        return None
+    tail = text[headers[-1]:]
+    nxt = re.search(r"^###\s", tail, re.MULTILINE)
+    return (tail[:nxt.start()] if nxt else tail).strip()
+
+
 def extract_markdown(text: str) -> str:
     """Extract the last ```markdown block; if none, return the whole
     response (the rulebook writer may answer in plain markdown)."""

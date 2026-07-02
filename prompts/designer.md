@@ -36,6 +36,15 @@ constraints:
 
 ## Design failure modes — check your draft against every one
 
+- **Opening paralysis / dead positions**: rules that leave the starting
+  position (or early positions) with NO legal move. This is the most
+  common failure of generated designs, especially with exact-distance
+  movement, mandatory actions, or dense starting formations: check
+  whether required distances are blocked by the player's own pieces or
+  land on occupied cells. You MUST concretely enumerate several of
+  player 0's legal first moves in your reasoning and verify the count is
+  nonzero before emitting the spec — and `example_turn` must be legal
+  move by move under your final rules.
 - **Hidden first-player asymmetry**: a setup or goal that looks symmetric
   but gives the first mover a forced tempo win (e.g. a race where player 0
   is always one step ahead; a placement game where the center is winning

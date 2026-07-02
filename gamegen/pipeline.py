@@ -37,6 +37,11 @@ class RunFailed(Exception):
     the batch)."""
 
 
+class SpecDefect(Exception):
+    """The repair agent declared the failure to be a rules-level defect
+    that no faithful engine can fix; route it back to the designer."""
+
+
 def _engineer_until_valid(backend, runlog: RunLog, spec: dict, cfg: Config,
                           revision: int) -> tuple[Path, dict]:
     """Rules engineer + repair loop. Returns (engine_path, validation
@@ -54,6 +59,13 @@ def _engineer_until_valid(backend, runlog: RunLog, spec: dict, cfg: Config,
             previous_engine=engine_code,
             previous_tests=test_code,
         )
+        if "SPEC_DEFECT" in files:
+            runlog.save_text(
+                f"engine/rev{revision}_spec_defect.txt", files["SPEC_DEFECT"]
+            )
+            runlog.event("spec_defect", revision=revision,
+                         detail=files["SPEC_DEFECT"][:500])
+            raise SpecDefect(files["SPEC_DEFECT"])
         engine_code, test_code = files["ENGINE"], files["TESTS"]
         # each attempt gets its own dir so tests can always `import engine`
         stem = f"rev{revision}_attempt{attempt}"
@@ -124,9 +136,31 @@ def run_one(cfg: Config, run_seed: int, root: Path) -> dict[str, Any]:
         for revision in range(int(cfg.limits["revision_cycles"]) + 1):
             summary["revisions"] = revision
             # 3-4. engineer + validate (with repair loop)
-            engine_path, validation = _engineer_until_valid(
-                backend, runlog, spec, cfg, revision
-            )
+            try:
+                engine_path, validation = _engineer_until_valid(
+                    backend, runlog, spec, cfg, revision
+                )
+            except SpecDefect as defect:
+                if revision == int(cfg.limits["revision_cycles"]):
+                    raise RunFailed(
+                        "spec still mechanically defective in the last "
+                        f"revision cycle: {str(defect)[:300]}"
+                    )
+                feedback = (
+                    "1. Mechanical validation proved the current rules are "
+                    "defective — no faithful implementation can pass. Fix "
+                    "the rules so the defect below cannot occur:\n"
+                    + str(defect)
+                )
+                spec = agents.run_designer(
+                    backend, runlog, inspiration,
+                    format_retries=int(cfg.limits["format_retries"]),
+                    revision_feedback=feedback,
+                    previous_spec=spec,
+                )
+                runlog.save_json(f"spec_rev{revision + 1}.json", spec)
+                summary["game_name"] = spec["name"]
+                continue
 
             # 5. playtest (no LLM)
             engine = load_engine_class(engine_path)()

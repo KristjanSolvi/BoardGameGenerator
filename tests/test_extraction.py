@@ -43,6 +43,19 @@ def test_missing_section_raises():
         )
 
 
+def test_section_text_extraction():
+    from gamegen.extraction import extract_section_text
+    text = (
+        "reasoning...\n### SPEC-DEFECT\nThe starting position has no "
+        "legal move because every required distance is blocked.\n\n"
+        "### OTHER\nx"
+    )
+    out = extract_section_text(text, "SPEC-DEFECT")
+    assert out.startswith("The starting position")
+    assert "OTHER" not in out
+    assert extract_section_text("no headers here", "SPEC-DEFECT") is None
+
+
 def test_markdown_block_or_whole_text():
     assert extract_markdown("```markdown\n# Title\n```") == "# Title"
     assert extract_markdown("# Plain\n\nbody") == "# Plain\n\nbody"

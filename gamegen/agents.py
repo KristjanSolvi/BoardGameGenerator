@@ -13,7 +13,8 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from .extraction import (ExtractionError, extract_json,
-                         extract_labeled_python, extract_markdown)
+                         extract_labeled_python, extract_markdown,
+                         extract_section_text)
 from .schema import SpecError, validate_spec
 
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
@@ -140,6 +141,16 @@ def run_rules_engineer(backend, runlog, spec: dict, format_retries: int,
         agent_name = "rules_engineer_repair"
 
     def parse(response: str) -> dict[str, str]:
+        if repair_feedback is not None:
+            defect = extract_section_text(response, "SPEC-DEFECT")
+            if defect:
+                if len(defect) < 80:
+                    raise ExtractionError(
+                        "a SPEC-DEFECT declaration must explain the rules "
+                        "defect concretely (which rule, which situation, why "
+                        "no faithful engine can pass validation)"
+                    )
+                return {"SPEC_DEFECT": defect}
         return extract_labeled_python(response, ("ENGINE", "TESTS"))
 
     return _call_with_format_retries(

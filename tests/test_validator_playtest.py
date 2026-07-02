@@ -96,6 +96,23 @@ def test_non_terminating_engine_fails(tmp_path):
     assert report.failed_check in ("playouts", "determinism")
 
 
+def test_terminal_initial_state_fails_cleanly(tmp_path):
+    # regression: an engine whose starting position is already terminal
+    # must produce a clear 'playouts' failure, not a validator crash
+    engine_path = _copy_fixture(
+        tmp_path,
+        mutate=lambda code: code.replace(
+            "        return self._winner(state) is not None or all(",
+            "        return True or all(",
+        ),
+    )
+    report = validate_engine(engine_path, test_path=None, spec={}, seed=7,
+                             random_playouts=20, move_cap=30)
+    assert not report.ok
+    assert report.failed_check == "playouts"
+    assert "initial_state() is already terminal" in report.failure_message
+
+
 def test_playtest_report_shape_and_reproducibility(tmp_path):
     engine_path = _copy_fixture(tmp_path)
     engine = load_engine_class(engine_path)()

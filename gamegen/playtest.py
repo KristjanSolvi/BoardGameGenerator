@@ -10,10 +10,16 @@ no per-game code anywhere here. Two agents:
     reliably stronger than random on games with any strategic signal,
     which is exactly what the decisiveness metric needs.
 
-Matchups: random vs random, MC vs random (both colors), MC vs MC.
-Metrics: game length distribution, first-player win rate, draw rate,
-decisiveness (MC win rate vs random), branching factor stats,
-termination reasons. Everything lands in playtest_report.json.
+Matchups: random vs random, MC vs random (both seats), MC vs MC. The
+games are asymmetric, so seat = role: player 0 is always the spec's
+role "0" (and moves first). MC-vs-random is run from both seats so each
+role's responsiveness to skill is measured separately — an asymmetric
+design where only one role rewards skill is broken even if the overall
+win rates look fine.
+Metrics: game length distribution, per-role win rates, draw rate,
+decisiveness (MC win rate vs random, overall and per role), branching
+factor stats, termination reasons. Everything lands in
+playtest_report.json.
 """
 
 from __future__ import annotations
@@ -148,7 +154,7 @@ def run_playtests(engine, seed: int, cfg: dict[str, Any]) -> dict[str, Any]:
         for _ in range(int(cfg["random_vs_random_games"]))
     ]
 
-    # -- MC vs random, both color assignments -----------------------------
+    # -- MC vs random, both seats (each seat is a distinct role) ----------
     mc_as_p0, mc_as_p1 = [], []
     for i in range(int(cfg["mc_vs_random_games"])):
         rng_g = random.Random(seed ^ 0x3C0001 ^ (i * 2654435761))

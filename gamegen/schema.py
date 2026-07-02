@@ -1,4 +1,8 @@
-"""Strict validation of the game spec JSON (schema v1.0).
+"""Strict validation of the game spec JSON (schema v1.1, asymmetric).
+
+Games are asymmetric: the two players play structurally different roles
+(different pieces, powers, or goals). Piece counts, move rules, and
+win/loss conditions may therefore be scoped to a single player.
 
 Standard-library only (no jsonschema dependency). Every check failure is
 collected so the designer agent gets one complete error report per
@@ -9,12 +13,13 @@ from __future__ import annotations
 
 from typing import Any
 
-SPEC_VERSION = "1.0"
+SPEC_VERSION = "1.1"
 
 TOP_LEVEL_REQUIRED = {
     "spec_version": str,
     "name": str,
     "tagline": str,
+    "roles": dict,
     "board": dict,
     "pieces": list,
     "setup": dict,
@@ -25,7 +30,7 @@ TOP_LEVEL_REQUIRED = {
     "repetition_rule": dict,
     "edge_cases": list,
     "example_turn": str,
-    "symmetry_statement": str,
+    "asymmetry_statement": str,
     "design_rationale": str,
 }
 TOP_LEVEL_OPTIONAL = {"loss_conditions": list}
@@ -58,6 +63,7 @@ WIN_TYPES = {
 DRAW_TYPES = {"repetition", "mutual_immobility", "move_cap", "custom"}
 NO_LEGAL_MOVE_RULES = {"pass", "lose", "draw"}
 REPETITION_OUTCOMES = {"draw", "loss_for_mover"}
+PLAYER_SCOPES = {0, 1, "both"}
 
 
 class SpecError(ValueError):
@@ -95,21 +101,22 @@ def validate_spec(spec: Any) -> None:
     if spec["spec_version"] != SPEC_VERSION:
         errors.append(f"spec_version must be {SPEC_VERSION!r}")
 
+    _check_roles(spec["roles"], errors)
     cells = _check_board(spec["board"], errors)
-    piece_ids = _check_pieces(spec["pieces"], errors)
-    _check_setup(spec["setup"], piece_ids, cells, errors)
+    piece_counts = _check_pieces(spec["pieces"], errors)
+    _check_setup(spec["setup"], piece_counts, cells, errors)
     _check_turn(spec["turn"], errors)
-    _check_move_rules(spec["move_rules"], piece_ids, errors)
+    _check_move_rules(spec["move_rules"], set(piece_counts), errors)
     _check_conditions(spec["win_conditions"], "win_conditions", WIN_TYPES, errors,
-                      required=True)
+                      required=True, allow_player=True)
     _check_conditions(spec.get("loss_conditions", []), "loss_conditions",
-                      WIN_TYPES, errors, required=False)
+                      WIN_TYPES, errors, required=False, allow_player=True)
     _check_conditions(spec["draw_conditions"], "draw_conditions", DRAW_TYPES,
                       errors, required=False)
     _check_repetition(spec["repetition_rule"], errors)
     _check_edge_cases(spec["edge_cases"], errors)
 
-    for key in ("example_turn", "symmetry_statement", "design_rationale",
+    for key in ("example_turn", "asymmetry_statement", "design_rationale",
                 "name", "tagline"):
         if not spec[key].strip():
             errors.append(f"{key!r} must be a non-empty string")
@@ -119,6 +126,27 @@ def validate_spec(spec: Any) -> None:
 
 
 # ----------------------------------------------------------------------
+def _check_roles(roles: dict, errors: list[str]) -> None:
+    if set(roles) != {"0", "1"}:
+        errors.append('roles must have exactly the keys "0" and "1"')
+        return
+    names = []
+    for key in ("0", "1"):
+        r = roles[key]
+        if (not isinstance(r, dict)
+                or not isinstance(r.get("name"), str) or not r["name"].strip()
+                or not isinstance(r.get("summary"), str)
+                or not r["summary"].strip()):
+            errors.append(
+                f'roles["{key}"] must be an object with non-empty "name" '
+                'and "summary" strings'
+            )
+        else:
+            names.append(r["name"].strip().lower())
+    if len(names) == 2 and names[0] == names[1]:
+        errors.append("the two roles must have different names")
+
+
 def _check_board(board: dict, errors: list[str]) -> set[str] | None:
     """Returns the set of cell names if enumerable, else None."""
     topo = board.get("topology")
@@ -168,8 +196,11 @@ def _check_board(board: dict, errors: list[str]) -> set[str] | None:
     return node_set
 
 
-def _check_pieces(pieces: list, errors: list[str]) -> set[str]:
-    ids: set[str] = set()
+def _check_pieces(pieces: list,
+                  errors: list[str]) -> dict[str, dict | None]:
+    """Returns piece id -> counts object ({"0": n, "1": n}) or None if the
+    counts were malformed (so setup checks can skip them)."""
+    piece_counts: dict[str, dict | None] = {}
     if not pieces:
         errors.append("pieces must be non-empty")
     for i, p in enumerate(pieces):
@@ -180,28 +211,37 @@ def _check_pieces(pieces: list, errors: list[str]) -> set[str]:
         if not isinstance(pid, str) or not pid:
             errors.append(f"pieces[{i}].id must be a non-empty string")
             continue
-        if pid in ids:
+        if pid in piece_counts:
             errors.append(f"duplicate piece id {pid!r}")
-        ids.add(pid)
+        piece_counts.setdefault(pid, None)
         if not isinstance(p.get("name"), str) or not p["name"]:
             errors.append(f"piece {pid!r}: missing name")
-        cnt = p.get("per_player_count")
-        if not isinstance(cnt, int) or cnt < 0:
-            errors.append(f"piece {pid!r}: per_player_count must be an int >= 0")
+        counts = p.get("counts")
+        if (not isinstance(counts, dict) or set(counts) != {"0", "1"}
+                or not all(isinstance(counts[k], int) and counts[k] >= 0
+                           for k in ("0", "1"))):
+            errors.append(
+                f"piece {pid!r}: counts must be an object "
+                '{"0": <int >= 0>, "1": <int >= 0>} giving each player\'s '
+                "count of this piece (the counts may differ; use 0 for a "
+                "piece one side never has)"
+            )
+        else:
+            piece_counts[pid] = counts
         if not isinstance(p.get("physical"), str) or not p["physical"]:
             errors.append(f"piece {pid!r}: missing 'physical' description")
-    return ids
+    return piece_counts
 
 
-def _check_setup(setup: dict, piece_ids: set[str], cells: set[str] | None,
-                 errors: list[str]) -> None:
+def _check_setup(setup: dict, piece_counts: dict[str, dict | None],
+                 cells: set[str] | None, errors: list[str]) -> None:
     if not isinstance(setup.get("description"), str) or not setup["description"].strip():
         errors.append("setup.description must be a non-empty string")
     placements = setup.get("initial_placements")
     if not isinstance(placements, list):
         errors.append("setup.initial_placements must be a list (may be empty)")
         return
-    per_player: dict[int, list[str]] = {0: [], 1: []}
+    placed: dict[tuple[int, str], int] = {}
     for i, pl in enumerate(placements):
         if not isinstance(pl, dict):
             errors.append(f"initial_placements[{i}] must be an object")
@@ -212,8 +252,10 @@ def _check_setup(setup: dict, piece_ids: set[str], cells: set[str] | None,
         if player not in (0, 1):
             errors.append(f"initial_placements[{i}].player must be 0 or 1")
             continue
-        if piece not in piece_ids:
+        if piece not in piece_counts:
             errors.append(f"initial_placements[{i}].piece {piece!r} not declared")
+        else:
+            placed[(player, piece)] = placed.get((player, piece), 0) + 1
         if not isinstance(cell, str) or not cell:
             errors.append(f"initial_placements[{i}].cell must be a string")
             continue
@@ -222,13 +264,14 @@ def _check_setup(setup: dict, piece_ids: set[str], cells: set[str] | None,
                 f"initial_placements[{i}].cell {cell!r} is not on the board "
                 "(square boards use canonical notation a1..)"
             )
-        per_player[player].append(piece)
-    if sorted(per_player[0]) != sorted(per_player[1]):
-        errors.append(
-            "setup is asymmetric: players 0 and 1 must place the same "
-            f"multiset of pieces (got {sorted(per_player[0])} vs "
-            f"{sorted(per_player[1])})"
-        )
+    for (player, piece), n in sorted(placed.items()):
+        counts = piece_counts.get(piece)
+        if counts is not None and n > counts[str(player)]:
+            errors.append(
+                f"setup places {n} of piece {piece!r} for player {player}, "
+                f"but that piece's declared count for player {player} is "
+                f"{counts[str(player)]}"
+            )
 
 
 def _check_turn(turn: dict, errors: list[str]) -> None:
@@ -269,6 +312,10 @@ def _check_move_rules(rules: list, piece_ids: set[str], errors: list[str]) -> No
             errors.append(
                 f"move_rules[{i}].category must be one of {sorted(MOVE_CATEGORIES)}"
             )
+        if "player" in r and r["player"] not in PLAYER_SCOPES:
+            errors.append(
+                f'move_rules[{i}].player must be 0, 1, or "both"'
+            )
         if not isinstance(r.get("parameters"), dict):
             errors.append(f"move_rules[{i}].parameters must be an object")
         if not isinstance(r.get("text"), str) or len(r.get("text", "")) < 20:
@@ -279,7 +326,8 @@ def _check_move_rules(rules: list, piece_ids: set[str], errors: list[str]) -> No
 
 
 def _check_conditions(conds: list, field: str, types: set[str],
-                      errors: list[str], required: bool) -> None:
+                      errors: list[str], required: bool,
+                      allow_player: bool = False) -> None:
     if required and not conds:
         errors.append(f"{field} must be non-empty")
     for i, c in enumerate(conds):
@@ -288,6 +336,11 @@ def _check_conditions(conds: list, field: str, types: set[str],
             continue
         if c.get("type") not in types:
             errors.append(f"{field}[{i}].type must be one of {sorted(types)}")
+        if "player" in c:
+            if not allow_player:
+                errors.append(f"{field}[{i}] does not take a 'player' field")
+            elif c["player"] not in PLAYER_SCOPES:
+                errors.append(f'{field}[{i}].player must be 0, 1, or "both"')
         if not isinstance(c.get("text"), str) or len(c.get("text", "")) < 10:
             errors.append(f"{field}[{i}].text must be a precise English condition")
 

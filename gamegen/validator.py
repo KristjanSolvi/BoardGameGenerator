@@ -6,13 +6,11 @@ is focused):
      required interface, instantiable with no arguments;
   2. generated pytest suite passes;
   3. N random playouts all terminate under the move cap, with hashable
-     states and moves throughout;
+     states and moves throughout (and player 0 — the spec's role "0" —
+     is to move in the initial state);
   4. move soundness: every move from legal_moves is accepted by apply,
      and sampled moves NOT in the legal set are rejected;
-  5. symmetry: mirror_state() gives an isomorphism between player 0's
-     opening moves and player 1's opening moves in the mirrored start,
-     and the mirror is an involution;
-  6. determinism / state hashing: replaying the same seeded playout
+  5. determinism / state hashing: replaying the same seeded playout
      yields the identical hash sequence (this is what repetition rules
      rely on).
 
@@ -136,7 +134,6 @@ def validate_engine(
         _check_playouts(engine, report, seed, random_playouts, move_cap)
         _check_move_soundness(engine, report, seed, illegal_move_samples,
                               move_cap)
-        _check_symmetry(engine, report)
         _check_determinism(engine, report, seed, move_cap)
 
         report.ok = True
@@ -193,6 +190,13 @@ def _random_playout(engine, rng: random.Random, move_cap: int,
 def _check_playouts(engine, report, seed, n_playouts, move_cap):
     rng = random.Random(seed ^ 0x5EED)
     initial = engine.initial_state()
+    if engine.current_player(initial) != 0:
+        raise ValidationFailure(
+            "playouts",
+            "player 0 must be to move in initial_state() (player 0 is the "
+            f"spec's role \"0\" and always moves first; got player "
+            f"{engine.current_player(initial)})",
+        )
     if engine.is_terminal(initial):
         raise ValidationFailure(
             "playouts",
@@ -303,53 +307,6 @@ def _check_move_soundness(engine, report, seed, n_samples, move_cap):
         "ok": True,
         "legal_moves_tested": tested_legal,
         "illegal_moves_tested": tested_illegal,
-    }
-
-
-def _check_symmetry(engine, report):
-    """mirror_state() must be an involution mapping player 0's opening
-    options one-to-one onto player 1's options in the mirrored start."""
-    s0 = engine.initial_state()
-    m0 = engine.mirror_state(s0)
-    if engine.current_player(s0) != 0:
-        raise ValidationFailure(
-            "symmetry", "player 0 must be to move in initial_state()"
-        )
-    if engine.current_player(m0) != 1:
-        raise ValidationFailure(
-            "symmetry",
-            "mirror_state(initial_state()) must have player 1 to move "
-            f"(got player {engine.current_player(m0)})",
-        )
-    if hash(engine.mirror_state(m0)) != hash(s0) or engine.mirror_state(m0) != s0:
-        raise ValidationFailure(
-            "symmetry",
-            "mirror_state must be an involution: "
-            "mirror(mirror(s)) != s for the initial state",
-        )
-    moves0 = engine.legal_moves(s0, 0)
-    moves1 = engine.legal_moves(m0, 1)
-    if len(moves0) != len(moves1):
-        raise ValidationFailure(
-            "symmetry",
-            f"players have different numbers of opening moves after the "
-            f"color swap: {len(moves0)} vs {len(moves1)}. The game (or the "
-            f"engine's mirror_state) is asymmetric.",
-        )
-    succ0 = Counter(hash(engine.mirror_state(engine.apply(s0, m))) for m in moves0)
-    succ1 = Counter(hash(engine.apply(m0, m)) for m in moves1)
-    if succ0 != succ1:
-        raise ValidationFailure(
-            "symmetry",
-            "opening move sets are not isomorphic under the color swap: the "
-            "multiset of mirrored successor states of player 0's opening "
-            "moves does not equal the multiset of successor states of "
-            "player 1's opening moves in the mirrored start. Either the "
-            "rules are asymmetric or mirror_state is implemented wrongly.",
-        )
-    report.checks["symmetry"] = {
-        "ok": True,
-        "opening_moves_per_player": len(moves0),
     }
 
 

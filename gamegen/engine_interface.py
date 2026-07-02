@@ -6,7 +6,8 @@ a generated module is self-contained and this file is the reference
 contract).
 
 Conventions (enforced by the validator):
-  * Players are 0 and 1. Player 0 always moves first.
+  * Players are 0 and 1 (the spec's two asymmetric roles). Player 0
+    always moves first.
   * States are immutable and hashable (nested tuples / frozen dataclasses)
     and encode whose turn it is plus anything repetition rules need:
     hash(state) is the repetition key.
@@ -59,15 +60,6 @@ class GameEngine(ABC):
         {"winner": 0 | 1 | None, "reason": "<short string>"}
         where winner None means a draw."""
 
-    @abstractmethod
-    def mirror_state(self, state: State) -> State:
-        """Return `state` with the two players' colors swapped (pieces,
-        counters, side-to-move, and any per-player data), applying the
-        game's color-swap symmetry map. Used by the validator to verify
-        the game is symmetric: for every move m of the player to move in
-        s, mirror(apply(s, m)) must equal apply(mirror(s), m') for exactly
-        one legal move m' of the other player in mirror(s)."""
-
     # Required so the validator can label logs; trivial to implement.
     @abstractmethod
     def render(self, state: State) -> str:
@@ -81,6 +73,5 @@ REQUIRED_METHODS = (
     "apply",
     "is_terminal",
     "result",
-    "mirror_state",
     "render",
 )

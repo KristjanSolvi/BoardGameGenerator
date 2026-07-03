@@ -54,10 +54,14 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def run_experiment(config_path: Path, device_override: str | None = None) -> Path:
+    config_path = Path(config_path)
     config = _load_config(config_path)
     _validate_config(config)
 
-    game_name, game_factory, generated_metadata = _resolve_game_source(config)
+    game_name, game_factory, generated_metadata = _resolve_game_source(
+        config,
+        config_path=config_path,
+    )
     device_requested = device_override or str(config.get("device", "cpu"))
     device_used = _resolve_device(device_requested)
 
@@ -285,6 +289,8 @@ def _resolve_device(device_requested: str) -> str:
 
 def _resolve_game_source(
     config: dict[str, Any],
+    *,
+    config_path: Path,
 ) -> tuple[str, Any, dict[str, Any]]:
     game_name = config.get("game")
     if game_name is not None:
@@ -293,6 +299,9 @@ def _resolve_game_source(
 
     game_source = config["game_source"]
     spec_path = Path(str(game_source["path"]))
+    if not spec_path.is_absolute():
+        spec_path = config_path.parent / spec_path
+    spec_path = spec_path.resolve()
     spec = load_generated_spec(spec_path)
     metadata = {
         "generated_family": spec.family,

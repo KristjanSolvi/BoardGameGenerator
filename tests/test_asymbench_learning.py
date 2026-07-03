@@ -6,7 +6,10 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-from research.asymbench.experiments.run_role_heads import run_experiment
+from research.asymbench.experiments.run_role_heads import (
+    _validate_config,
+    run_experiment,
+)
 from research.asymbench.generation.escape_capture import EscapeCaptureGenerator
 from research.asymbench.generation.specs import GenerationConstraints
 from research.asymbench.games.base import RoleResult
@@ -148,6 +151,24 @@ def _train_buffer_with_policy(policy, action_mask=None):
 
 def _tiny_policy_value_model():
     return PolicyValueNet((1, 1, 1), action_size=2, num_roles=1)
+
+
+def _minimal_role_head_runner_config() -> dict[str, object]:
+    return {
+        "device": "cpu",
+        "seeds": [1],
+        "model_variants": ["shared_heads", "role_heads"],
+        "iterations": 1,
+        "selfplay_games_per_iteration": 1,
+        "train_steps_per_iteration": 1,
+        "batch_size": 2,
+        "replay_capacity": 64,
+        "mcts_simulations": 1,
+        "eval_games": 1,
+        "eval_simulations": 1,
+        "learning_rate": 0.001,
+        "output_root": "unused",
+    }
 
 
 def test_policy_value_net_shared_and_role_heads_shapes():
@@ -716,9 +737,10 @@ def test_role_head_runner_accepts_generated_game_source(tmp_path):
     )
     spec_path = tmp_path / "generated_spec.json"
     spec_path.write_text(json.dumps(spec.to_dict()))
+    normalized_spec_path = str(spec_path.resolve())
 
     config = {
-        "game_source": {"type": "generated_spec", "path": str(spec_path)},
+        "game_source": {"type": "generated_spec", "path": "generated_spec.json"},
         "device": "cpu",
         "seeds": [1],
         "model_variants": ["shared_heads", "role_heads"],
@@ -747,7 +769,7 @@ def test_role_head_runner_accepts_generated_game_source(tmp_path):
     assert all(row["generated_family"] == "escape_capture" for row in rows)
     assert all(row["generated_name"] == spec.name for row in rows)
     assert all(row["generated_seed"] == 77 for row in rows)
-    assert all(row["generated_spec_path"] == str(spec_path) for row in rows)
+    assert all(row["generated_spec_path"] == normalized_spec_path for row in rows)
 
     written_config = json.loads((run_dir / "config.json").read_text())
     assert written_config["game_source"] == config["game_source"]
@@ -756,4 +778,32 @@ def test_role_head_runner_accepts_generated_game_source(tmp_path):
     assert summary["generated_family"] == "escape_capture"
     assert summary["generated_name"] == spec.name
     assert summary["generated_seed"] == 77
-    assert summary["generated_spec_path"] == str(spec_path)
+    assert summary["generated_spec_path"] == normalized_spec_path
+
+
+@pytest.mark.parametrize(
+    ("config", "message"),
+    [
+        (
+            {
+                **_minimal_role_head_runner_config(),
+                "game": "breaker_builder",
+                "game_source": {"type": "generated_spec", "path": "generated_spec.json"},
+            },
+            "exactly one of game or game_source",
+        ),
+        (_minimal_role_head_runner_config(), "exactly one of game or game_source"),
+        (
+            {
+                **_minimal_role_head_runner_config(),
+                "game_source": {"type": "bad_source", "path": "generated_spec.json"},
+            },
+            "game_source.type must be 'generated_spec'",
+        ),
+    ],
+)
+def test_role_head_runner_config_validation_rejects_invalid_game_source_shapes(
+    config, message
+):
+    with pytest.raises(ValueError, match=message):
+        _validate_config(config)

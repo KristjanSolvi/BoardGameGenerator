@@ -1,7 +1,10 @@
 import json
 
+import numpy as np
 import pytest
 
+from research.asymbench.games.base import IllegalActionError
+from research.asymbench.generation.escape_capture import EscapeCaptureGame
 from research.asymbench.generation.specs import (
     GeneratedGameSpec,
     GenerationConstraints,
@@ -337,3 +340,64 @@ def test_generated_artifacts_reject_non_string_text_fields():
             valid=False,
             reasons=(None,),
         )
+
+
+def _escape_capture_test_spec():
+    return GeneratedGameSpec(
+        family="escape_capture",
+        name="escape_capture_runtime_test",
+        seed=101,
+        board={"rows": 5, "cols": 5},
+        roles=("attacker", "defender"),
+        setup={
+            "attackers": [1, 3, 21, 23],
+            "guards": [7, 17],
+            "key": 12,
+            "exits": [10],
+            "hostile": [],
+        },
+        actions={"movement": "orthogonal_step"},
+        terminal_rules={"capture": "opposite_sides"},
+        max_plies=20,
+    )
+
+
+def test_escape_capture_runtime_api_and_observation():
+    game = EscapeCaptureGame(_escape_capture_test_spec())
+    state = game.initial_state()
+    assert game.name == "escape_capture_runtime_test"
+    assert game.roles == ("attacker", "defender")
+    assert game.board_shape == (5, 5)
+    assert game.action_size == 625
+    assert game.current_player(state) == 0
+    assert game.player_role(state, 0) == 0
+    assert len(game.legal_actions(state)) > 0
+    assert game.action_mask(state).sum() == len(game.legal_actions(state))
+    obs = game.observation_tensor(state, player=0)
+    assert obs.shape == (8, 5, 5)
+    assert obs.dtype == np.float32
+
+
+def test_escape_capture_known_escape_path_reaches_defender_win():
+    game = EscapeCaptureGame(_escape_capture_test_spec())
+    state = game.initial_state(seat_roles=(1, 0))
+    moves = [
+        game.encode_move(12, 11),
+        game.encode_move(1, 6),
+        game.encode_move(11, 10),
+    ]
+    for action in moves:
+        assert action in game.legal_actions(state), game.render(state)
+        state = game.apply_action(state, action)
+    assert game.is_terminal(state)
+    assert game.result(state).winner == 0
+    assert game.result(state).reason == "key_escape"
+
+
+def test_escape_capture_rejects_illegal_move():
+    game = EscapeCaptureGame(_escape_capture_test_spec())
+    state = game.initial_state()
+    illegal = game.encode_move(12, 13)
+    assert illegal not in game.legal_actions(state)
+    with pytest.raises(IllegalActionError):
+        game.apply_action(state, illegal)

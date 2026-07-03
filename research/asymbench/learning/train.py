@@ -107,6 +107,8 @@ def _validate_target_policies(policies: np.ndarray, action_masks: np.ndarray) ->
     row_sums = policies.sum(axis=1)
     if not np.all(row_sums > 0.0):
         raise ValueError("target policies must have positive probability mass")
+    if not np.all(np.isclose(row_sums, 1.0, rtol=1e-5, atol=1e-8)):
+        raise ValueError("target policies must be normalized")
 
 
 __all__ = ["train_steps"]

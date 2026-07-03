@@ -124,6 +124,26 @@ class _InvalidPolicyAgent:
         return np.array([0.5, 0.5], dtype=np.float64)[: game.action_size]
 
 
+def _train_buffer_with_policy(policy, action_mask=None):
+    if action_mask is None:
+        action_mask = np.array([True, True], dtype=np.bool_)
+    buffer = ReplayBuffer(capacity=1, seed=1)
+    buffer.add(
+        TrainingExample(
+            observation=np.zeros((1, 1, 1), dtype=np.float32),
+            role=0,
+            action_mask=np.asarray(action_mask, dtype=np.bool_),
+            policy=np.asarray(policy, dtype=np.float32),
+            value=0.0,
+        )
+    )
+    return buffer
+
+
+def _tiny_policy_value_model():
+    return PolicyValueNet((1, 1, 1), action_size=2, num_roles=1)
+
+
 def test_policy_value_net_shared_and_role_heads_shapes():
     game = BreakerBuilder()
     obs = torch.zeros((2, 6, 5, 5), dtype=torch.float32)
@@ -415,6 +435,28 @@ def test_train_steps_updates_model_and_returns_metrics():
     )
 
 
+@pytest.mark.parametrize(
+    ("policy", "action_mask", "message"),
+    [
+        ([0.0, 0.0], [True, True], "positive probability mass"),
+        ([0.5, 0.5], [True, False], "illegal actions"),
+        ([-0.1, 1.1], [True, True], "negative probabilities"),
+        ([float("nan"), 1.0], [True, True], "finite values"),
+        ([0.4, 0.4], [True, True], "normalized"),
+    ],
+)
+def test_train_steps_rejects_invalid_target_policies(policy, action_mask, message):
+    with pytest.raises(ValueError, match=message):
+        train_steps(
+            _tiny_policy_value_model(),
+            _train_buffer_with_policy(policy, action_mask),
+            batch_size=1,
+            steps=1,
+            lr=1e-3,
+            device="cpu",
+        )
+
+
 def test_evaluate_model_vs_random_returns_role_summary():
     game = BreakerBuilder(max_plies=8)
     model = PolicyValueNet((6, 5, 5), game.action_size, num_roles=2, role_heads=True)
@@ -429,4 +471,28 @@ def test_evaluate_model_vs_random_returns_role_summary():
     assert summary["games"] == 4
     assert "role_win_rates" in summary
     assert "model_win_rate" in summary
+    assert len(summary["outcomes"]) == 4
+    assert (
+        summary["model_win_rate"] + summary["random_win_rate"] + summary["draw_rate"]
+        == pytest.approx(1.0, abs=0.002)
+    )
+    assert {outcome["model_player"] for outcome in summary["outcomes"]} == {0, 1}
+    assert {outcome["model_role"] for outcome in summary["outcomes"]} == {0, 1}
     assert model.training is True
+
+
+def test_evaluate_model_vs_random_preserves_eval_mode():
+    game = BreakerBuilder(max_plies=8)
+    model = PolicyValueNet((6, 5, 5), game.action_size, num_roles=2, role_heads=True)
+    model.eval()
+
+    evaluate_model_vs_random(
+        game=game,
+        model=model,
+        device="cpu",
+        games=2,
+        simulations=2,
+        seed=101,
+    )
+
+    assert model.training is False

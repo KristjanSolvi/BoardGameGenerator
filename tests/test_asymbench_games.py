@@ -7,6 +7,7 @@ from research.asymbench.games.base import (
     RoleResult,
     make_action_mask,
 )
+from research.asymbench.games.breaker_builder import BreakerBuilder
 from research.asymbench.games.micro_tafl import MicroTaflState
 
 
@@ -242,3 +243,91 @@ def test_micro_tafl_no_legal_action_awards_win_to_opponent():
     assert game.is_terminal(state)
     assert result.winner == 1
     assert result.reason == "no_legal_actions"
+
+
+def test_breaker_builder_initial_state_roles_and_actions():
+    game = BreakerBuilder()
+    state = game.initial_state()
+
+    assert game.current_player(state) == 0
+    assert game.player_role(state, 0) == BreakerBuilder.BUILDER
+    assert game.player_role(state, 1) == BreakerBuilder.BREAKER
+    assert len(game.legal_actions(state)) == 23
+    assert game.action_mask(state).sum() == 23
+
+
+def test_breaker_builder_observation_shape():
+    game = BreakerBuilder()
+    state = game.initial_state()
+
+    obs = game.observation_tensor(state, player=0)
+
+    assert obs.shape == (6, 5, 5)
+    assert obs.dtype == np.float32
+
+
+def test_breaker_builder_known_connection_win():
+    game = BreakerBuilder()
+    state = game.initial_state()
+    moves = [
+        game.encode_place("a3"),
+        game.encode_move("b2", "b1"),
+        game.encode_place("b3"),
+        game.encode_move("d4", "d5"),
+        game.encode_place("c3"),
+        game.encode_move("b1", "a1"),
+        game.encode_place("d3"),
+        game.encode_move("d5", "e5"),
+        game.encode_place("e3"),
+    ]
+
+    for action in moves:
+        assert action in game.legal_actions(state), game.render(state)
+        state = game.apply_action(state, action)
+
+    assert game.is_terminal(state)
+    assert game.result(state).winner == 0
+    assert game.result(state).reason == "builder_connection"
+
+
+def test_breaker_builder_breaker_can_remove_adjacent_marker():
+    game = BreakerBuilder()
+    state = game.initial_state()
+    state = game.apply_action(state, game.encode_place("b3"))
+
+    remove = game.encode_remove("b2", "b3")
+
+    assert remove in game.legal_actions(state)
+    state = game.apply_action(state, remove)
+    assert "b3" not in game.builder_cells(state)
+
+
+def test_breaker_builder_illegal_builder_place_on_blocker_rejected():
+    game = BreakerBuilder()
+    state = game.initial_state()
+    action = game.encode_place("b2")
+
+    assert action not in game.legal_actions(state)
+    with pytest.raises(IllegalActionError):
+        game.apply_action(state, action)
+
+
+def test_breaker_builder_initial_state_accepts_seat_role_swap():
+    game = BreakerBuilder()
+    state = game.initial_state(
+        seat_roles=(BreakerBuilder.BREAKER, BreakerBuilder.BUILDER)
+    )
+
+    assert game.current_player(state) == 0
+    assert game.player_role(state, 0) == BreakerBuilder.BREAKER
+    assert game.player_role(state, 1) == BreakerBuilder.BUILDER
+    assert all(action >= 25 for action in game.legal_actions(state))
+
+
+def test_breaker_builder_cell_validation_rejects_malformed_cells():
+    game = BreakerBuilder()
+
+    with pytest.raises(ValueError, match="cell must be in"):
+        game.encode_place("a")
+    with pytest.raises(ValueError, match="cell outside board"):
+        game.encode_move("a0", "a1")

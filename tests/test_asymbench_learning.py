@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -498,3 +501,13 @@ def test_evaluate_model_vs_random_preserves_eval_mode():
     )
 
     assert model.training is False
+
+
+def test_smoke_experiment_configs_are_valid_json():
+    config_dir = Path("research/asymbench/experiments/configs")
+    for name in ("micro_tafl_smoke.json", "breaker_builder_smoke.json"):
+        data = json.loads((config_dir / name).read_text())
+        assert data["iterations"] >= 1
+        assert data["selfplay_games_per_iteration"] >= 1
+        assert data["mcts_simulations"] >= 1
+        assert data["model_variants"] == ["shared_heads", "role_heads"]

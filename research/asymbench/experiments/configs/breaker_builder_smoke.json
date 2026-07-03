@@ -1,0 +1,16 @@
+{
+  "game": "breaker_builder",
+  "device": "cuda",
+  "seeds": [1],
+  "model_variants": ["shared_heads", "role_heads"],
+  "iterations": 2,
+  "selfplay_games_per_iteration": 2,
+  "train_steps_per_iteration": 4,
+  "batch_size": 8,
+  "replay_capacity": 512,
+  "mcts_simulations": 8,
+  "eval_games": 4,
+  "eval_simulations": 4,
+  "learning_rate": 0.001,
+  "output_root": "research_runs/asymbench"
+}

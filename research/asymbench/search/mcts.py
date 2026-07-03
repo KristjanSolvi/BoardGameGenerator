@@ -50,8 +50,8 @@ class MCTSAgent:
         c_puct: float = 1.5,
         seed: int | None = None,
     ) -> None:
-        if simulations < 0:
-            raise ValueError("simulations must be non-negative")
+        if simulations <= 0:
+            raise ValueError("simulations must be positive")
         if c_puct < 0.0:
             raise ValueError("c_puct must be non-negative")
         self.evaluator = evaluator if evaluator is not None else UniformEvaluator()
@@ -60,11 +60,14 @@ class MCTSAgent:
         self.rng = np.random.default_rng(seed)
 
     def policy(self, game: Any, state: Any, player: int) -> np.ndarray:
-        del player
+        current_player = game.current_player(state)
+        if player != current_player:
+            raise ValueError("policy player must be the current player")
+
         root = _Node(
             state=state,
             prior=1.0,
-            player_to_move=game.current_player(state),
+            player_to_move=current_player,
         )
 
         for _ in range(self.simulations):
@@ -76,19 +79,26 @@ class MCTSAgent:
                 path.append(node)
 
             if game.is_terminal(node.state):
-                value = game.result(node.state).value_for_player(node.player_to_move)
+                value = self._validate_value(
+                    game.result(node.state).value_for_player(node.player_to_move)
+                )
             else:
                 prior, value = self.evaluator.evaluate(
                     game, node.state, node.player_to_move
                 )
+                value = self._validate_value(value)
                 self._expand(game, node, prior)
 
-            self._backup(path, float(value))
+            self._backup(path, value)
 
         return self._root_policy(game, root)
 
     def choose(self, game: Any, state: Any, player: int) -> int:
+        if not game.legal_actions(state):
+            raise ValueError("no legal actions")
         policy = self.policy(game, state, player)
+        if float(policy.sum()) <= 0.0:
+            raise ValueError("policy has no probability mass")
         return int(np.argmax(policy))
 
     def _expand(self, game: Any, node: _Node, prior: np.ndarray) -> None:
@@ -114,6 +124,8 @@ class MCTSAgent:
                 f"evaluator prior shape {prior.shape} does not match "
                 f"action_size {game.action_size}"
             )
+        if not np.all(np.isfinite(prior)):
+            raise ValueError("evaluator prior must contain only finite values")
 
         legal_prior = np.zeros(game.action_size, dtype=np.float64)
         legal_values = np.maximum(prior[legal_actions], 0.0)
@@ -167,6 +179,12 @@ class MCTSAgent:
         if total > 0.0:
             return policy / total
         return policy
+
+    def _validate_value(self, value: float) -> float:
+        value = float(value)
+        if not math.isfinite(value):
+            raise ValueError("evaluator value must be finite")
+        return value
 
 
 __all__ = ["MCTSAgent", "UniformEvaluator"]

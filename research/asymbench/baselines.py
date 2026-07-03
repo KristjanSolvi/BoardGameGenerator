@@ -15,13 +15,26 @@ class RandomAgent:
         return self.rng.choice(game.legal_actions(state))
 
 
-def play_game(game, agents: dict[int, object], seed: int, seat_roles=(0, 1)) -> dict:
+def play_game(
+    game,
+    agents: dict[int, object],
+    seed: int,
+    seat_roles=(0, 1),
+    max_steps: int | None = None,
+) -> dict:
     del seed
+    if max_steps is None:
+        max_steps = getattr(game, "max_plies", 1000)
+
     state = game.initial_state(seat_roles=seat_roles)
+    steps = 0
     while not game.is_terminal(state):
+        if steps >= max_steps:
+            raise RuntimeError(f"play_game exceeded max_steps={max_steps}")
         player = game.current_player(state)
         action = agents[player].choose(game, state, player)
         state = game.apply_action(state, action)
+        steps += 1
     result = game.result(state)
     winner_role = (
         None if result.winner is None else game.player_role(state, result.winner)
@@ -44,6 +57,8 @@ def evaluate_matchup(
 ) -> dict:
     if games <= 0:
         raise ValueError("games must be positive")
+    if not seat_roles_list:
+        raise ValueError("seat_roles_list must not be empty")
 
     outcomes = []
     for i in range(games):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -31,7 +32,7 @@ def summarize_metrics(path: Path) -> dict[str, dict[str, Any]]:
                 raise ValueError(f"invalid JSON on line {line_number}: {exc.msg}") from exc
             if not isinstance(row, dict):
                 raise ValueError(f"metrics row {line_number} must be a JSON object")
-            _validate_required_fields(row, line_number)
+            _validate_row(row, line_number)
             rows_by_variant[str(row["variant"])].append(row)
             rows_seen += 1
 
@@ -44,13 +45,21 @@ def summarize_metrics(path: Path) -> dict[str, dict[str, Any]]:
     }
 
 
-def _validate_required_fields(row: dict[str, Any], line_number: int) -> None:
+def _validate_row(row: dict[str, Any], line_number: int) -> None:
     missing = [field for field in REQUIRED_FIELDS if field not in row]
     if missing:
         raise ValueError(f"metrics row {line_number} missing required fields: {missing}")
     for field in ("eval_model_win_rate", "eval_avg_plies"):
-        if not isinstance(row[field], int | float):
-            raise ValueError(f"metrics row {line_number} field {field!r} must be numeric")
+        _require_number(row[field], field, line_number)
+    for field in OPTIONAL_NUMERIC_FIELDS:
+        if field in row:
+            _require_number(row[field], field, line_number)
+
+
+def _require_number(value: Any, field: str, line_number: int) -> float:
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise ValueError(f"metrics row {line_number} field {field!r} must be numeric")
+    return float(value)
 
 
 def _summarize_variant(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -62,11 +71,7 @@ def _summarize_variant(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "last_model_win_rate": float(last_row["eval_model_win_rate"]),
     }
     for source_field, summary_field in OPTIONAL_NUMERIC_FIELDS.items():
-        values = [
-            row[source_field]
-            for row in rows
-            if isinstance(row.get(source_field), int | float)
-        ]
+        values = [row[source_field] for row in rows if source_field in row]
         if values:
             summary[summary_field] = _mean(values)
     if "eval_model_role_win_rates" in last_row:
@@ -82,6 +87,8 @@ def _summarize_variant(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 def _mean(values: Any) -> float:
     values = list(values)
+    if not values:
+        raise ValueError("cannot compute mean of empty values")
     return float(sum(values) / len(values))
 
 
@@ -90,7 +97,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("metrics", type=Path)
     args = parser.parse_args(argv)
 
-    print(json.dumps(summarize_metrics(args.metrics), indent=2, sort_keys=True))
+    try:
+        summary = summarize_metrics(args.metrics)
+    except (OSError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    print(json.dumps(summary, indent=2, sort_keys=True))
     return 0
 
 

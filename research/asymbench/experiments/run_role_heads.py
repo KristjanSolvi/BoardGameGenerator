@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -28,6 +30,10 @@ VARIANT_ROLE_HEADS = {
     "shared_heads": False,
     "role_heads": True,
 }
+
+# We seed Python, NumPy, Torch, and CUDA/cuDNN where available. Full Torch
+# deterministic algorithms are not forced here, so CUDA smoke metrics should be
+# treated as approximate even with fixed seeds.
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -68,16 +74,19 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
     checkpoints: list[dict[str, Any]] = []
 
     for seed in config["seeds"]:
-        _seed_everything(int(seed))
         for variant in config["model_variants"]:
-            variant_dir = run_dir / str(variant) / f"seed_{seed}"
+            variant_name = str(variant)
+            variant_seed = _variant_seed(int(seed), variant_name)
+            _seed_everything(variant_seed)
+
+            variant_dir = run_dir / variant_name / f"seed_{seed}"
             variant_dir.mkdir(parents=True, exist_ok=False)
 
             game = game_class()
-            model = _create_model(game, role_heads=VARIANT_ROLE_HEADS[str(variant)])
+            model = _create_model(game, role_heads=VARIANT_ROLE_HEADS[variant_name])
             buffer = ReplayBuffer(
                 capacity=int(config["replay_capacity"]),
-                seed=int(seed),
+                seed=variant_seed,
             )
             selfplay_games_total = 0
 
@@ -88,7 +97,7 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                         model=model,
                         device=device_used,
                         simulations=int(config["mcts_simulations"]),
-                        seed=_derived_seed(int(seed), iteration, game_index),
+                        seed=_derived_seed(variant_seed, iteration, game_index),
                     )
                     for example in examples:
                         buffer.add(example)
@@ -114,14 +123,15 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                     device=device_used,
                     games=int(config["eval_games"]),
                     simulations=int(config["eval_simulations"]),
-                    seed=_derived_seed(int(seed), iteration, 10_000),
+                    seed=_derived_seed(variant_seed, iteration, 10_000),
                 )
 
                 row = {
                     "iteration": iteration,
                     "game": game_name,
-                    "variant": str(variant),
+                    "variant": variant_name,
                     "seed": int(seed),
+                    "variant_seed": variant_seed,
                     "device_requested": device_requested,
                     "device_used": device_used,
                     "selfplay_games_total": selfplay_games_total,
@@ -129,10 +139,20 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                     "train_batch_size": effective_batch_size,
                     "policy_loss": float(train_metrics["policy_loss"]),
                     "value_loss": float(train_metrics["value_loss"]),
+                    "train_total_loss": float(train_metrics["total_loss"]),
+                    "eval_games": int(config["eval_games"]),
+                    "eval_simulations": int(config["eval_simulations"]),
                     "eval_model_win_rate": float(eval_summary["model_win_rate"]),
+                    "eval_random_win_rate": float(eval_summary["random_win_rate"]),
                     "eval_role_win_rates": eval_summary["role_win_rates"],
+                    "eval_model_role_win_rates": eval_summary[
+                        "model_role_win_rates"
+                    ],
                     "eval_draw_rate": float(eval_summary["draw_rate"]),
                     "eval_avg_plies": float(eval_summary["avg_plies"]),
+                    "eval_termination_reasons": eval_summary[
+                        "termination_reasons"
+                    ],
                 }
                 _append_jsonl(metrics_path, row)
                 all_rows.append(row)
@@ -140,11 +160,12 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
             checkpoint_path = variant_dir / "final_checkpoint.pt"
             torch.save(
                 {
-                    "model_state_dict": model.state_dict(),
+                    "model_state_dict": _cpu_state_dict(model),
                     "config": config,
                     "game": game_name,
-                    "variant": str(variant),
+                    "variant": variant_name,
                     "seed": int(seed),
+                    "variant_seed": variant_seed,
                     "device_requested": device_requested,
                     "device_used": device_used,
                     "input_shape": model.input_shape,
@@ -156,8 +177,9 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
             )
             checkpoints.append(
                 {
-                    "variant": str(variant),
+                    "variant": variant_name,
                     "seed": int(seed),
+                    "variant_seed": variant_seed,
                     "path": str(checkpoint_path),
                 }
             )
@@ -228,12 +250,31 @@ def _create_model(game: Any, *, role_heads: bool) -> PolicyValueNet:
 
 def _seed_everything(seed: int) -> None:
     random.seed(seed)
-    np.random.seed(seed)
+    np.random.seed(seed % (2**32))
     torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+
+def _variant_seed(seed: int, variant: str) -> int:
+    digest = hashlib.blake2b(
+        f"{seed}:{variant}".encode("utf-8"),
+        digest_size=8,
+    ).digest()
+    return int.from_bytes(digest, byteorder="big") % (2**31)
 
 
 def _derived_seed(seed: int, iteration: int, index: int) -> int:
     return seed * 1_000_003 + iteration * 10_007 + index
+
+
+def _cpu_state_dict(model: torch.nn.Module) -> dict[str, torch.Tensor]:
+    return {
+        name: tensor.detach().cpu()
+        for name, tensor in model.state_dict().items()
+    }
 
 
 def _append_jsonl(path: Path, row: dict[str, Any]) -> None:
@@ -267,11 +308,29 @@ def _summarize_run(
             "final_eval_model_win_rate_mean": _mean(
                 row["eval_model_win_rate"] for row in variant_rows
             ),
+            "final_eval_random_win_rate_mean": _mean(
+                row["eval_random_win_rate"] for row in variant_rows
+            ),
             "final_eval_draw_rate_mean": _mean(
                 row["eval_draw_rate"] for row in variant_rows
             ),
+            "final_eval_avg_plies_mean": _mean(
+                row["eval_avg_plies"] for row in variant_rows
+            ),
             "final_policy_loss_mean": _mean(row["policy_loss"] for row in variant_rows),
             "final_value_loss_mean": _mean(row["value_loss"] for row in variant_rows),
+            "final_total_loss_mean": _mean(
+                row["train_total_loss"] for row in variant_rows
+            ),
+            "final_replay_examples_mean": _mean(
+                row["replay_examples"] for row in variant_rows
+            ),
+            "final_model_role_win_rates_mean": _mean_nested_rates(
+                row["eval_model_role_win_rates"] for row in variant_rows
+            ),
+            "final_termination_reasons": _sum_counter_maps(
+                row["eval_termination_reasons"] for row in variant_rows
+            ),
             "final_rows": variant_rows,
         }
 
@@ -294,6 +353,21 @@ def _mean(values: Any) -> float:
     if not values:
         return 0.0
     return round(float(sum(values) / len(values)), 6)
+
+
+def _mean_nested_rates(rows: Any) -> dict[str, float]:
+    totals: dict[str, list[float]] = {}
+    for row in rows:
+        for key, value in row.items():
+            totals.setdefault(str(key), []).append(float(value))
+    return {key: _mean(values) for key, values in sorted(totals.items())}
+
+
+def _sum_counter_maps(rows: Any) -> dict[str, int]:
+    counts: Counter[str] = Counter()
+    for row in rows:
+        counts.update({str(key): int(value) for key, value in row.items()})
+    return dict(sorted(counts.items()))
 
 
 if __name__ == "__main__":

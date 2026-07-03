@@ -6,6 +6,7 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
+from research.asymbench.experiments.run_role_heads import run_experiment
 from research.asymbench.games.base import RoleResult
 from research.asymbench.games.breaker_builder import BreakerBuilder
 from research.asymbench.learning import selfplay as selfplay_module
@@ -511,3 +512,137 @@ def test_smoke_experiment_configs_are_valid_json():
         assert data["selfplay_games_per_iteration"] >= 1
         assert data["mcts_simulations"] >= 1
         assert data["model_variants"] == ["shared_heads", "role_heads"]
+
+
+def test_role_head_runner_writes_smoke_outputs_and_schema(tmp_path):
+    config = {
+        "game": "breaker_builder",
+        "device": "cuda",
+        "seeds": [7],
+        "model_variants": ["shared_heads", "role_heads"],
+        "iterations": 1,
+        "selfplay_games_per_iteration": 1,
+        "train_steps_per_iteration": 1,
+        "batch_size": 2,
+        "replay_capacity": 64,
+        "mcts_simulations": 1,
+        "eval_games": 2,
+        "eval_simulations": 1,
+        "learning_rate": 0.001,
+        "output_root": str(tmp_path / "runs"),
+    }
+    config_path = tmp_path / "tiny_role_heads.json"
+    config_path.write_text(json.dumps(config))
+
+    run_dir = run_experiment(config_path, device_override="cpu")
+
+    assert (run_dir / "metrics.jsonl").is_file()
+    assert (run_dir / "role_summary.json").is_file()
+    assert (run_dir / "config.json").is_file()
+
+    rows = [
+        json.loads(line)
+        for line in (run_dir / "metrics.jsonl").read_text().splitlines()
+    ]
+    assert len(rows) == 2
+    required_fields = {
+        "variant_seed",
+        "train_total_loss",
+        "eval_random_win_rate",
+        "eval_model_role_win_rates",
+        "eval_termination_reasons",
+        "eval_games",
+        "eval_simulations",
+        "device_requested",
+        "device_used",
+    }
+    for row in rows:
+        assert required_fields.issubset(row)
+        assert row["device_requested"] == "cpu"
+        assert row["device_used"] == "cpu"
+        assert row["eval_games"] == 2
+        assert row["eval_simulations"] == 1
+
+    summary = json.loads((run_dir / "role_summary.json").read_text())
+    assert summary["device_requested"] == "cpu"
+    assert summary["device_used"] == "cpu"
+    for variant in ("shared_heads", "role_heads"):
+        assert "final_eval_random_win_rate_mean" in summary["by_variant"][variant]
+        assert "final_total_loss_mean" in summary["by_variant"][variant]
+        assert "final_model_role_win_rates_mean" in summary["by_variant"][variant]
+        assert "final_termination_reasons" in summary["by_variant"][variant]
+
+    shared_checkpoint_path = run_dir / "shared_heads" / "seed_7" / "final_checkpoint.pt"
+    role_checkpoint_path = run_dir / "role_heads" / "seed_7" / "final_checkpoint.pt"
+    assert shared_checkpoint_path.is_file()
+    assert role_checkpoint_path.is_file()
+
+    shared_checkpoint = torch.load(shared_checkpoint_path, map_location="cpu")
+    role_checkpoint = torch.load(role_checkpoint_path, map_location="cpu")
+    assert shared_checkpoint["role_heads"] is False
+    assert role_checkpoint["role_heads"] is True
+    by_variant = {row["variant"]: row for row in rows}
+    assert (
+        shared_checkpoint["variant_seed"]
+        == by_variant["shared_heads"]["variant_seed"]
+    )
+    assert (
+        role_checkpoint["variant_seed"]
+        == by_variant["role_heads"]["variant_seed"]
+    )
+    assert shared_checkpoint["variant_seed"] != role_checkpoint["variant_seed"]
+    assert all(
+        tensor.device.type == "cpu"
+        for tensor in shared_checkpoint["model_state_dict"].values()
+    )
+    assert all(
+        tensor.device.type == "cpu"
+        for tensor in role_checkpoint["model_state_dict"].values()
+    )
+
+
+def test_role_head_runner_variant_seed_does_not_depend_on_variant_order(tmp_path):
+    base_config = {
+        "game": "breaker_builder",
+        "device": "cpu",
+        "seeds": [11],
+        "iterations": 1,
+        "selfplay_games_per_iteration": 1,
+        "train_steps_per_iteration": 1,
+        "batch_size": 2,
+        "replay_capacity": 64,
+        "mcts_simulations": 1,
+        "eval_games": 1,
+        "eval_simulations": 1,
+        "learning_rate": 0.001,
+    }
+    config_paths = []
+    for name, variants in (
+        ("forward", ["shared_heads", "role_heads"]),
+        ("reversed", ["role_heads", "shared_heads"]),
+    ):
+        config = {
+            **base_config,
+            "model_variants": variants,
+            "output_root": str(tmp_path / name),
+        }
+        config_path = tmp_path / f"{name}.json"
+        config_path.write_text(json.dumps(config))
+        config_paths.append(config_path)
+
+    variant_seeds_by_run = []
+    for config_path in config_paths:
+        run_dir = run_experiment(config_path, device_override="cpu")
+        rows = [
+            json.loads(line)
+            for line in (run_dir / "metrics.jsonl").read_text().splitlines()
+        ]
+        variant_seeds_by_run.append(
+            {row["variant"]: row["variant_seed"] for row in rows}
+        )
+
+    assert variant_seeds_by_run[0] == variant_seeds_by_run[1]
+    assert (
+        variant_seeds_by_run[0]["shared_heads"]
+        != variant_seeds_by_run[0]["role_heads"]
+    )

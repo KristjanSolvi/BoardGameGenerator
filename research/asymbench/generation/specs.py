@@ -3,10 +3,27 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass, field
 import math
+from types import MappingProxyType
 from typing import Any
 
 
 VALID_FAMILIES = {"escape_capture", "connection_disruption"}
+
+
+def _freeze_json(value: Any) -> Any:
+    if type(value) is dict:
+        return MappingProxyType({key: _freeze_json(item) for key, item in value.items()})
+    if type(value) in (list, tuple):
+        return tuple(_freeze_json(item) for item in value)
+    return copy.deepcopy(value)
+
+
+def _thaw_json(value: Any) -> Any:
+    if isinstance(value, MappingProxyType):
+        return {key: _thaw_json(item) for key, item in value.items()}
+    if type(value) is tuple:
+        return [_thaw_json(item) for item in value]
+    return copy.deepcopy(value)
 
 
 def _require_string(value: Any, field_name: str, *, allow_empty: bool = False) -> str:
@@ -57,7 +74,10 @@ class GenerationConstraints:
         if type(self.board_sizes) not in (tuple, list) or not self.board_sizes:
             raise ValueError("board_sizes must not be empty")
         board_sizes: list[tuple[int, int]] = []
-        for rows, cols in self.board_sizes:
+        for entry in self.board_sizes:
+            if type(entry) not in (tuple, list) or len(entry) != 2:
+                raise ValueError("board_sizes entries must contain exactly two ints")
+            rows, cols = entry
             rows = _require_int(rows, "board_sizes rows")
             cols = _require_int(cols, "board_sizes cols")
             if rows <= 0 or cols <= 0:
@@ -111,14 +131,14 @@ class GeneratedGameSpec:
         object.__setattr__(self, "family", family)
         object.__setattr__(self, "name", name)
         object.__setattr__(self, "seed", seed)
-        object.__setattr__(self, "board", board)
+        object.__setattr__(self, "board", _freeze_json(board))
         object.__setattr__(self, "roles", roles)
-        object.__setattr__(self, "setup", _require_mapping(self.setup, "setup"))
-        object.__setattr__(self, "actions", _require_mapping(self.actions, "actions"))
+        object.__setattr__(self, "setup", _freeze_json(_require_mapping(self.setup, "setup")))
+        object.__setattr__(self, "actions", _freeze_json(_require_mapping(self.actions, "actions")))
         object.__setattr__(
             self,
             "terminal_rules",
-            _require_mapping(self.terminal_rules, "terminal_rules"),
+            _freeze_json(_require_mapping(self.terminal_rules, "terminal_rules")),
         )
         object.__setattr__(self, "max_plies", max_plies)
 
@@ -127,11 +147,11 @@ class GeneratedGameSpec:
             "family": self.family,
             "name": self.name,
             "seed": int(self.seed),
-            "board": copy.deepcopy(self.board),
+            "board": _thaw_json(self.board),
             "roles": list(self.roles),
-            "setup": copy.deepcopy(self.setup),
-            "actions": copy.deepcopy(self.actions),
-            "terminal_rules": copy.deepcopy(self.terminal_rules),
+            "setup": _thaw_json(self.setup),
+            "actions": _thaw_json(self.actions),
+            "terminal_rules": _thaw_json(self.terminal_rules),
             "max_plies": int(self.max_plies),
         }
 
@@ -216,7 +236,7 @@ class ValidationReport:
             if rate < 0.0 or rate > 1.0:
                 raise ValueError(f"{field_name} win rate must be in [0.0, 1.0]")
             rates[key] = rate
-        return rates
+        return _freeze_json(rates)
 
     @staticmethod
     def _validated_terminal_reasons(value: Any) -> dict[str, int]:
@@ -226,7 +246,7 @@ class ValidationReport:
             if count < 0:
                 raise ValueError("terminal reason counts must be non-negative")
             terminal_reasons[key] = count
-        return terminal_reasons
+        return _freeze_json(terminal_reasons)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -235,16 +255,10 @@ class ValidationReport:
             "valid": bool(self.valid),
             "reasons": list(self.reasons),
             "initial_branching_factor": int(self.initial_branching_factor),
-            "random_role_win_rates": {
-                str(key): float(value) for key, value in self.random_role_win_rates.items()
-            },
-            "mcts_role_win_rates": {
-                str(key): float(value) for key, value in self.mcts_role_win_rates.items()
-            },
+            "random_role_win_rates": _thaw_json(self.random_role_win_rates),
+            "mcts_role_win_rates": _thaw_json(self.mcts_role_win_rates),
             "average_random_plies": float(self.average_random_plies),
-            "terminal_reasons": {
-                str(key): int(value) for key, value in self.terminal_reasons.items()
-            },
+            "terminal_reasons": _thaw_json(self.terminal_reasons),
         }
 
     @classmethod

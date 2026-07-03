@@ -194,6 +194,13 @@ def test_generation_constraints_rejects_bool_numeric_fields():
         GenerationConstraints(board_sizes=((True, 5),))
 
 
+def test_generation_constraints_rejects_malformed_board_size_entries():
+    with pytest.raises(ValueError, match="board_sizes"):
+        GenerationConstraints(board_sizes=(5,))
+    with pytest.raises(ValueError, match="board_sizes"):
+        GenerationConstraints(board_sizes=((1, 2, 3),))
+
+
 def test_validation_report_from_dict_rejects_non_bool_valid():
     base = ValidationReport(
         family="connection_disruption",
@@ -244,7 +251,7 @@ def test_generated_artifacts_do_not_alias_nested_mutable_inputs_or_outputs():
     spec_dict = spec.to_dict()
     spec_dict["setup"]["nested"]["key"] = 99
     spec_dict["actions"]["movement"]["kind"] = "slide"
-    assert spec.setup["attackers"] == [1, 3]
+    assert spec.setup["attackers"] == (1, 3)
     assert spec.setup["nested"]["key"] == 6
     assert spec.actions["movement"]["kind"] == "orthogonal_step"
 
@@ -263,6 +270,44 @@ def test_generated_artifacts_do_not_alias_nested_mutable_inputs_or_outputs():
     report_dict["random_role_win_rates"]["0"] = 0.0
     report_dict["terminal_reasons"]["max_plies"] = 7
     assert report.random_role_win_rates["0"] == 0.5
+    assert report.terminal_reasons["max_plies"] == 1
+
+
+def test_generated_artifact_fields_are_recursively_immutable():
+    spec = GeneratedGameSpec(
+        family="escape_capture",
+        name="escape_capture_seed_3",
+        seed=3,
+        board={"rows": 5, "cols": 5},
+        roles=("attacker", "defender"),
+        setup={"attackers": [1, 3], "nested": {"key": 6}},
+        actions={"movement": {"kind": "orthogonal_step"}},
+        terminal_rules={"capture": {"kind": "sandwich"}},
+        max_plies=50,
+    )
+    with pytest.raises(TypeError):
+        spec.setup["new"] = 1
+    with pytest.raises((AttributeError, TypeError)):
+        spec.setup["attackers"].append(9)
+    with pytest.raises(TypeError):
+        spec.actions["movement"]["kind"] = "diagonal_step"
+
+    spec_dict = spec.to_dict()
+    spec_dict["setup"]["attackers"].append(9)
+    spec_dict["setup"]["nested"]["key"] = 99
+    assert spec.setup["attackers"] == (1, 3)
+    assert spec.setup["nested"]["key"] == 6
+
+    report = ValidationReport(
+        family="escape_capture",
+        name="report",
+        valid=True,
+        terminal_reasons={"max_plies": 1},
+    )
+    with pytest.raises(TypeError):
+        report.terminal_reasons["max_plies"] = 2
+    report_dict = report.to_dict()
+    report_dict["terminal_reasons"]["max_plies"] = 7
     assert report.terminal_reasons["max_plies"] == 1
 
 

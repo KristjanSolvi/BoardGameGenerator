@@ -8,6 +8,7 @@ from research.asymbench.generation.escape_capture import (
     EscapeCaptureGame,
     EscapeCaptureGenerator,
 )
+from research.asymbench.generation.loader import compile_generated_game, load_generated_spec
 from research.asymbench.generation.connection_disruption import (
     ConnectionDisruptionGame,
     ConnectionDisruptionGenerator,
@@ -1018,3 +1019,40 @@ def test_connection_disruption_compile_rejects_wrong_family():
     spec = _escape_capture_test_spec()
     with pytest.raises(ValueError, match="connection_disruption"):
         generator.compile(spec)
+
+
+def test_generated_loader_reads_spec_and_compiles_game(tmp_path):
+    generator = EscapeCaptureGenerator()
+    spec = generator.generate(
+        seed=44,
+        constraints=GenerationConstraints(board_sizes=((5, 5),), max_plies_range=(40, 40)),
+    )
+    spec_path = tmp_path / "spec.json"
+    spec_path.write_text(json.dumps(spec.to_dict()))
+
+    loaded = load_generated_spec(spec_path)
+    game = compile_generated_game(loaded)
+
+    assert loaded == spec
+    assert game.name == spec.name
+    assert len(game.legal_actions(game.initial_state())) > 0
+
+
+def test_generated_loader_rejects_unknown_family():
+    bad = GeneratedGameSpec(
+        family="escape_capture",
+        name="bad",
+        seed=1,
+        board={"rows": 5, "cols": 5},
+        roles=("attacker", "defender"),
+        setup={},
+        actions={},
+        terminal_rules={},
+        max_plies=10,
+    )
+    invalid = object.__new__(GeneratedGameSpec)
+    for field, value in bad.to_dict().items():
+        object.__setattr__(invalid, field, value)
+    object.__setattr__(invalid, "family", "unknown_family")
+    with pytest.raises(ValueError, match="unknown family"):
+        compile_generated_game(invalid)

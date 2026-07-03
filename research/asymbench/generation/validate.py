@@ -111,6 +111,8 @@ def _compile_failure_reason(exc: Exception) -> str:
     message = str(exc)
     if "must not start connected" in message:
         return "initial state is terminal"
+    if "key must not start captured" in message:
+        return "initial state is terminal"
     if "initial state must have legal actions" in message:
         return "initial state has no legal actions"
     return f"compile failed: {message}"

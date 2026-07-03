@@ -1090,6 +1090,21 @@ def test_validate_generated_game_rejects_terminal_initial_connection():
     assert "initial state is terminal" in report.reasons
 
 
+def test_validate_generated_game_rejects_terminal_initial_escape_capture():
+    spec_data = _escape_capture_test_spec().to_dict()
+    spec_data["setup"] = {
+        **spec_data["setup"],
+        "attackers": [7, 17],
+        "guards": [],
+        "hostile": [],
+    }
+    spec = GeneratedGameSpec.from_dict(spec_data)
+
+    report = validate_generated_game(spec, random_games=2, seed=1)
+    assert not report.valid
+    assert report.reasons == ("initial state is terminal",)
+
+
 def test_validate_generated_game_propagates_internal_initial_state_runtime_error(monkeypatch):
     spec = _escape_capture_test_spec()
 

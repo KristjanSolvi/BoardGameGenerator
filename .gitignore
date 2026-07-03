@@ -3,3 +3,8 @@ __pycache__/
 .pytest_cache/
 runs/
 .DS_Store
+
+# AsymBench research outputs
+research_runs/
+*.pt
+*.pth

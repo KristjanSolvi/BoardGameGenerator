@@ -17,6 +17,7 @@ from research.asymbench.generation.connection_disruption import (
     ConnectionDisruptionState,
 )
 from research.asymbench.experiments.generate_grid_games import main as generate_main
+import research.asymbench.experiments.generate_grid_games as generate_grid_games_module
 from research.asymbench.generation.specs import (
     GeneratedGameSpec,
     GenerationConstraints,
@@ -1070,6 +1071,89 @@ def test_generate_grid_games_cli_writes_accepted_specs(tmp_path):
         ValidationReport.from_dict(json.loads(path.read_text())).valid
         for path in reports
     )
+
+
+def test_generate_grid_games_cli_propagates_generator_runtime_error(monkeypatch, tmp_path):
+    def boom(*, seed, constraints):
+        raise RuntimeError("internal generator bug")
+
+    monkeypatch.setattr(
+        generate_grid_games_module.GENERATOR_REGISTRY["escape_capture"],
+        "generate",
+        boom,
+    )
+
+    with pytest.raises(RuntimeError, match="internal generator bug"):
+        generate_main(
+            [
+                "--family",
+                "escape_capture",
+                "--count",
+                "1",
+                "--seed",
+                "100",
+                "--output",
+                str(tmp_path),
+                "--random-games",
+                "2",
+            ]
+        )
+
+
+def test_generate_grid_games_cli_reports_shortfall_when_validation_rejects_all(
+    monkeypatch, tmp_path, capsys
+):
+    generator = generate_grid_games_module.GENERATOR_REGISTRY["escape_capture"]
+
+    def fake_generate(*, seed, constraints):
+        return GeneratedGameSpec(
+            family="escape_capture",
+            name=f"escape_capture_{seed}",
+            seed=seed,
+            board={"rows": 5, "cols": 5},
+            roles=("attacker", "defender"),
+            setup={
+                "attackers": [0, 4, 20, 24],
+                "guards": [7, 11],
+                "key": 12,
+                "exits": [2],
+                "hostile": [],
+            },
+            actions={"movement": "orthogonal_step"},
+            terminal_rules={"capture": "opposite_sides"},
+            max_plies=40,
+        )
+
+    monkeypatch.setattr(generator, "generate", fake_generate)
+    monkeypatch.setattr(
+        generate_grid_games_module,
+        "validate_generated_game",
+        lambda spec, random_games, seed: ValidationReport(
+            family=spec.family,
+            name=spec.name,
+            valid=False,
+            reasons=("forced invalid",),
+        ),
+    )
+
+    exit_code = generate_main(
+        [
+            "--family",
+            "escape_capture",
+            "--count",
+            "1",
+            "--seed",
+            "100",
+            "--output",
+            str(tmp_path),
+            "--random-games",
+            "2",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert "family=escape_capture accepted=0 target=1" in captured.err
 
 
 def test_generated_loader_rejects_unknown_family():

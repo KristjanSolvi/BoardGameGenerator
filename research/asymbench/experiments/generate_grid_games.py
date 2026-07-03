@@ -76,11 +76,7 @@ def _generate_family(
 
     while accepted < count and attempts < constraints.max_attempts:
         attempts += 1
-        try:
-            spec = generator.generate(seed=candidate_seed, constraints=constraints)
-        except Exception:
-            candidate_seed += 1
-            continue
+        spec = generator.generate(seed=candidate_seed, constraints=constraints)
 
         report = validate_generated_game(
             spec,

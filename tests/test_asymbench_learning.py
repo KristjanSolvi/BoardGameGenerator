@@ -9,6 +9,45 @@ from research.asymbench.learning.replay import ReplayBuffer, TrainingExample
 from research.asymbench.learning.selfplay import NeuralEvaluator, generate_selfplay_game
 
 
+class _TinyEvaluatorGame:
+    action_size = 2
+
+    def __init__(self, terminal: bool = False) -> None:
+        self.terminal = terminal
+
+    def is_terminal(self, state):
+        del state
+        return self.terminal
+
+    def legal_actions(self, state):
+        del state
+        return [0]
+
+    def observation_tensor(self, state, player: int):
+        del state, player
+        return np.zeros((1, 1, 1), dtype=np.float32)
+
+    def player_role(self, state, player: int):
+        del state, player
+        return 0
+
+    def action_mask(self, state):
+        del state
+        return np.array([True, False], dtype=np.bool_)
+
+
+class _DominantIllegalLogitModel(torch.nn.Module):
+    def forward(self, observations, roles, action_mask):
+        del roles, action_mask
+        logits = torch.tensor(
+            [[0.0, 1.0e30]], dtype=observations.dtype, device=observations.device
+        )
+        values = torch.tensor(
+            [0.25], dtype=observations.dtype, device=observations.device
+        )
+        return logits, values
+
+
 def test_policy_value_net_shared_and_role_heads_shapes():
     game = BreakerBuilder()
     obs = torch.zeros((2, 6, 5, 5), dtype=torch.float32)
@@ -185,6 +224,27 @@ def test_neural_evaluator_returns_legal_prior_and_value():
     assert np.isclose(prior.sum(), 1.0)
     assert set(np.flatnonzero(prior)).issubset(set(game.legal_actions(state)))
     assert -1.0 <= value <= 1.0
+
+
+def test_neural_evaluator_rejects_terminal_state_with_legal_actions():
+    game = _TinyEvaluatorGame(terminal=True)
+    evaluator = NeuralEvaluator(_DominantIllegalLogitModel(), device="cpu")
+
+    with pytest.raises(ValueError, match="terminal"):
+        evaluator.evaluate(game, state=object(), player=0)
+
+
+def test_neural_evaluator_masks_logits_before_softmax():
+    game = _TinyEvaluatorGame()
+    evaluator = NeuralEvaluator(_DominantIllegalLogitModel(), device="cpu")
+
+    prior, value = evaluator.evaluate(game, state=object(), player=0)
+
+    assert np.isfinite(prior).all()
+    assert prior[0] == pytest.approx(1.0)
+    assert prior[1] == pytest.approx(0.0)
+    assert prior.sum() == pytest.approx(1.0)
+    assert value == pytest.approx(0.25)
 
 
 def test_generate_selfplay_game_produces_training_examples():

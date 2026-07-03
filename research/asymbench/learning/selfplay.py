@@ -19,6 +19,9 @@ class NeuralEvaluator:
         self.model.eval()
 
     def evaluate(self, game: Any, state: Any, player: int) -> tuple[np.ndarray, float]:
+        if game.is_terminal(state):
+            raise ValueError("cannot evaluate terminal state")
+
         legal_actions = game.legal_actions(state)
         if not legal_actions:
             raise ValueError("cannot evaluate state with no legal actions")
@@ -43,8 +46,9 @@ class NeuralEvaluator:
         self.model.eval()
         with torch.no_grad():
             logits, values = self.model(observations, roles, masks)
-            probabilities = torch.softmax(logits, dim=1)
-            probabilities = probabilities.masked_fill(~masks, 0.0)
+            mask_value = torch.finfo(logits.dtype).min
+            masked_logits = logits.masked_fill(~masks, mask_value)
+            probabilities = torch.softmax(masked_logits, dim=1)
             total = probabilities.sum(dim=1, keepdim=True)
             probabilities = probabilities / total
 

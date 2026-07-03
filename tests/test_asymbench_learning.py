@@ -521,7 +521,7 @@ def test_role_head_runner_writes_smoke_outputs_and_schema(tmp_path):
         "seeds": [7],
         "model_variants": ["shared_heads", "role_heads"],
         "iterations": 1,
-        "selfplay_games_per_iteration": 1,
+        "selfplay_games_per_iteration": 2,
         "train_steps_per_iteration": 1,
         "batch_size": 2,
         "replay_capacity": 64,
@@ -547,6 +547,11 @@ def test_role_head_runner_writes_smoke_outputs_and_schema(tmp_path):
     assert len(rows) == 2
     required_fields = {
         "variant_seed",
+        "trial_seed",
+        "model_init_seed",
+        "eval_seed",
+        "selfplay_game_seeds",
+        "selfplay_seat_role_counts",
         "train_total_loss",
         "eval_random_win_rate",
         "eval_model_role_win_rates",
@@ -562,6 +567,27 @@ def test_role_head_runner_writes_smoke_outputs_and_schema(tmp_path):
         assert row["device_used"] == "cpu"
         assert row["eval_games"] == 2
         assert row["eval_simulations"] == 1
+        assert row["trial_seed"] == 7
+        assert row["variant_seed"] == row["model_init_seed"]
+        assert row["selfplay_seat_role_counts"] == {"0-1": 1, "1-0": 1}
+
+    by_variant = {row["variant"]: row for row in rows}
+    assert (
+        by_variant["shared_heads"]["eval_seed"]
+        == by_variant["role_heads"]["eval_seed"]
+    )
+    assert (
+        by_variant["shared_heads"]["selfplay_game_seeds"]
+        == by_variant["role_heads"]["selfplay_game_seeds"]
+    )
+    assert (
+        by_variant["shared_heads"]["selfplay_seat_role_counts"]
+        == by_variant["role_heads"]["selfplay_seat_role_counts"]
+    )
+    assert (
+        by_variant["shared_heads"]["model_init_seed"]
+        != by_variant["role_heads"]["model_init_seed"]
+    )
 
     summary = json.loads((run_dir / "role_summary.json").read_text())
     assert summary["device_requested"] == "cpu"
@@ -581,7 +607,6 @@ def test_role_head_runner_writes_smoke_outputs_and_schema(tmp_path):
     role_checkpoint = torch.load(role_checkpoint_path, map_location="cpu")
     assert shared_checkpoint["role_heads"] is False
     assert role_checkpoint["role_heads"] is True
-    by_variant = {row["variant"]: row for row in rows}
     assert (
         shared_checkpoint["variant_seed"]
         == by_variant["shared_heads"]["variant_seed"]
@@ -591,6 +616,9 @@ def test_role_head_runner_writes_smoke_outputs_and_schema(tmp_path):
         == by_variant["role_heads"]["variant_seed"]
     )
     assert shared_checkpoint["variant_seed"] != role_checkpoint["variant_seed"]
+    assert shared_checkpoint["trial_seed"] == role_checkpoint["trial_seed"] == 7
+    assert shared_checkpoint["model_init_seed"] == shared_checkpoint["variant_seed"]
+    assert role_checkpoint["model_init_seed"] == role_checkpoint["variant_seed"]
     assert all(
         tensor.device.type == "cpu"
         for tensor in shared_checkpoint["model_state_dict"].values()

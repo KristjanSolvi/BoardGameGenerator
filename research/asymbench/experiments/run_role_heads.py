@@ -74,10 +74,12 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
     checkpoints: list[dict[str, Any]] = []
 
     for seed in config["seeds"]:
+        trial_seed = int(seed)
         for variant in config["model_variants"]:
             variant_name = str(variant)
-            variant_seed = _variant_seed(int(seed), variant_name)
-            _seed_everything(variant_seed)
+            model_init_seed = _variant_seed(trial_seed, variant_name)
+            variant_seed = model_init_seed
+            _seed_everything(model_init_seed)
 
             variant_dir = run_dir / variant_name / f"seed_{seed}"
             variant_dir.mkdir(parents=True, exist_ok=False)
@@ -86,19 +88,30 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
             model = _create_model(game, role_heads=VARIANT_ROLE_HEADS[variant_name])
             buffer = ReplayBuffer(
                 capacity=int(config["replay_capacity"]),
-                seed=variant_seed,
+                seed=trial_seed,
             )
             selfplay_games_total = 0
 
             for iteration in range(1, int(config["iterations"]) + 1):
+                selfplay_game_seeds: list[int] = []
+                selfplay_seat_role_counts: Counter[str] = Counter()
                 for game_index in range(int(config["selfplay_games_per_iteration"])):
+                    selfplay_seed = _derived_seed(trial_seed, iteration, game_index)
+                    seat_roles = _selfplay_seat_roles(
+                        trial_seed=trial_seed,
+                        iteration=iteration,
+                        game_index=game_index,
+                    )
                     examples, _ = generate_selfplay_game(
                         game=game,
                         model=model,
                         device=device_used,
                         simulations=int(config["mcts_simulations"]),
-                        seed=_derived_seed(variant_seed, iteration, game_index),
+                        seed=selfplay_seed,
+                        seat_roles=seat_roles,
                     )
+                    selfplay_game_seeds.append(selfplay_seed)
+                    selfplay_seat_role_counts[_seat_roles_key(seat_roles)] += 1
                     for example in examples:
                         buffer.add(example)
                     selfplay_games_total += 1
@@ -117,13 +130,14 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                     lr=float(config["learning_rate"]),
                     device=device_used,
                 )
+                eval_seed = _derived_seed(trial_seed, iteration, 10_000)
                 eval_summary = evaluate_model_vs_random(
                     game=game,
                     model=model,
                     device=device_used,
                     games=int(config["eval_games"]),
                     simulations=int(config["eval_simulations"]),
-                    seed=_derived_seed(variant_seed, iteration, 10_000),
+                    seed=eval_seed,
                 )
 
                 row = {
@@ -132,6 +146,13 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                     "variant": variant_name,
                     "seed": int(seed),
                     "variant_seed": variant_seed,
+                    "trial_seed": trial_seed,
+                    "model_init_seed": model_init_seed,
+                    "eval_seed": eval_seed,
+                    "selfplay_game_seeds": selfplay_game_seeds,
+                    "selfplay_seat_role_counts": dict(
+                        sorted(selfplay_seat_role_counts.items())
+                    ),
                     "device_requested": device_requested,
                     "device_used": device_used,
                     "selfplay_games_total": selfplay_games_total,
@@ -166,6 +187,8 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                     "variant": variant_name,
                     "seed": int(seed),
                     "variant_seed": variant_seed,
+                    "trial_seed": trial_seed,
+                    "model_init_seed": model_init_seed,
                     "device_requested": device_requested,
                     "device_used": device_used,
                     "input_shape": model.input_shape,
@@ -180,6 +203,8 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                     "variant": variant_name,
                     "seed": int(seed),
                     "variant_seed": variant_seed,
+                    "trial_seed": trial_seed,
+                    "model_init_seed": model_init_seed,
                     "path": str(checkpoint_path),
                 }
             )
@@ -268,6 +293,19 @@ def _variant_seed(seed: int, variant: str) -> int:
 
 def _derived_seed(seed: int, iteration: int, index: int) -> int:
     return seed * 1_000_003 + iteration * 10_007 + index
+
+
+def _selfplay_seat_roles(
+    *, trial_seed: int, iteration: int, game_index: int
+) -> tuple[int, int]:
+    offset = _derived_seed(trial_seed, iteration, 50_000) % 2
+    if (offset + game_index) % 2 == 0:
+        return (0, 1)
+    return (1, 0)
+
+
+def _seat_roles_key(seat_roles: tuple[int, int]) -> str:
+    return f"{seat_roles[0]}-{seat_roles[1]}"
 
 
 def _cpu_state_dict(model: torch.nn.Module) -> dict[str, torch.Tensor]:

@@ -15,9 +15,9 @@ def _require_positive_dimensions(*, rows: int | None = None, cols: int) -> None:
         raise ValueError("rows must be positive")
 
 
-def coord_to_index(row: int, col: int, *, cols: int) -> int:
-    _require_positive_dimensions(cols=cols)
-    if row < 0 or col < 0 or col >= cols:
+def coord_to_index(row: int, col: int, *, cols: int, rows: int | None = None) -> int:
+    _require_positive_dimensions(rows=rows, cols=cols)
+    if row < 0 or (rows is not None and row >= rows) or col < 0 or col >= cols:
         raise ValueError("coordinate outside board")
     return row * cols + col
 
@@ -65,6 +65,8 @@ def ray_cells(
         raise ValueError("coordinate outside board")
     if dr == 0 and dc == 0:
         raise ValueError("ray direction must be non-zero")
+    if dr not in {-1, 0, 1} or dc not in {-1, 0, 1}:
+        raise ValueError("ray direction must be unit")
 
     cells: list[tuple[int, int]] = []
     row += dr

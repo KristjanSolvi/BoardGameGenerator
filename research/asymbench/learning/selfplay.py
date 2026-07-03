@@ -16,7 +16,6 @@ class NeuralEvaluator:
     def __init__(self, model: torch.nn.Module, device: str | torch.device) -> None:
         self.device = torch.device(device)
         self.model = model.to(self.device)
-        self.model.eval()
 
     def evaluate(self, game: Any, state: Any, player: int) -> tuple[np.ndarray, float]:
         if game.is_terminal(state):
@@ -43,16 +42,23 @@ class NeuralEvaluator:
             action_mask, dtype=torch.bool, device=self.device
         ).unsqueeze(0)
 
+        was_training = self.model.training
         self.model.eval()
-        with torch.no_grad():
-            logits, values = self.model(observations, roles, masks)
-            mask_value = torch.finfo(logits.dtype).min
-            masked_logits = logits.masked_fill(~masks, mask_value)
-            probabilities = torch.softmax(masked_logits, dim=1)
-            total = probabilities.sum(dim=1, keepdim=True)
-            probabilities = probabilities / total
+        try:
+            with torch.no_grad():
+                logits, values = self.model(observations, roles, masks)
+                mask_value = torch.finfo(logits.dtype).min
+                masked_logits = logits.masked_fill(~masks, mask_value)
+                probabilities = torch.softmax(masked_logits, dim=1)
+                probabilities = probabilities.masked_fill(~masks, 0.0)
+        finally:
+            self.model.train(was_training)
 
-        prior = probabilities.squeeze(0).detach().cpu().numpy().astype(np.float64)
+        prior = _validate_policy(
+            probabilities.squeeze(0).detach().cpu().numpy(),
+            action_mask,
+            context="neural evaluator prior",
+        )
         return prior, float(values.squeeze(0).detach().cpu().item())
 
     def _model_dtype(self) -> torch.dtype:
@@ -70,6 +76,37 @@ class _PendingExample:
     action_mask: np.ndarray
     policy: np.ndarray
     player: int
+
+
+def _validate_policy(
+    policy: np.ndarray,
+    action_mask: np.ndarray,
+    *,
+    context: str,
+) -> np.ndarray:
+    policy = np.asarray(policy, dtype=np.float64)
+    action_mask = np.asarray(action_mask, dtype=np.bool_)
+    if policy.shape != action_mask.shape:
+        raise ValueError(f"{context} shape must match action mask")
+    if not np.all(np.isfinite(policy)):
+        raise ValueError(f"{context} must contain only finite values")
+    if np.any(policy < -1e-8):
+        raise ValueError(f"{context} must not contain negative probabilities")
+    if float(np.abs(policy[~action_mask]).sum()) > 1e-8:
+        raise ValueError(f"{context} has illegal action mass")
+
+    legal_policy = np.zeros_like(policy, dtype=np.float64)
+    legal_policy[action_mask] = np.maximum(policy[action_mask], 0.0)
+    total = float(legal_policy.sum())
+    if total <= 0.0:
+        raise ValueError(f"{context} must have positive probability mass")
+    if not np.isclose(total, 1.0, rtol=1e-5, atol=1e-8):
+        raise ValueError(f"{context} must be normalized")
+
+    normalized = legal_policy / total
+    if not np.isclose(float(normalized.sum()), 1.0):
+        raise ValueError(f"{context} could not be normalized")
+    return normalized
 
 
 def generate_selfplay_game(
@@ -105,7 +142,11 @@ def generate_selfplay_game(
         observation = np.asarray(game.observation_tensor(state, player)).copy()
         role = int(game.player_role(state, player))
         action_mask = np.asarray(game.action_mask(state), dtype=np.bool_).copy()
-        policy = np.asarray(agent.policy(game, state, player), dtype=np.float64).copy()
+        policy = _validate_policy(
+            agent.policy(game, state, player),
+            action_mask,
+            context="MCTS policy",
+        ).astype(np.float32)
 
         action = int(np.argmax(policy))
         if action not in legal_actions:

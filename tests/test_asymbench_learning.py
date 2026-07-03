@@ -3,7 +3,9 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
+from research.asymbench.games.base import RoleResult
 from research.asymbench.games.breaker_builder import BreakerBuilder
+from research.asymbench.learning import selfplay as selfplay_module
 from research.asymbench.learning.model import PolicyValueNet
 from research.asymbench.learning.replay import ReplayBuffer, TrainingExample
 from research.asymbench.learning.selfplay import NeuralEvaluator, generate_selfplay_game
@@ -46,6 +48,78 @@ class _DominantIllegalLogitModel(torch.nn.Module):
             [0.25], dtype=observations.dtype, device=observations.device
         )
         return logits, values
+
+
+class _NanLegalLogitModel(torch.nn.Module):
+    def forward(self, observations, roles, action_mask):
+        del roles, action_mask
+        logits = torch.tensor(
+            [[float("nan"), 0.0]],
+            dtype=observations.dtype,
+            device=observations.device,
+        )
+        values = torch.zeros(
+            (1,), dtype=observations.dtype, device=observations.device
+        )
+        return logits, values
+
+
+class _TwoActionModel(torch.nn.Module):
+    def forward(self, observations, roles, action_mask):
+        del roles, action_mask
+        batch_size = observations.shape[0]
+        logits = torch.zeros(
+            (batch_size, 2), dtype=observations.dtype, device=observations.device
+        )
+        values = torch.zeros(
+            (batch_size,), dtype=observations.dtype, device=observations.device
+        )
+        return logits, values
+
+
+class _TwoPlyGame:
+    action_size = 2
+    max_plies = 2
+
+    def initial_state(self, seat_roles=(0, 1)):
+        del seat_roles
+        return 0
+
+    def is_terminal(self, state: int):
+        return state >= 2
+
+    def legal_actions(self, state: int):
+        return [] if self.is_terminal(state) else [0]
+
+    def current_player(self, state: int):
+        return state % 2
+
+    def player_role(self, state: int, player: int):
+        del state
+        return player
+
+    def observation_tensor(self, state: int, player: int):
+        return np.full((1, 1, 1), state + player, dtype=np.float32)
+
+    def action_mask(self, state: int):
+        return np.array([not self.is_terminal(state), False], dtype=np.bool_)
+
+    def apply_action(self, state: int, action: int):
+        assert action == 0
+        return state + 1
+
+    def result(self, state: int):
+        assert state == 2
+        return RoleResult(winner=1, reason="scripted", plies=2)
+
+
+class _InvalidPolicyAgent:
+    def __init__(self, evaluator, simulations: int, seed: int | None = None):
+        del evaluator, simulations, seed
+
+    def policy(self, game, state, player: int):
+        del state, player
+        return np.array([0.5, 0.5], dtype=np.float64)[: game.action_size]
 
 
 def test_policy_value_net_shared_and_role_heads_shapes():
@@ -247,6 +321,25 @@ def test_neural_evaluator_masks_logits_before_softmax():
     assert value == pytest.approx(0.25)
 
 
+def test_neural_evaluator_restores_training_mode():
+    game = _TinyEvaluatorGame()
+    model = _DominantIllegalLogitModel()
+    model.train()
+    evaluator = NeuralEvaluator(model, device="cpu")
+
+    evaluator.evaluate(game, state=object(), player=0)
+
+    assert model.training is True
+
+
+def test_neural_evaluator_rejects_invalid_policy_logits():
+    game = _TinyEvaluatorGame()
+    evaluator = NeuralEvaluator(_NanLegalLogitModel(), device="cpu")
+
+    with pytest.raises(ValueError, match="finite"):
+        evaluator.evaluate(game, state=object(), player=0)
+
+
 def test_generate_selfplay_game_produces_training_examples():
     game = BreakerBuilder(max_plies=8)
     model = PolicyValueNet((6, 5, 5), game.action_size, num_roles=2, role_heads=True)
@@ -263,3 +356,30 @@ def test_generate_selfplay_game_produces_training_examples():
     assert all(ex.action_mask.dtype == np.bool_ for ex in examples)
     assert all(ex.policy.shape == (game.action_size,) for ex in examples)
     assert all(-1.0 <= ex.value <= 1.0 for ex in examples)
+
+
+def test_generate_selfplay_game_values_use_acting_player_perspective():
+    examples, outcome = generate_selfplay_game(
+        game=_TwoPlyGame(),
+        model=_TwoActionModel(),
+        device="cpu",
+        simulations=1,
+        seed=123,
+    )
+
+    assert outcome == {"winner": 1, "reason": "scripted", "plies": 2}
+    assert [example.role for example in examples] == [0, 1]
+    assert [example.value for example in examples] == [-1.0, 1.0]
+
+
+def test_generate_selfplay_game_rejects_illegal_policy_mass(monkeypatch):
+    monkeypatch.setattr(selfplay_module, "MCTSAgent", _InvalidPolicyAgent)
+
+    with pytest.raises(ValueError, match="illegal"):
+        generate_selfplay_game(
+            game=_TwoPlyGame(),
+            model=_TwoActionModel(),
+            device="cpu",
+            simulations=1,
+            seed=123,
+        )

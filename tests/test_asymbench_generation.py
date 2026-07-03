@@ -16,6 +16,7 @@ from research.asymbench.generation.connection_disruption import (
     ConnectionDisruptionGenerator,
     ConnectionDisruptionState,
 )
+from research.asymbench.experiments.generate_grid_games import main as generate_main
 from research.asymbench.generation.specs import (
     GeneratedGameSpec,
     GenerationConstraints,
@@ -1038,6 +1039,37 @@ def test_generated_loader_reads_spec_and_compiles_game(tmp_path):
     assert loaded == spec
     assert game.name == spec.name
     assert len(game.legal_actions(game.initial_state())) > 0
+
+
+def test_generate_grid_games_cli_writes_accepted_specs(tmp_path):
+    exit_code = generate_main(
+        [
+            "--family",
+            "escape_capture",
+            "--count",
+            "2",
+            "--seed",
+            "100",
+            "--output",
+            str(tmp_path),
+            "--random-games",
+            "2",
+        ]
+    )
+    assert exit_code == 0
+    specs = sorted(tmp_path.glob("escape_capture_*/spec.json"))
+    reports = sorted(tmp_path.glob("escape_capture_*/validation.json"))
+    assert len(specs) == 2
+    assert len(reports) == 2
+    assert all(
+        GeneratedGameSpec.from_dict(json.loads(path.read_text())).family
+        == "escape_capture"
+        for path in specs
+    )
+    assert all(
+        ValidationReport.from_dict(json.loads(path.read_text())).valid
+        for path in reports
+    )
 
 
 def test_generated_loader_rejects_unknown_family():

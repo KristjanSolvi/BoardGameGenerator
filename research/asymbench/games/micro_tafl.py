@@ -44,6 +44,8 @@ class MicroTafl:
     _INITIAL_KING = "c3"
 
     def __init__(self, max_plies: int = 80) -> None:
+        if max_plies <= 0:
+            raise ValueError("max_plies must be positive")
         self.max_plies = max_plies
 
     def initial_state(
@@ -70,7 +72,15 @@ class MicroTafl:
         return state.to_move
 
     def player_role(self, state: MicroTaflState, player: int) -> int:
+        if player not in (0, 1):
+            raise ValueError(f"player must be 0 or 1: {player}")
         return state.seat_roles[player]
+
+    def encode_slide(self, from_cell: str, to_cell: str) -> int:
+        return (
+            self.cell_index(from_cell) * self.action_size_root
+            + self.cell_index(to_cell)
+        )
 
     def legal_actions(self, state: MicroTaflState) -> list[int]:
         if self._has_static_terminal_condition(state):
@@ -190,17 +200,22 @@ class MicroTafl:
             rows.append(f"{row + 1} " + " ".join(cells))
         rows.append("  a b c d e")
         role = self.roles[self.player_role(state, state.to_move)]
-        rows.append(
-            f"to_move={state.to_move} role={role}"
-        )
+        rows.append(f"to_move={state.to_move} role={role}")
         return "\n".join(rows)
 
     @classmethod
     def cell_index(cls, cell: str) -> int:
-        file_index = ord(cell[0]) - ord("a")
-        rank_index = int(cell[1]) - 1
+        if not isinstance(cell, str) or len(cell) != 2:
+            raise ValueError(f"cell must be in a1..e5 form: {cell!r}")
+
+        file_char, rank_char = cell
+        if not file_char.isalpha() or not rank_char.isdigit():
+            raise ValueError(f"cell must be in a1..e5 form: {cell!r}")
+
+        file_index = ord(file_char.lower()) - ord("a")
+        rank_index = int(rank_char) - 1
         if not cls._in_bounds(rank_index, file_index):
-            raise ValueError(f"cell outside board: {cell}")
+            raise ValueError(f"cell outside board: {cell!r}")
         return rank_index * cls._BOARD_SIZE + file_index
 
     @classmethod

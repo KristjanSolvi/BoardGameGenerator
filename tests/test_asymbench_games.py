@@ -2,7 +2,12 @@ import numpy as np
 import pytest
 
 from research.asymbench.games import MicroTafl
-from research.asymbench.games.base import IllegalActionError, make_action_mask, RoleResult
+from research.asymbench.games.base import (
+    IllegalActionError,
+    RoleResult,
+    make_action_mask,
+)
+from research.asymbench.games.micro_tafl import MicroTaflState
 
 
 def test_make_action_mask_marks_only_legal_actions():
@@ -23,13 +28,29 @@ def test_role_result_value_for_player():
     assert RoleResult(winner=None, reason="draw", plies=20).value_for_player(0) == 0.0
 
 
-def _micro_tafl_action(from_cell: str, to_cell: str) -> int:
-    def index(cell: str) -> int:
-        file_index = ord(cell[0]) - ord("a")
-        rank_index = int(cell[1]) - 1
-        return rank_index * 5 + file_index
+def _micro_tafl_state(
+    pieces: dict[str, int],
+    *,
+    to_move: int = 0,
+    seat_roles: tuple[int, int] = (MicroTafl.ATTACKER, MicroTafl.DEFENDER),
+    plies: int = 0,
+) -> MicroTaflState:
+    board = [MicroTafl.EMPTY] * 25
+    for cell, piece in pieces.items():
+        board[MicroTafl.cell_index(cell)] = piece
+    return MicroTaflState(
+        board=tuple(board), to_move=to_move, seat_roles=seat_roles, plies=plies
+    )
 
-    return index(from_cell) * 25 + index(to_cell)
+
+def test_micro_tafl_encode_slide_uses_public_cell_validation():
+    game = MicroTafl()
+
+    assert game.encode_slide("a1", "e5") == 24
+    with pytest.raises(ValueError, match="cell must be in"):
+        game.encode_slide("a", "e5")
+    with pytest.raises(ValueError, match="cell outside board"):
+        game.encode_slide("a0", "e5")
 
 
 def test_micro_tafl_initial_state_roles_and_legal_moves():
@@ -72,11 +93,11 @@ def test_micro_tafl_known_escape_sequence_reaches_defender_win():
         seat_roles=(MicroTafl.DEFENDER, MicroTafl.ATTACKER)
     )
     actions = [
-        _micro_tafl_action("b3", "b2"),
-        _micro_tafl_action("a3", "a4"),
-        _micro_tafl_action("c3", "a3"),
-        _micro_tafl_action("e3", "e4"),
-        _micro_tafl_action("a3", "a1"),
+        game.encode_slide("b3", "b2"),
+        game.encode_slide("a3", "a4"),
+        game.encode_slide("c3", "a3"),
+        game.encode_slide("e3", "e4"),
+        game.encode_slide("a3", "a1"),
     ]
 
     for action in actions:
@@ -93,8 +114,131 @@ def test_micro_tafl_known_escape_sequence_reaches_defender_win():
 def test_micro_tafl_rejects_illegal_action():
     game = MicroTafl()
     state = game.initial_state()
-    illegal_action = _micro_tafl_action("a1", "a2")
+    illegal_action = game.encode_slide("a1", "a2")
 
     assert illegal_action not in game.legal_actions(state)
     with pytest.raises(IllegalActionError):
         game.apply_action(state, illegal_action)
+
+
+def test_micro_tafl_captures_defender_guard_against_attacker_anchor():
+    game = MicroTafl()
+    state = _micro_tafl_state(
+        {
+            "a3": MicroTafl.ATTACKER_PIECE,
+            "c3": MicroTafl.DEFENDER_GUARD,
+            "d3": MicroTafl.ATTACKER_PIECE,
+            "e4": MicroTafl.KING,
+        }
+    )
+
+    state = game.apply_action(state, game.encode_slide("a3", "b3"))
+
+    assert state.board[MicroTafl.cell_index("c3")] == MicroTafl.EMPTY
+
+
+def test_micro_tafl_captures_non_king_piece_against_hostile_corner():
+    game = MicroTafl()
+    state = _micro_tafl_state(
+        {
+            "b1": MicroTafl.DEFENDER_GUARD,
+            "d1": MicroTafl.ATTACKER_PIECE,
+            "e4": MicroTafl.KING,
+        }
+    )
+
+    state = game.apply_action(state, game.encode_slide("d1", "c1"))
+
+    assert state.board[MicroTafl.cell_index("b1")] == MicroTafl.EMPTY
+
+
+def test_micro_tafl_king_capture_by_opposite_attackers():
+    game = MicroTafl()
+    state = _micro_tafl_state(
+        {
+            "c1": MicroTafl.ATTACKER_PIECE,
+            "c3": MicroTafl.KING,
+            "c4": MicroTafl.ATTACKER_PIECE,
+        }
+    )
+
+    state = game.apply_action(state, game.encode_slide("c1", "c2"))
+    result = game.result(state)
+
+    assert game.is_terminal(state)
+    assert result.winner == 0
+    assert result.reason == "king_capture"
+
+
+def test_micro_tafl_king_capture_can_use_hostile_corner():
+    game = MicroTafl()
+    state = _micro_tafl_state(
+        {
+            "b1": MicroTafl.KING,
+            "d1": MicroTafl.ATTACKER_PIECE,
+        }
+    )
+
+    state = game.apply_action(state, game.encode_slide("d1", "c1"))
+    result = game.result(state)
+
+    assert game.is_terminal(state)
+    assert result.winner == 0
+    assert result.reason == "king_capture"
+
+
+def test_micro_tafl_max_plies_is_draw():
+    game = MicroTafl(max_plies=3)
+    state = _micro_tafl_state(
+        {
+            "a3": MicroTafl.ATTACKER_PIECE,
+            "c3": MicroTafl.KING,
+        },
+        plies=3,
+    )
+
+    result = game.result(state)
+
+    assert game.is_terminal(state)
+    assert result.winner is None
+    assert result.reason == "max_plies"
+
+
+def test_micro_tafl_no_legal_action_awards_win_to_opponent():
+    game = MicroTafl()
+    state = _micro_tafl_state(
+        {
+            "a1": MicroTafl.ATTACKER_PIECE,
+            "b1": MicroTafl.DEFENDER_GUARD,
+            "c1": MicroTafl.ATTACKER_PIECE,
+            "d1": MicroTafl.DEFENDER_GUARD,
+            "e1": MicroTafl.ATTACKER_PIECE,
+            "a2": MicroTafl.DEFENDER_GUARD,
+            "b2": MicroTafl.ATTACKER_PIECE,
+            "c2": MicroTafl.DEFENDER_GUARD,
+            "d2": MicroTafl.ATTACKER_PIECE,
+            "e2": MicroTafl.DEFENDER_GUARD,
+            "a3": MicroTafl.ATTACKER_PIECE,
+            "b3": MicroTafl.DEFENDER_GUARD,
+            "c3": MicroTafl.KING,
+            "d3": MicroTafl.DEFENDER_GUARD,
+            "e3": MicroTafl.ATTACKER_PIECE,
+            "a4": MicroTafl.DEFENDER_GUARD,
+            "b4": MicroTafl.ATTACKER_PIECE,
+            "c4": MicroTafl.DEFENDER_GUARD,
+            "d4": MicroTafl.ATTACKER_PIECE,
+            "e4": MicroTafl.DEFENDER_GUARD,
+            "a5": MicroTafl.ATTACKER_PIECE,
+            "b5": MicroTafl.DEFENDER_GUARD,
+            "c5": MicroTafl.ATTACKER_PIECE,
+            "d5": MicroTafl.DEFENDER_GUARD,
+            "e5": MicroTafl.ATTACKER_PIECE,
+        }
+    )
+
+    result = game.result(state)
+
+    assert game.legal_actions(state) == []
+    assert game.is_terminal(state)
+    assert result.winner == 1
+    assert result.reason == "no_legal_actions"

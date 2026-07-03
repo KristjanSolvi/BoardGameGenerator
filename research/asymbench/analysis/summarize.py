@@ -16,6 +16,12 @@ OPTIONAL_NUMERIC_FIELDS = {
     "value_loss": "mean_value_loss",
     "train_total_loss": "mean_train_total_loss",
 }
+GENERATED_METADATA_FIELDS = (
+    "generated_family",
+    "generated_name",
+    "generated_seed",
+    "generated_spec_path",
+)
 
 
 def summarize_metrics(path: Path) -> dict[str, dict[str, Any]]:
@@ -54,12 +60,22 @@ def _validate_row(row: dict[str, Any], line_number: int) -> None:
     for field in OPTIONAL_NUMERIC_FIELDS:
         if field in row:
             _require_number(row[field], field, line_number)
+    if "generated_seed" in row:
+        _require_exact_int(row["generated_seed"], "generated_seed", line_number)
 
 
 def _require_number(value: Any, field: str, line_number: int) -> float:
     if isinstance(value, bool) or not isinstance(value, int | float):
         raise ValueError(f"metrics row {line_number} field {field!r} must be numeric")
     return float(value)
+
+
+def _require_exact_int(value: Any, field: str, line_number: int) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(
+            f"metrics row {line_number} field {field!r} must be an exact int"
+        )
+    return value
 
 
 def _summarize_variant(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -82,7 +98,26 @@ def _summarize_variant(rows: list[dict[str, Any]]) -> dict[str, Any]:
         summary["last_eval_termination_reasons"] = last_row[
             "eval_termination_reasons"
         ]
+    for field in GENERATED_METADATA_FIELDS:
+        shared_value = _shared_optional_value(rows, field)
+        if shared_value is not _MISSING:
+            summary[field] = shared_value
     return summary
+
+
+_MISSING = object()
+
+
+def _shared_optional_value(rows: list[dict[str, Any]], field: str) -> Any:
+    if not rows:
+        return _MISSING
+    values = [row[field] for row in rows if field in row]
+    if len(values) != len(rows):
+        return _MISSING
+    first_value = values[0]
+    if any(value != first_value for value in values[1:]):
+        return _MISSING
+    return first_value
 
 
 def _mean(values: Any) -> float:

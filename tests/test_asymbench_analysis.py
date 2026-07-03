@@ -60,6 +60,102 @@ def test_summarize_metrics_groups_by_variant(tmp_path: Path):
     assert summary["role_heads"]["mean_model_win_rate"] == 1.0
 
 
+def test_summarize_metrics_preserves_generated_metadata_when_present(tmp_path: Path):
+    metrics = tmp_path / "metrics.jsonl"
+    rows = [
+        {
+            "variant": "shared_heads",
+            "eval_model_win_rate": 0.25,
+            "eval_avg_plies": 8,
+            "generated_family": "escape_capture",
+            "generated_name": "escape_capture_v1",
+            "generated_seed": 17,
+            "generated_spec_path": "research/asymbench/specs/escape_capture.json",
+        },
+        {
+            "variant": "role_heads",
+            "eval_model_win_rate": 0.75,
+            "eval_avg_plies": 10,
+            "generated_family": "escape_capture",
+            "generated_name": "escape_capture_v1",
+            "generated_seed": 17,
+            "generated_spec_path": "research/asymbench/specs/escape_capture.json",
+        },
+    ]
+    metrics.write_text("\n".join(json.dumps(row) for row in rows) + "\n")
+    summary = summarize_metrics(metrics)
+    assert summary["shared_heads"]["generated_family"] == "escape_capture"
+    assert summary["shared_heads"]["generated_name"] == "escape_capture_v1"
+    assert summary["shared_heads"]["generated_seed"] == 17
+    assert (
+        summary["shared_heads"]["generated_spec_path"]
+        == "research/asymbench/specs/escape_capture.json"
+    )
+    assert summary["role_heads"]["generated_family"] == "escape_capture"
+    assert summary["role_heads"]["generated_name"] == "escape_capture_v1"
+    assert summary["role_heads"]["generated_seed"] == 17
+    assert (
+        summary["role_heads"]["generated_spec_path"]
+        == "research/asymbench/specs/escape_capture.json"
+    )
+
+
+def test_summarize_metrics_omits_partial_generated_metadata(tmp_path: Path):
+    metrics = tmp_path / "metrics.jsonl"
+    rows = [
+        {
+            "variant": "shared_heads",
+            "eval_model_win_rate": 0.25,
+            "eval_avg_plies": 8,
+            "generated_family": "escape_capture",
+        },
+        {
+            "variant": "shared_heads",
+            "eval_model_win_rate": 0.75,
+            "eval_avg_plies": 10,
+        },
+    ]
+    metrics.write_text("\n".join(json.dumps(row) for row in rows) + "\n")
+    summary = summarize_metrics(metrics)
+    assert "generated_family" not in summary["shared_heads"]
+
+
+def test_summarize_metrics_rejects_non_int_generated_seed(tmp_path: Path):
+    metrics = tmp_path / "metrics.jsonl"
+    metrics.write_text(
+        json.dumps(
+            {
+                "variant": "shared_heads",
+                "eval_model_win_rate": 0.5,
+                "eval_avg_plies": 8,
+                "generated_seed": 17.0,
+            }
+        )
+        + "\n"
+    )
+
+    with pytest.raises(ValueError, match="generated_seed"):
+        summarize_metrics(metrics)
+
+
+def test_summarize_metrics_rejects_bool_generated_seed(tmp_path: Path):
+    metrics = tmp_path / "metrics.jsonl"
+    metrics.write_text(
+        json.dumps(
+            {
+                "variant": "shared_heads",
+                "eval_model_win_rate": 0.5,
+                "eval_avg_plies": 8,
+                "generated_seed": True,
+            }
+        )
+        + "\n"
+    )
+
+    with pytest.raises(ValueError, match="generated_seed"):
+        summarize_metrics(metrics)
+
+
 def test_summarize_metrics_rejects_empty_file(tmp_path: Path):
     metrics = tmp_path / "metrics.jsonl"
     metrics.write_text("")

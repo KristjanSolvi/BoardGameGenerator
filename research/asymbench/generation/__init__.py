@@ -18,6 +18,7 @@ from research.asymbench.generation.specs import (
     VALID_FAMILIES,
     ValidationReport,
 )
+from research.asymbench.generation.validate import validate_generated_game
 
 __all__ = [
     "ConnectionDisruptionGame",
@@ -29,5 +30,6 @@ __all__ = [
     "GenerationConstraints",
     "VALID_FAMILIES",
     "load_generated_spec",
+    "validate_generated_game",
     "ValidationReport",
 ]

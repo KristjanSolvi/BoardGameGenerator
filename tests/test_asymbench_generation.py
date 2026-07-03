@@ -9,6 +9,7 @@ from research.asymbench.generation.escape_capture import (
     EscapeCaptureGenerator,
 )
 from research.asymbench.generation.loader import compile_generated_game, load_generated_spec
+from research.asymbench.generation.validate import validate_generated_game
 from research.asymbench.generation.connection_disruption import (
     ConnectionDisruptionGame,
     ConnectionDisruptionGenerator,
@@ -1056,3 +1057,33 @@ def test_generated_loader_rejects_unknown_family():
     object.__setattr__(invalid, "family", "unknown_family")
     with pytest.raises(ValueError, match="unknown family"):
         compile_generated_game(invalid)
+
+
+def test_validate_generated_game_accepts_escape_capture_smoke():
+    generator = EscapeCaptureGenerator()
+    spec = generator.generate(
+        seed=55,
+        constraints=GenerationConstraints(board_sizes=((5, 5),), max_plies_range=(40, 40)),
+    )
+    report = validate_generated_game(spec, random_games=4, seed=9)
+    assert report.valid
+    assert report.family == "escape_capture"
+    assert report.initial_branching_factor > 0
+    assert sum(report.terminal_reasons.values()) == 4
+
+
+def test_validate_generated_game_rejects_terminal_initial_connection():
+    spec = GeneratedGameSpec(
+        family="connection_disruption",
+        name="already_connected",
+        seed=1,
+        board={"rows": 3, "cols": 3},
+        roles=("builder", "breaker"),
+        setup={"blockers": [], "protected": [], "builders": [3, 4, 5]},
+        actions={"builder": "place", "breaker": ["orthogonal_step", "adjacent_remove"]},
+        terminal_rules={"connect": ["west", "east"]},
+        max_plies=10,
+    )
+    report = validate_generated_game(spec, random_games=2, seed=1)
+    assert not report.valid
+    assert "initial state is terminal" in report.reasons

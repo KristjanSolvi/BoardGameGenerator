@@ -4,7 +4,10 @@ import numpy as np
 import pytest
 
 from research.asymbench.games.base import IllegalActionError
-from research.asymbench.generation.escape_capture import EscapeCaptureGame
+from research.asymbench.generation.escape_capture import (
+    EscapeCaptureGame,
+    EscapeCaptureGenerator,
+)
 from research.asymbench.generation.specs import (
     GeneratedGameSpec,
     GenerationConstraints,
@@ -610,3 +613,27 @@ def test_escape_capture_max_plies_is_draw():
     assert game.is_terminal(state)
     assert game.result(state).winner is None
     assert game.result(state).reason == "max_plies"
+
+
+def test_escape_capture_generator_is_deterministic_by_seed():
+    generator = EscapeCaptureGenerator()
+    constraints = GenerationConstraints(board_sizes=((5, 5),), max_plies_range=(40, 40))
+    first = generator.generate(seed=17, constraints=constraints)
+    second = generator.generate(seed=17, constraints=constraints)
+    assert first == second
+    assert first.family == "escape_capture"
+    assert first.board == {"rows": 5, "cols": 5}
+    assert first.max_plies == 40
+
+
+def test_escape_capture_generator_compiles_to_playable_game():
+    generator = EscapeCaptureGenerator()
+    spec = generator.generate(
+        seed=18,
+        constraints=GenerationConstraints(board_sizes=((5, 5),), max_plies_range=(40, 40)),
+    )
+    game = generator.compile(spec)
+    state = game.initial_state()
+    assert not game.is_terminal(state)
+    assert len(game.legal_actions(state)) > 0
+    assert game.action_mask(state).shape == (game.action_size,)

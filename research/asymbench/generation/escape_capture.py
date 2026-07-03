@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import random
 from typing import Any
 
 import numpy as np
@@ -17,7 +18,10 @@ from research.asymbench.games.grid import (
     neighbors,
     replace_cell,
 )
-from research.asymbench.generation.specs import GeneratedGameSpec
+from research.asymbench.generation.specs import (
+    GeneratedGameSpec,
+    GenerationConstraints,
+)
 
 
 EMPTY = 0
@@ -397,3 +401,126 @@ class EscapeCaptureGame:
         if number <= 0:
             raise ValueError(f"{field_name} must be positive")
         return number
+
+
+class EscapeCaptureGenerator:
+    family = "escape_capture"
+
+    def generate(
+        self,
+        *,
+        seed: int,
+        constraints: GenerationConstraints,
+    ) -> GeneratedGameSpec:
+        rng = random.Random(seed)
+        last_error: Exception | None = None
+
+        for _ in range(constraints.max_attempts):
+            try:
+                spec = self._candidate_spec(seed=seed, constraints=constraints, rng=rng)
+                game = self.compile(spec)
+                state = game.initial_state()
+                if game.is_terminal(state):
+                    raise ValueError("initial state is terminal")
+                if not game.legal_actions(state):
+                    raise ValueError("initial state has no legal actions")
+                return spec
+            except ValueError as exc:
+                last_error = exc
+
+        detail = f": {last_error}" if last_error is not None else ""
+        raise RuntimeError(f"failed to generate escape_capture spec{detail}")
+
+    def compile(self, spec: GeneratedGameSpec) -> EscapeCaptureGame:
+        if spec.family != self.family:
+            raise ValueError(f"expected escape_capture spec, got {spec.family!r}")
+        return EscapeCaptureGame(spec)
+
+    def _candidate_spec(
+        self,
+        *,
+        seed: int,
+        constraints: GenerationConstraints,
+        rng: random.Random,
+    ) -> GeneratedGameSpec:
+        rows, cols = constraints.board_sizes[rng.randrange(len(constraints.board_sizes))]
+        min_plies, max_plies = constraints.max_plies_range
+        if min_plies == max_plies:
+            max_plies_value = min_plies
+        else:
+            max_plies_value = rng.randint(min_plies, max_plies)
+
+        key = coord_to_index(rows // 2, cols // 2, rows=rows, cols=cols)
+        occupied = {key}
+
+        edge_candidates = [index for index in self._outer_ring(rows, cols) if index != key]
+        if not edge_candidates:
+            raise ValueError("no legal exit cells")
+        exits = self._sample_sorted(
+            rng,
+            edge_candidates,
+            rng.randint(1, min(4, len(edge_candidates))),
+        )
+        occupied.update(exits)
+
+        key_row, key_col = index_to_coord(key, cols=cols)
+        guard_candidates = [
+            coord_to_index(row, col, rows=rows, cols=cols)
+            for row, col in neighbors(key_row, key_col, rows=rows, cols=cols)
+            if coord_to_index(row, col, rows=rows, cols=cols) not in occupied
+        ]
+        guard_count = 0
+        if guard_candidates:
+            guard_count = rng.randint(
+                min(2, len(guard_candidates)),
+                min(4, len(guard_candidates)),
+            )
+        guards = self._sample_sorted(rng, guard_candidates, guard_count)
+        occupied.update(guards)
+
+        attacker_candidates = [
+            index
+            for index in self._outer_ring(rows, cols)
+            if index not in occupied
+        ]
+        if len(attacker_candidates) < 4:
+            raise ValueError("not enough legal attacker cells")
+        attacker_count = rng.randint(4, min(8, len(attacker_candidates)))
+        attackers = self._sample_sorted(rng, attacker_candidates, attacker_count)
+
+        return GeneratedGameSpec(
+            family=self.family,
+            name=f"escape_capture_seed_{seed}",
+            seed=seed,
+            board={"rows": rows, "cols": cols},
+            roles=("attacker", "defender"),
+            setup={
+                "attackers": attackers,
+                "guards": guards,
+                "key": key,
+                "exits": exits,
+                "hostile": [],
+            },
+            actions={"movement": "orthogonal_step"},
+            terminal_rules={"capture": "opposite_sides"},
+            max_plies=max_plies_value,
+        )
+
+    @staticmethod
+    def _outer_ring(rows: int, cols: int) -> list[int]:
+        return [
+            coord_to_index(row, col, rows=rows, cols=cols)
+            for row in range(rows)
+            for col in range(cols)
+            if row in (0, rows - 1) or col in (0, cols - 1)
+        ]
+
+    @staticmethod
+    def _sample_sorted(
+        rng: random.Random,
+        candidates: list[int],
+        count: int,
+    ) -> list[int]:
+        if count == 0:
+            return []
+        return sorted(rng.sample(candidates, count))

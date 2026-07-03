@@ -362,6 +362,34 @@ def _escape_capture_test_spec():
     )
 
 
+def _escape_capture_spec(
+    *,
+    board=None,
+    roles=("attacker", "defender"),
+    setup=None,
+    max_plies=20,
+):
+    return GeneratedGameSpec(
+        family="escape_capture",
+        name="escape_capture_custom_test",
+        seed=202,
+        board=board if board is not None else {"rows": 3, "cols": 3},
+        roles=roles,
+        setup=setup
+        if setup is not None
+        else {
+            "attackers": [1],
+            "guards": [],
+            "key": 4,
+            "exits": [0],
+            "hostile": [],
+        },
+        actions={"movement": "orthogonal_step"},
+        terminal_rules={"capture": "opposite_sides"},
+        max_plies=max_plies,
+    )
+
+
 def test_escape_capture_runtime_api_and_observation():
     game = EscapeCaptureGame(_escape_capture_test_spec())
     state = game.initial_state()
@@ -374,8 +402,25 @@ def test_escape_capture_runtime_api_and_observation():
     assert len(game.legal_actions(state)) > 0
     assert game.action_mask(state).sum() == len(game.legal_actions(state))
     obs = game.observation_tensor(state, player=0)
-    assert obs.shape == (8, 5, 5)
+    assert obs.shape == (9, 5, 5)
     assert obs.dtype == np.float32
+
+
+def test_escape_capture_observation_includes_hostile_cells():
+    spec = _escape_capture_spec(
+        setup={
+            "attackers": [1],
+            "guards": [],
+            "key": 4,
+            "exits": [8],
+            "hostile": [0],
+        }
+    )
+    game = EscapeCaptureGame(spec)
+    obs = game.observation_tensor(game.initial_state(), player=0)
+    assert obs.shape == (9, 3, 3)
+    assert obs[4, 0, 0] == 1.0
+    assert obs[4].sum() == 1.0
 
 
 def test_escape_capture_known_escape_path_reaches_defender_win():
@@ -401,3 +446,167 @@ def test_escape_capture_rejects_illegal_move():
     assert illegal not in game.legal_actions(state)
     with pytest.raises(IllegalActionError):
         game.apply_action(state, illegal)
+
+
+def test_escape_capture_rejects_reversed_roles():
+    with pytest.raises(ValueError, match="roles"):
+        EscapeCaptureGame(_escape_capture_spec(roles=("defender", "attacker")))
+
+
+def test_escape_capture_rejects_no_attackers():
+    with pytest.raises(ValueError, match="attackers"):
+        EscapeCaptureGame(
+            _escape_capture_spec(
+                setup={
+                    "attackers": [],
+                    "guards": [],
+                    "key": 4,
+                    "exits": [8],
+                    "hostile": [],
+                }
+            )
+        )
+
+
+def test_escape_capture_rejects_no_exits():
+    with pytest.raises(ValueError, match="exits"):
+        EscapeCaptureGame(
+            _escape_capture_spec(
+                setup={
+                    "attackers": [1],
+                    "guards": [],
+                    "key": 4,
+                    "exits": [],
+                    "hostile": [],
+                }
+            )
+        )
+
+
+def test_escape_capture_rejects_initially_escaped_key():
+    with pytest.raises(ValueError, match="key.*exit"):
+        EscapeCaptureGame(
+            _escape_capture_spec(
+                setup={
+                    "attackers": [1],
+                    "guards": [],
+                    "key": 4,
+                    "exits": [4],
+                    "hostile": [],
+                }
+            )
+        )
+
+
+def test_escape_capture_rejects_initially_captured_key():
+    with pytest.raises(ValueError, match="captured"):
+        EscapeCaptureGame(
+            _escape_capture_spec(
+                setup={
+                    "attackers": [1, 7],
+                    "guards": [],
+                    "key": 4,
+                    "exits": [0],
+                    "hostile": [],
+                }
+            )
+        )
+
+
+def test_escape_capture_rejects_initial_state_with_no_legal_actions():
+    with pytest.raises(ValueError, match="legal actions"):
+        EscapeCaptureGame(
+            _escape_capture_spec(
+                setup={
+                    "attackers": [0],
+                    "guards": [1, 3],
+                    "key": 4,
+                    "exits": [8],
+                    "hostile": [],
+                }
+            )
+        )
+
+
+def test_escape_capture_key_capture_maps_winner_for_swapped_roles():
+    game = EscapeCaptureGame(
+        _escape_capture_spec(
+            setup={
+                "attackers": [1, 8],
+                "guards": [3],
+                "key": 4,
+                "exits": [0],
+                "hostile": [],
+            }
+        )
+    )
+    state = game.initial_state(seat_roles=(1, 0))
+    state = game.apply_action(state, game.encode_move(3, 6))
+    state = game.apply_action(state, game.encode_move(8, 7))
+    assert game.is_terminal(state)
+    assert game.result(state).winner == 1
+    assert game.result(state).reason == "key_capture"
+
+
+def test_escape_capture_hostile_cell_participates_in_capture():
+    game = EscapeCaptureGame(
+        _escape_capture_spec(
+            setup={
+                "attackers": [8],
+                "guards": [],
+                "key": 4,
+                "exits": [0],
+                "hostile": [1],
+            }
+        )
+    )
+    state = game.apply_action(game.initial_state(), game.encode_move(8, 7))
+    assert game.is_terminal(state)
+    assert game.result(state).winner == 0
+    assert game.result(state).reason == "key_capture"
+
+
+def test_escape_capture_out_of_bounds_participates_in_edge_capture():
+    game = EscapeCaptureGame(
+        _escape_capture_spec(
+            setup={
+                "attackers": [5],
+                "guards": [],
+                "key": 1,
+                "exits": [0],
+                "hostile": [],
+            }
+        )
+    )
+    state = game.apply_action(game.initial_state(), game.encode_move(5, 4))
+    assert game.is_terminal(state)
+    assert game.result(state).winner == 0
+    assert game.result(state).reason == "key_capture"
+
+
+def test_escape_capture_defender_move_does_not_trigger_key_capture():
+    game = EscapeCaptureGame(
+        _escape_capture_spec(
+            setup={
+                "attackers": [1, 7],
+                "guards": [],
+                "key": 5,
+                "exits": [0],
+                "hostile": [],
+            }
+        )
+    )
+    state = game.initial_state(seat_roles=(1, 0))
+    state = game.apply_action(state, game.encode_move(5, 4))
+    assert not game.is_terminal(state)
+
+
+def test_escape_capture_max_plies_is_draw():
+    spec_data = _escape_capture_test_spec().to_dict()
+    game = EscapeCaptureGame(
+        GeneratedGameSpec.from_dict({**spec_data, "max_plies": 1})
+    )
+    state = game.apply_action(game.initial_state(), game.encode_move(1, 6))
+    assert game.is_terminal(state)
+    assert game.result(state).winner is None
+    assert game.result(state).reason == "max_plies"

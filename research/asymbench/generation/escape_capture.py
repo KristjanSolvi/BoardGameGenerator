@@ -44,6 +44,8 @@ class EscapeCaptureGame:
     def __init__(self, spec: GeneratedGameSpec) -> None:
         if spec.family != "escape_capture":
             raise ValueError(f"expected escape_capture spec, got {spec.family!r}")
+        if spec.roles != ("attacker", "defender"):
+            raise ValueError("escape_capture roles must be ('attacker', 'defender')")
         if spec.actions.get("movement") != "orthogonal_step":
             raise ValueError("escape_capture only supports orthogonal_step movement")
 
@@ -87,14 +89,8 @@ class EscapeCaptureGame:
             raise ValueError("seat_roles must assign attacker and defender once each")
         normalized_seat_roles = tuple(seat_roles)
 
-        board = [EMPTY] * self._cell_count
-        for index in self._attackers:
-            board[index] = ATTACKER
-        for index in self._guards:
-            board[index] = GUARD
-        board[self._key] = KEY
         return EscapeCaptureState(
-            board=tuple(board),
+            board=self._initial_board(),
             to_move=0,
             seat_roles=normalized_seat_roles,
             plies=0,
@@ -133,7 +129,8 @@ class EscapeCaptureGame:
     def apply_action(
         self, state: EscapeCaptureState, action: int
     ) -> EscapeCaptureState:
-        if action not in self.legal_actions(state):
+        legal_actions = self.legal_actions(state)
+        if action not in legal_actions:
             raise IllegalActionError(
                 f"illegal action {action} for player {state.to_move}"
             )
@@ -197,6 +194,10 @@ class EscapeCaptureGame:
         for index in self._exits:
             row, col = index_to_coord(index, cols=self._cols)
             exits[row, col] = True
+        hostile = np.zeros(self.board_shape, dtype=np.bool_)
+        for index in self._hostile:
+            row, col = index_to_coord(index, cols=self._cols)
+            hostile[row, col] = True
 
         if role == ROLE_ATTACKER:
             own = attackers
@@ -205,15 +206,16 @@ class EscapeCaptureGame:
             own = guards | key
             enemy = attackers
 
-        planes = np.zeros((8, *self.board_shape), dtype=np.float32)
+        planes = np.zeros((9, *self.board_shape), dtype=np.float32)
         planes[0] = attackers
         planes[1] = guards
         planes[2] = key
         planes[3] = exits
-        planes[4] = own
-        planes[5] = enemy
-        planes[6].fill(1.0 if player == state.to_move else 0.0)
-        planes[7].fill(float(role))
+        planes[4] = hostile
+        planes[5] = own
+        planes[6] = enemy
+        planes[7].fill(1.0 if player == state.to_move else 0.0)
+        planes[8].fill(float(role))
         return planes
 
     def action_mask(self, state: EscapeCaptureState) -> np.ndarray:
@@ -323,6 +325,13 @@ class EscapeCaptureGame:
         return "."
 
     def _validate_setup(self) -> None:
+        if not self._attackers:
+            raise ValueError("setup attackers must not be empty")
+        if not self._exits:
+            raise ValueError("setup exits must not be empty")
+        if self._key in self._exits:
+            raise ValueError("key must not start on an exit")
+
         occupied = self._attackers + self._guards + (self._key,)
         if len(set(occupied)) != len(occupied):
             raise ValueError("occupied setup cells must not collide")
@@ -330,6 +339,30 @@ class EscapeCaptureGame:
         for index in exits_and_hostile:
             if index in occupied:
                 raise ValueError("exits and hostile cells must not overlap occupied cells")
+        board = self._initial_board()
+        if self._is_key_captured(board):
+            raise ValueError("key must not start captured")
+        for seat_roles in (
+            (ROLE_ATTACKER, ROLE_DEFENDER),
+            (ROLE_DEFENDER, ROLE_ATTACKER),
+        ):
+            initial_state = EscapeCaptureState(
+                board=board,
+                to_move=0,
+                seat_roles=seat_roles,
+                plies=0,
+            )
+            if not self.legal_actions(initial_state):
+                raise ValueError("initial state must have legal actions")
+
+    def _initial_board(self) -> tuple[int, ...]:
+        board = [EMPTY] * self._cell_count
+        for index in self._attackers:
+            board[index] = ATTACKER
+        for index in self._guards:
+            board[index] = GUARD
+        board[self._key] = KEY
+        return tuple(board)
 
     def _setup_key(self, value: Any) -> int:
         if value is None:

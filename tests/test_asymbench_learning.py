@@ -41,7 +41,6 @@ def test_policy_value_net_masks_illegal_actions():
 def test_policy_value_net_uses_role_specific_heads_by_role_id():
     model = PolicyValueNet((6, 5, 5), action_size=4, num_roles=2, role_heads=True)
     obs = torch.zeros((2, 6, 5, 5), dtype=torch.float32)
-    roles = torch.tensor([0, 1], dtype=torch.long)
     mask = torch.ones((2, 4), dtype=torch.bool)
 
     with torch.no_grad():
@@ -52,11 +51,19 @@ def test_policy_value_net_uses_role_specific_heads_by_role_id():
         model.value_heads[0].bias.fill_(0.25)
         model.value_heads[1].bias.fill_(-0.5)
 
-    logits, values = model(obs, roles, mask)
+    logits, values = model(obs, torch.tensor([0, 1], dtype=torch.long), mask)
 
     assert torch.allclose(logits[0], torch.tensor([1.0, 2.0, 3.0, 4.0]))
     assert torch.allclose(logits[1], torch.tensor([5.0, 6.0, 7.0, 8.0]))
     assert torch.allclose(values, torch.tanh(torch.tensor([0.25, -0.5])))
+
+    swapped_logits, swapped_values = model(
+        obs, torch.tensor([1, 0], dtype=torch.long), mask
+    )
+
+    assert torch.allclose(swapped_logits[0], torch.tensor([5.0, 6.0, 7.0, 8.0]))
+    assert torch.allclose(swapped_logits[1], torch.tensor([1.0, 2.0, 3.0, 4.0]))
+    assert torch.allclose(swapped_values, torch.tanh(torch.tensor([-0.5, 0.25])))
 
 
 def test_policy_value_net_rejects_non_bool_action_mask():
@@ -89,6 +96,19 @@ def test_policy_value_net_rejects_wrong_mask_shape():
         model(obs, roles, mask)
 
 
+def test_policy_value_net_rejects_all_false_action_mask_row():
+    model = PolicyValueNet((6, 5, 5), action_size=4)
+    obs = torch.zeros((2, 6, 5, 5), dtype=torch.float32)
+    roles = torch.tensor([0, 1], dtype=torch.long)
+    mask = torch.tensor(
+        [[True, False, False, False], [False, False, False, False]],
+        dtype=torch.bool,
+    )
+
+    with pytest.raises(ValueError, match="at least one legal action per row"):
+        model(obs, roles, mask)
+
+
 def test_policy_value_net_uses_dtype_aware_mask_sentinel_on_cpu():
     model = PolicyValueNet((6, 5, 5), action_size=4)
     obs = torch.zeros((1, 6, 5, 5), dtype=torch.float32)
@@ -99,6 +119,20 @@ def test_policy_value_net_uses_dtype_aware_mask_sentinel_on_cpu():
 
     assert logits.dtype == torch.float32
     assert logits[0, 1].item() == torch.finfo(logits.dtype).min
+
+
+def test_policy_value_net_uses_float64_mask_sentinel_on_cpu():
+    model = PolicyValueNet((6, 5, 5), action_size=4).double()
+    obs = torch.zeros((1, 6, 5, 5), dtype=torch.float64)
+    roles = torch.tensor([0], dtype=torch.long)
+    mask = torch.tensor([[True, False, True, True]], dtype=torch.bool)
+
+    logits, _ = model(obs, roles, mask)
+
+    assert logits.dtype == torch.float64
+    assert torch.isfinite(logits[0, 0])
+    assert logits[0, 1].item() == torch.finfo(torch.float64).min
+    assert logits[0, 1] < logits[0, 0]
 
 
 def test_replay_buffer_samples_examples():

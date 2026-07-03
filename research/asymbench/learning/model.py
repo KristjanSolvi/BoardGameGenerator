@@ -82,6 +82,10 @@ class PolicyValueNet(nn.Module):
             raise ValueError("action_mask must have shape (batch, action_size)")
         if action_mask.dtype != torch.bool:
             raise ValueError("action_mask must use bool dtype")
+        if not bool(action_mask.any(dim=1).all().item()):
+            raise ValueError(
+                "action_mask must contain at least one legal action per row"
+            )
         if (
             roles.device != observations.device
             or action_mask.device != observations.device

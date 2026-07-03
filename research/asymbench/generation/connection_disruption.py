@@ -47,7 +47,11 @@ class ConnectionDisruptionState:
 
 
 class ConnectionDisruptionGame:
-    """Generated-family connection game with mobile disruptive blockers."""
+    """Canonical west/east connection game with mobile disruptive blockers.
+
+    Protected cells are blocked terrain in this family: no piece can start on,
+    enter, place onto, or be removed from a protected cell.
+    """
 
     def __init__(self, spec: GeneratedGameSpec) -> None:
         if spec.family != "connection_disruption":
@@ -70,14 +74,10 @@ class ConnectionDisruptionGame:
                 "('orthogonal_step', 'adjacent_remove')"
             )
         connect = spec.terminal_rules.get("connect")
-        if type(connect) not in (tuple, list) or tuple(connect) not in (
-            ("west", "east"),
-            ("east", "west"),
-            ("north", "south"),
-            ("south", "north"),
-        ):
+        if type(connect) not in (tuple, list) or tuple(connect) != ("west", "east"):
             raise ValueError(
-                "connection_disruption connect rule must be opposite board edges"
+                "connection_disruption currently supports only west/east "
+                "connect rules because objective edges are implicit in observation"
             )
 
         rows = self._require_positive_int(spec.board.get("rows"), "board rows")
@@ -95,6 +95,7 @@ class ConnectionDisruptionGame:
         self._start_edge, self._target_edge = tuple(connect)
 
         setup = spec.setup
+        self._validate_setup_schema(setup)
         self._blockers = self._setup_index_sequence(setup.get("blockers", ()), "blockers")
         self._protected = self._setup_index_sequence(
             setup.get("protected", ()), "protected"
@@ -142,7 +143,12 @@ class ConnectionDisruptionGame:
     def initial_state(
         self, seat_roles: tuple[int, int] = (ROLE_BUILDER, ROLE_BREAKER)
     ) -> ConnectionDisruptionState:
-        if len(seat_roles) != 2 or set(seat_roles) != {ROLE_BUILDER, ROLE_BREAKER}:
+        if (
+            type(seat_roles) not in (tuple, list)
+            or len(seat_roles) != 2
+            or any(type(role) is not int for role in seat_roles)
+            or set(seat_roles) != {ROLE_BUILDER, ROLE_BREAKER}
+        ):
             raise ValueError("seat_roles must assign builder and breaker once each")
         return ConnectionDisruptionState(
             board=self._initial_board(),
@@ -355,7 +361,9 @@ class ConnectionDisruptionGame:
         if builders & blockers:
             raise ValueError("builders must not overlap blockers")
         if builders & protected:
-            raise ValueError("builders must not overlap protected cells")
+            raise ValueError(
+                "builders must not overlap protected blocked terrain cells"
+            )
 
         board = self._initial_board()
         if self._builder_has_connection(board):
@@ -380,6 +388,22 @@ class ConnectionDisruptionGame:
         for index in self._blockers:
             board[index] = BLOCKER
         return tuple(board)
+
+    @staticmethod
+    def _validate_setup_schema(setup: Any) -> None:
+        allowed = {"blockers", "protected", "builders"}
+        required = {"blockers", "protected"}
+        keys = set(setup)
+        unknown = keys - allowed
+        if unknown:
+            raise ValueError(
+                f"unknown setup keys for connection_disruption: {sorted(unknown)}"
+            )
+        missing = required - keys
+        if missing:
+            raise ValueError(
+                f"required setup keys missing for connection_disruption: {sorted(missing)}"
+            )
 
     def _setup_index_sequence(self, value: Any, field_name: str) -> tuple[int, ...]:
         if type(value) not in (tuple, list):
@@ -452,6 +476,7 @@ class ConnectionDisruptionGenerator:
     ) -> GeneratedGameSpec:
         rows, cols = constraints.board_sizes[rng.randrange(len(constraints.board_sizes))]
         min_plies, max_plies = constraints.max_plies_range
+        min_plies = max(min_plies, self._minimum_connection_plies(cols))
         max_plies_value = (
             min_plies if min_plies == max_plies else rng.randint(min_plies, max_plies)
         )
@@ -495,17 +520,110 @@ class ConnectionDisruptionGenerator:
         for rows, cols in constraints.board_sizes:
             if rows < 5 or cols < 5:
                 raise ValueError("board_sizes entries must be at least 5x5")
+            minimum_connection_plies = self._minimum_connection_plies(cols)
+            if constraints.max_plies_range[1] < minimum_connection_plies:
+                raise ValueError(
+                    "max_plies_range is too small for a west/east connection; "
+                    f"board {rows}x{cols} needs at least "
+                    f"{minimum_connection_plies} plies"
+                )
 
     def _validate_candidate_spec(self, spec: GeneratedGameSpec) -> None:
-        if not spec.setup["blockers"]:
-            raise _CandidateRejected("no blockers")
         try:
             game = self.compile(spec)
         except ValueError as exc:
             raise _CandidateRejected(str(exc)) from exc
+        if not spec.setup["blockers"]:
+            raise _CandidateRejected("no blockers")
+        if spec.max_plies < self._minimum_connection_plies(spec.board["cols"]):
+            raise _CandidateRejected("max plies too small for west/east connection")
+        if not self._has_structural_connection_path(spec):
+            raise _CandidateRejected("west/east connection is structurally impossible")
 
         state = game.initial_state()
         if game.is_terminal(state):
             raise _CandidateRejected("initial state is terminal")
         if not game.legal_actions(state):
             raise _CandidateRejected("initial state has no legal actions")
+        if not self._has_common_opening_breaker_response(game):
+            raise _CandidateRejected("breaker has no meaningful opening response")
+        if self._random_rollouts_all_max_plies(spec):
+            raise _CandidateRejected("all sampled random rollouts ended by max plies")
+
+    @staticmethod
+    def _minimum_connection_plies(cols: int) -> int:
+        return 2 * cols - 1
+
+    def _has_structural_connection_path(self, spec: GeneratedGameSpec) -> bool:
+        rows = spec.board["rows"]
+        cols = spec.board["cols"]
+        blocked = set(spec.setup["protected"]) | set(spec.setup["blockers"])
+        traversable = set(range(rows * cols)) - blocked
+        return path_exists_between_edges(
+            occupied=traversable,
+            rows=rows,
+            cols=cols,
+            start_edge="west",
+            target_edge="east",
+        )
+
+    def _has_common_opening_breaker_response(
+        self,
+        game: ConnectionDisruptionGame,
+    ) -> bool:
+        breaker_first = game.initial_state(seat_roles=(ROLE_BREAKER, ROLE_BUILDER))
+        if not any(
+            action < game._remove_offset
+            for action in game.legal_actions(breaker_first)
+        ):
+            return False
+
+        builder_first = game.initial_state()
+        openings = self._sample_opening_actions(game, builder_first)
+        if not openings:
+            return False
+        for action in openings:
+            next_state = game.apply_action(builder_first, action)
+            if game.is_terminal(next_state):
+                continue
+            if game.legal_actions(next_state):
+                return True
+        return False
+
+    @staticmethod
+    def _sample_opening_actions(
+        game: ConnectionDisruptionGame,
+        state: ConnectionDisruptionState,
+    ) -> list[int]:
+        legal = sorted(game.legal_actions(state))
+        if len(legal) <= 6:
+            return legal
+        rows, cols = game.board_shape
+        priority_cells = [
+            coord_to_index(rows // 2, 0, rows=rows, cols=cols),
+            coord_to_index(rows // 2, cols // 2, rows=rows, cols=cols),
+            coord_to_index(rows // 2, cols - 1, rows=rows, cols=cols),
+            coord_to_index(0, 0, rows=rows, cols=cols),
+            coord_to_index(rows - 1, cols - 1, rows=rows, cols=cols),
+            legal[0],
+        ]
+        openings: list[int] = []
+        for action in priority_cells:
+            if action in legal and action not in openings:
+                openings.append(action)
+        return openings or legal[:6]
+
+    def _random_rollouts_all_max_plies(self, spec: GeneratedGameSpec) -> bool:
+        rng = random.Random((spec.seed << 8) ^ 0xC0D15)
+        reasons: list[str] = []
+        for _ in range(4):
+            game = self.compile(spec)
+            state = game.initial_state()
+            while not game.is_terminal(state):
+                actions = game.legal_actions(state)
+                if not actions:
+                    break
+                state = game.apply_action(state, rng.choice(actions))
+            if game.is_terminal(state):
+                reasons.append(game.result(state).reason)
+        return bool(reasons) and all(reason == "max_plies" for reason in reasons)

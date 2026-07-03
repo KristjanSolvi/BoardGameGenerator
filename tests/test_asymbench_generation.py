@@ -11,6 +11,7 @@ from research.asymbench.generation.escape_capture import (
 from research.asymbench.generation.connection_disruption import (
     ConnectionDisruptionGame,
     ConnectionDisruptionGenerator,
+    ConnectionDisruptionState,
 )
 from research.asymbench.generation.specs import (
     GeneratedGameSpec,
@@ -756,6 +757,7 @@ def _connection_disruption_spec(
     setup=None,
     max_plies=20,
     family="connection_disruption",
+    terminal_rules=None,
 ):
     return GeneratedGameSpec(
         family=family,
@@ -765,7 +767,9 @@ def _connection_disruption_spec(
         roles=roles,
         setup=setup if setup is not None else {"blockers": [6], "protected": []},
         actions={"builder": "place", "breaker": ["orthogonal_step", "adjacent_remove"]},
-        terminal_rules={"connect": ["west", "east"]},
+        terminal_rules=terminal_rules
+        if terminal_rules is not None
+        else {"connect": ["west", "east"]},
         max_plies=max_plies,
     )
 
@@ -819,6 +823,35 @@ def test_connection_disruption_rejects_reversed_roles():
         )
 
 
+def test_connection_disruption_rejects_non_west_east_connection_rule():
+    with pytest.raises(ValueError, match="west.*east"):
+        ConnectionDisruptionGame(
+            _connection_disruption_spec(terminal_rules={"connect": ["north", "south"]})
+        )
+
+
+def test_connection_disruption_rejects_unknown_setup_keys():
+    with pytest.raises(ValueError, match="unknown setup"):
+        ConnectionDisruptionGame(
+            _connection_disruption_spec(
+                setup={"blockers": [6], "protected": [], "walls": [12]}
+            )
+        )
+
+
+def test_connection_disruption_requires_blockers_and_protected_setup_fields():
+    with pytest.raises(ValueError, match="required setup"):
+        ConnectionDisruptionGame(_connection_disruption_spec(setup={"blockers": [6]}))
+    with pytest.raises(ValueError, match="required setup"):
+        ConnectionDisruptionGame(_connection_disruption_spec(setup={"protected": []}))
+
+
+def test_connection_disruption_rejects_bool_seat_roles():
+    game = ConnectionDisruptionGame(_connection_disruption_test_spec())
+    with pytest.raises(ValueError, match="seat_roles"):
+        game.initial_state(seat_roles=(False, True))
+
+
 def test_connection_disruption_protected_cells_are_visible_and_block_actions():
     game = ConnectionDisruptionGame(
         _connection_disruption_spec(setup={"blockers": [7], "protected": [6, 11]})
@@ -835,6 +868,16 @@ def test_connection_disruption_protected_cells_are_visible_and_block_actions():
     assert game.encode_remove(7, 11) not in game.legal_actions(state)
 
 
+def test_connection_disruption_protected_cells_are_blocked_terrain_not_pieces():
+    protected_setup = {
+        "blockers": [7],
+        "protected": [6, 11],
+        "builders": [11],
+    }
+    with pytest.raises(ValueError, match="blocked terrain"):
+        ConnectionDisruptionGame(_connection_disruption_spec(setup=protected_setup))
+
+
 def test_connection_disruption_breaker_remove_action_removes_adjacent_builder_marker():
     game = ConnectionDisruptionGame(_connection_disruption_spec(setup={"blockers": [6], "protected": []}))
     state = game.initial_state()
@@ -844,6 +887,39 @@ def test_connection_disruption_breaker_remove_action_removes_adjacent_builder_ma
     state = game.apply_action(state, remove)
     assert state.board[11] == 0
     assert state.board[6] == 2
+
+
+def test_connection_disruption_encode_decode_round_trips():
+    game = ConnectionDisruptionGame(_connection_disruption_test_spec())
+    place = game.encode_place(10)
+    move = game.encode_move(6, 1)
+    remove = game.encode_remove(6, 11)
+    assert game.decode_place(place) == 10
+    assert game.decode_move(move) == (6, 1)
+    assert game.decode_remove(remove) == (6, 11)
+
+
+def test_connection_disruption_swapped_roles_builder_connection_winner():
+    game = ConnectionDisruptionGame(_connection_disruption_test_spec())
+    state = game.initial_state(seat_roles=(1, 0))
+    moves = [
+        game.encode_move(6, 1),
+        game.encode_place(10),
+        game.encode_move(18, 23),
+        game.encode_place(11),
+        game.encode_move(1, 0),
+        game.encode_place(12),
+        game.encode_move(23, 24),
+        game.encode_place(13),
+        game.encode_move(0, 5),
+        game.encode_place(14),
+    ]
+    for action in moves:
+        assert action in game.legal_actions(state), game.render(state)
+        state = game.apply_action(state, action)
+    assert game.is_terminal(state)
+    assert game.result(state).winner == 1
+    assert game.result(state).reason == "builder_connection"
 
 
 def test_connection_disruption_max_plies_winner_maps_to_breaker_with_swapped_roles():
@@ -860,6 +936,23 @@ def test_connection_disruption_max_plies_winner_maps_to_breaker_with_swapped_rol
     assert game.result(state).reason == "max_plies"
 
 
+def test_connection_disruption_no_legal_actions_gives_previous_player_win():
+    game = ConnectionDisruptionGame(_connection_disruption_spec())
+    game._protected = tuple(index for index in range(25) if index not in {6, 24})
+    board = [0] * 25
+    board[6] = 2
+    state = ConnectionDisruptionState(
+        board=tuple(board),
+        to_move=0,
+        seat_roles=(0, 1),
+        plies=0,
+    )
+    state = game.apply_action(state, game.encode_place(24))
+    assert game.is_terminal(state)
+    assert game.result(state).winner == 0
+    assert game.result(state).reason == "no_legal_actions"
+
+
 @pytest.mark.parametrize("seed", [True, "abc"])
 def test_connection_disruption_generator_rejects_invalid_seed_types(seed):
     generator = ConnectionDisruptionGenerator()
@@ -872,6 +965,23 @@ def test_connection_disruption_generator_rejects_unsupported_board_sizes_immedia
     constraints = GenerationConstraints(board_sizes=((4, 5),), max_attempts=1)
     with pytest.raises(ValueError, match="board_sizes.*at least 5"):
         generator.generate(seed=1, constraints=constraints)
+
+
+def test_connection_disruption_generator_rejects_too_small_max_plies_immediately():
+    generator = ConnectionDisruptionGenerator()
+    constraints = GenerationConstraints(board_sizes=((5, 5),), max_plies_range=(1, 1))
+    with pytest.raises(ValueError, match="max_plies_range.*connection"):
+        generator.generate(seed=1, constraints=constraints)
+
+
+def test_connection_disruption_generator_rejects_structurally_blocked_connection():
+    generator = ConnectionDisruptionGenerator()
+    spec = _connection_disruption_spec(
+        setup={"blockers": [6], "protected": [2, 7, 12, 17, 22]},
+        max_plies=20,
+    )
+    with pytest.raises(Exception, match="structurally impossible"):
+        generator._validate_candidate_spec(spec)
 
 
 def test_connection_disruption_generator_seed_range_has_structural_invariants():

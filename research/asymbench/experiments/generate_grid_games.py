@@ -11,6 +11,7 @@ from research.asymbench.generation.connection_disruption import (
 )
 from research.asymbench.generation.escape_capture import EscapeCaptureGenerator
 from research.asymbench.generation.specs import GenerationConstraints
+from research.asymbench.generation.specs import GenerationExhaustedError
 from research.asymbench.generation.validate import validate_generated_game
 
 
@@ -76,7 +77,11 @@ def _generate_family(
 
     while accepted < count and attempts < constraints.max_attempts:
         attempts += 1
-        spec = generator.generate(seed=candidate_seed, constraints=constraints)
+        try:
+            spec = generator.generate(seed=candidate_seed, constraints=constraints)
+        except GenerationExhaustedError:
+            candidate_seed += 1
+            continue
 
         report = validate_generated_game(
             spec,

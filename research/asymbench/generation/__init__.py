@@ -15,6 +15,7 @@ from research.asymbench.generation.loader import (
 from research.asymbench.generation.specs import (
     GeneratedGameSpec,
     GenerationConstraints,
+    GenerationExhaustedError,
     VALID_FAMILIES,
     ValidationReport,
 )
@@ -28,6 +29,7 @@ __all__ = [
     "compile_generated_game",
     "GeneratedGameSpec",
     "GenerationConstraints",
+    "GenerationExhaustedError",
     "VALID_FAMILIES",
     "load_generated_spec",
     "validate_generated_game",

@@ -22,6 +22,7 @@ from research.asymbench.games.grid import (
 from research.asymbench.generation.specs import (
     GeneratedGameSpec,
     GenerationConstraints,
+    GenerationExhaustedError,
 )
 
 
@@ -458,7 +459,9 @@ class ConnectionDisruptionGenerator:
                 last_rejection = exc
 
         detail = f": {last_rejection}" if last_rejection is not None else ""
-        raise RuntimeError(f"failed to generate connection_disruption spec{detail}")
+        raise GenerationExhaustedError(
+            f"failed to generate connection_disruption spec{detail}"
+        )
 
     def compile(self, spec: GeneratedGameSpec) -> ConnectionDisruptionGame:
         if spec.family != self.family:

@@ -21,6 +21,7 @@ import research.asymbench.experiments.generate_grid_games as generate_grid_games
 from research.asymbench.generation.specs import (
     GeneratedGameSpec,
     GenerationConstraints,
+    GenerationExhaustedError,
     ValidationReport,
 )
 from research.asymbench.games.grid import (
@@ -1098,6 +1099,38 @@ def test_generate_grid_games_cli_propagates_generator_runtime_error(monkeypatch,
                 "2",
             ]
         )
+
+
+def test_generate_grid_games_cli_handles_expected_generation_exhaustion(
+    monkeypatch, tmp_path, capsys
+):
+    def exhausted(*, seed, constraints):
+        raise GenerationExhaustedError("exhausted seed")
+
+    monkeypatch.setattr(
+        generate_grid_games_module.GENERATOR_REGISTRY["escape_capture"],
+        "generate",
+        exhausted,
+    )
+
+    exit_code = generate_main(
+        [
+            "--family",
+            "escape_capture",
+            "--count",
+            "1",
+            "--seed",
+            "100",
+            "--output",
+            str(tmp_path),
+            "--random-games",
+            "2",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert "family=escape_capture accepted=0 target=1" in captured.err
 
 
 def test_generate_grid_games_cli_reports_shortfall_when_validation_rejects_all(

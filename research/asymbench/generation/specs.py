@@ -10,6 +10,10 @@ from typing import Any
 VALID_FAMILIES = {"escape_capture", "connection_disruption"}
 
 
+class GenerationExhaustedError(RuntimeError):
+    """Raised when a generator exhausts its per-seed attempt budget."""
+
+
 def _freeze_json(value: Any) -> Any:
     if type(value) is dict:
         return MappingProxyType({key: _freeze_json(item) for key, item in value.items()})

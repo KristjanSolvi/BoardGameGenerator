@@ -80,6 +80,8 @@ class PolicyValueNet(nn.Module):
             raise ValueError("roles must use an integer dtype")
         if action_mask.shape != (batch_size, self.action_size):
             raise ValueError("action_mask must have shape (batch, action_size)")
+        if action_mask.dtype != torch.bool:
+            raise ValueError("action_mask must use bool dtype")
         if (
             roles.device != observations.device
             or action_mask.device != observations.device
@@ -104,5 +106,6 @@ class PolicyValueNet(nn.Module):
             logits = self.policy_head(features)
             values = torch.tanh(self.value_head(features)).squeeze(-1)
 
-        masked_logits = logits.masked_fill(~action_mask.to(dtype=torch.bool), -1e9)
+        mask_value = torch.finfo(logits.dtype).min
+        masked_logits = logits.masked_fill(~action_mask, mask_value)
         return masked_logits, values

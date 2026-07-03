@@ -38,6 +38,69 @@ def test_policy_value_net_masks_illegal_actions():
     assert logits[0, 4].item() < -1e8
 
 
+def test_policy_value_net_uses_role_specific_heads_by_role_id():
+    model = PolicyValueNet((6, 5, 5), action_size=4, num_roles=2, role_heads=True)
+    obs = torch.zeros((2, 6, 5, 5), dtype=torch.float32)
+    roles = torch.tensor([0, 1], dtype=torch.long)
+    mask = torch.ones((2, 4), dtype=torch.bool)
+
+    with torch.no_grad():
+        for parameter in model.parameters():
+            parameter.zero_()
+        model.policy_heads[0].bias.copy_(torch.tensor([1.0, 2.0, 3.0, 4.0]))
+        model.policy_heads[1].bias.copy_(torch.tensor([5.0, 6.0, 7.0, 8.0]))
+        model.value_heads[0].bias.fill_(0.25)
+        model.value_heads[1].bias.fill_(-0.5)
+
+    logits, values = model(obs, roles, mask)
+
+    assert torch.allclose(logits[0], torch.tensor([1.0, 2.0, 3.0, 4.0]))
+    assert torch.allclose(logits[1], torch.tensor([5.0, 6.0, 7.0, 8.0]))
+    assert torch.allclose(values, torch.tanh(torch.tensor([0.25, -0.5])))
+
+
+def test_policy_value_net_rejects_non_bool_action_mask():
+    model = PolicyValueNet((6, 5, 5), action_size=4)
+    obs = torch.zeros((1, 6, 5, 5), dtype=torch.float32)
+    roles = torch.tensor([0], dtype=torch.long)
+    mask = torch.ones((1, 4), dtype=torch.float32)
+
+    with pytest.raises(ValueError, match="action_mask must use bool dtype"):
+        model(obs, roles, mask)
+
+
+def test_policy_value_net_rejects_invalid_role_id():
+    model = PolicyValueNet((6, 5, 5), action_size=4)
+    obs = torch.zeros((1, 6, 5, 5), dtype=torch.float32)
+    roles = torch.tensor([2], dtype=torch.long)
+    mask = torch.ones((1, 4), dtype=torch.bool)
+
+    with pytest.raises(ValueError, match=r"roles must be in \[0, 2\)"):
+        model(obs, roles, mask)
+
+
+def test_policy_value_net_rejects_wrong_mask_shape():
+    model = PolicyValueNet((6, 5, 5), action_size=4)
+    obs = torch.zeros((1, 6, 5, 5), dtype=torch.float32)
+    roles = torch.tensor([0], dtype=torch.long)
+    mask = torch.ones((1, 3), dtype=torch.bool)
+
+    with pytest.raises(ValueError, match="action_mask must have shape"):
+        model(obs, roles, mask)
+
+
+def test_policy_value_net_uses_dtype_aware_mask_sentinel_on_cpu():
+    model = PolicyValueNet((6, 5, 5), action_size=4)
+    obs = torch.zeros((1, 6, 5, 5), dtype=torch.float32)
+    roles = torch.tensor([0], dtype=torch.long)
+    mask = torch.tensor([[True, False, True, True]], dtype=torch.bool)
+
+    logits, _ = model(obs, roles, mask)
+
+    assert logits.dtype == torch.float32
+    assert logits[0, 1].item() == torch.finfo(logits.dtype).min
+
+
 def test_replay_buffer_samples_examples():
     buffer = ReplayBuffer(capacity=4, seed=1)
     example = TrainingExample(

@@ -17,7 +17,11 @@ class TrainingExample:
 
 
 class ReplayBuffer:
-    """Fixed-capacity replay buffer with deterministic sampling."""
+    """Fixed-capacity replay buffer with deterministic sampling.
+
+    Training examples are stored by reference; callers should treat contained
+    NumPy arrays as immutable after adding them.
+    """
 
     def __init__(self, capacity: int, seed: int | None = None) -> None:
         if capacity <= 0:

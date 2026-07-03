@@ -607,6 +607,8 @@ def test_role_head_runner_writes_smoke_outputs_and_schema(tmp_path):
 
     shared_checkpoint = torch.load(shared_checkpoint_path, map_location="cpu")
     role_checkpoint = torch.load(role_checkpoint_path, map_location="cpu")
+    assert "generated_metadata" not in shared_checkpoint
+    assert "generated_metadata" not in role_checkpoint
     assert shared_checkpoint["role_heads"] is False
     assert role_checkpoint["role_heads"] is True
     assert (
@@ -748,7 +750,7 @@ def test_role_head_runner_accepts_generated_game_source(tmp_path):
     assert all(row["generated_spec_path"] == str(spec_path) for row in rows)
 
     written_config = json.loads((run_dir / "config.json").read_text())
-    assert written_config["game_source"]["type"] == "generated_spec"
+    assert written_config["game_source"] == config["game_source"]
 
     summary = json.loads((run_dir / "role_summary.json").read_text())
     assert summary["generated_family"] == "escape_capture"

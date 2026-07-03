@@ -183,26 +183,25 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                 all_rows.append(row)
 
             checkpoint_path = variant_dir / "final_checkpoint.pt"
-            torch.save(
-                {
-                    "model_state_dict": _cpu_state_dict(model),
-                    "config": config,
-                    "game": game_name,
-                    "variant": variant_name,
-                    "seed": int(seed),
-                    "variant_seed": variant_seed,
-                    "trial_seed": trial_seed,
-                    "model_init_seed": model_init_seed,
-                    "device_requested": device_requested,
-                    "device_used": device_used,
-                    "generated_metadata": generated_metadata,
-                    "input_shape": model.input_shape,
-                    "action_size": model.action_size,
-                    "num_roles": model.num_roles,
-                    "role_heads": model.role_heads,
-                },
-                checkpoint_path,
-            )
+            checkpoint_payload = {
+                "model_state_dict": _cpu_state_dict(model),
+                "config": config,
+                "game": game_name,
+                "variant": variant_name,
+                "seed": int(seed),
+                "variant_seed": variant_seed,
+                "trial_seed": trial_seed,
+                "model_init_seed": model_init_seed,
+                "device_requested": device_requested,
+                "device_used": device_used,
+                "input_shape": model.input_shape,
+                "action_size": model.action_size,
+                "num_roles": model.num_roles,
+                "role_heads": model.role_heads,
+            }
+            if generated_metadata:
+                checkpoint_payload["generated_metadata"] = dict(generated_metadata)
+            torch.save(checkpoint_payload, checkpoint_path)
             checkpoints.append(
                 {
                     "variant": variant_name,

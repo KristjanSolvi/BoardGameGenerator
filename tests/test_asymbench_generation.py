@@ -10,6 +10,7 @@ from research.asymbench.generation.escape_capture import (
 )
 from research.asymbench.generation.loader import compile_generated_game, load_generated_spec
 from research.asymbench.generation.validate import validate_generated_game
+import research.asymbench.generation.validate as validate_module
 from research.asymbench.generation.connection_disruption import (
     ConnectionDisruptionGame,
     ConnectionDisruptionGenerator,
@@ -1087,3 +1088,97 @@ def test_validate_generated_game_rejects_terminal_initial_connection():
     report = validate_generated_game(spec, random_games=2, seed=1)
     assert not report.valid
     assert "initial state is terminal" in report.reasons
+
+
+def test_validate_generated_game_propagates_internal_initial_state_runtime_error(monkeypatch):
+    spec = _escape_capture_test_spec()
+
+    class BrokenGame:
+        def initial_state(self):
+            raise RuntimeError("internal bug")
+
+    monkeypatch.setattr(validate_module, "compile_generated_game", lambda _spec: BrokenGame())
+
+    with pytest.raises(RuntimeError, match="internal bug"):
+        validate_generated_game(spec, random_games=1, seed=0)
+
+
+def test_validate_generated_game_rejects_mask_with_wrong_legal_action_index(monkeypatch):
+    spec = _escape_capture_test_spec()
+
+    class MaskMismatchGame:
+        name = spec.name
+        roles = spec.roles
+        max_plies = spec.max_plies
+        action_size = 3
+
+        def initial_state(self):
+            return object()
+
+        def is_terminal(self, state):
+            return False
+
+        def legal_actions(self, state):
+            return [1]
+
+        def action_mask(self, state):
+            return np.array([True, False, False], dtype=np.bool_)
+
+    monkeypatch.setattr(validate_module, "compile_generated_game", lambda _spec: MaskMismatchGame())
+
+    report = validate_generated_game(spec, random_games=1, seed=0)
+    assert not report.valid
+    assert report.reasons == ("action mask does not match legal actions",)
+
+
+def test_validate_generated_game_normalizes_no_actions_compile_failure(monkeypatch):
+    spec = _escape_capture_test_spec()
+
+    def fake_compile(_spec):
+        raise ValueError("initial state must have legal actions")
+
+    monkeypatch.setattr(validate_module, "compile_generated_game", fake_compile)
+
+    report = validate_generated_game(spec, random_games=1, seed=0)
+    assert not report.valid
+    assert report.reasons == ("initial state has no legal actions",)
+
+
+def test_validate_generated_game_marks_all_max_plies_rollouts_invalid(monkeypatch):
+    spec = _escape_capture_test_spec()
+
+    class ValidGame:
+        name = spec.name
+        roles = spec.roles
+        max_plies = spec.max_plies
+        action_size = 3
+
+        def initial_state(self):
+            return object()
+
+        def is_terminal(self, state):
+            return False
+
+        def legal_actions(self, state):
+            return [1]
+
+        def action_mask(self, state):
+            return np.array([False, True, False], dtype=np.bool_)
+
+    monkeypatch.setattr(validate_module, "compile_generated_game", lambda _spec: ValidGame())
+    monkeypatch.setattr(
+        validate_module,
+        "evaluate_matchup",
+        lambda *args, **kwargs: {
+            "role_win_rates": {"0": 0.5, "1": 0.5},
+            "avg_plies": 12.5,
+            "termination_reasons": {"max_plies": 4, "key_capture": 1},
+        },
+    )
+
+    report = validate_generated_game(spec, random_games=4, seed=9)
+    assert not report.valid
+    assert report.reasons == ("all random rollouts ended by max plies",)
+    assert report.random_role_win_rates == {"0": 0.5, "1": 0.5}
+    assert report.average_random_plies == 12.5
+    assert report.terminal_reasons == {"max_plies": 4, "key_capture": 1}

@@ -14,6 +14,10 @@ import torch
 
 from research.asymbench.games.breaker_builder import BreakerBuilder
 from research.asymbench.games.micro_tafl import MicroTafl
+from research.asymbench.generation.loader import (
+    compile_generated_game,
+    load_generated_spec,
+)
 from research.asymbench.learning.evaluate import evaluate_model_vs_random
 from research.asymbench.learning.model import PolicyValueNet
 from research.asymbench.learning.replay import ReplayBuffer
@@ -53,8 +57,7 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
     config = _load_config(config_path)
     _validate_config(config)
 
-    game_name = str(config["game"])
-    game_class = GAME_CLASSES[game_name]
+    game_name, game_factory, generated_metadata = _resolve_game_source(config)
     device_requested = device_override or str(config.get("device", "cpu"))
     device_used = _resolve_device(device_requested)
 
@@ -84,7 +87,7 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
             variant_dir = run_dir / variant_name / f"seed_{seed}"
             variant_dir.mkdir(parents=True, exist_ok=False)
 
-            game = game_class()
+            game = game_factory()
             model = _create_model(game, role_heads=VARIANT_ROLE_HEADS[variant_name])
             buffer = ReplayBuffer(
                 capacity=int(config["replay_capacity"]),
@@ -174,6 +177,7 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                     "eval_termination_reasons": eval_summary[
                         "termination_reasons"
                     ],
+                    **generated_metadata,
                 }
                 _append_jsonl(metrics_path, row)
                 all_rows.append(row)
@@ -191,6 +195,7 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                     "model_init_seed": model_init_seed,
                     "device_requested": device_requested,
                     "device_used": device_used,
+                    "generated_metadata": generated_metadata,
                     "input_shape": model.input_shape,
                     "action_size": model.action_size,
                     "num_roles": model.num_roles,
@@ -206,12 +211,14 @@ def run_experiment(config_path: Path, device_override: str | None = None) -> Pat
                     "trial_seed": trial_seed,
                     "model_init_seed": model_init_seed,
                     "path": str(checkpoint_path),
+                    **generated_metadata,
                 }
             )
 
     summary = _summarize_run(
         config=config,
         game_name=game_name,
+        generated_metadata=generated_metadata,
         run_dir=run_dir,
         device_requested=device_requested,
         device_used=device_used,
@@ -227,8 +234,24 @@ def _load_config(path: Path) -> dict[str, Any]:
 
 
 def _validate_config(config: dict[str, Any]) -> None:
-    if config.get("game") not in GAME_CLASSES:
-        raise ValueError(f"unknown game: {config.get('game')!r}")
+    has_game = "game" in config
+    has_game_source = "game_source" in config
+    if has_game == has_game_source:
+        raise ValueError("config must include exactly one of game or game_source")
+
+    if has_game:
+        if config.get("game") not in GAME_CLASSES:
+            raise ValueError(f"unknown game: {config.get('game')!r}")
+    else:
+        game_source = config.get("game_source")
+        if type(game_source) is not dict:
+            raise ValueError("game_source must be a dict")
+        if game_source.get("type") != "generated_spec":
+            raise ValueError("game_source.type must be 'generated_spec'")
+        path = game_source.get("path")
+        if type(path) is not str or path == "":
+            raise ValueError("game_source.path must be a non-empty string")
+
     variants = config.get("model_variants")
     if not isinstance(variants, list) or not variants:
         raise ValueError("model_variants must be a non-empty list")
@@ -259,6 +282,26 @@ def _resolve_device(device_requested: str) -> str:
     if device_requested == "cuda" and not torch.cuda.is_available():
         return "cpu"
     return device_requested
+
+
+def _resolve_game_source(
+    config: dict[str, Any],
+) -> tuple[str, Any, dict[str, Any]]:
+    game_name = config.get("game")
+    if game_name is not None:
+        game_name = str(game_name)
+        return game_name, lambda: GAME_CLASSES[game_name](), {}
+
+    game_source = config["game_source"]
+    spec_path = Path(str(game_source["path"]))
+    spec = load_generated_spec(spec_path)
+    metadata = {
+        "generated_family": spec.family,
+        "generated_name": spec.name,
+        "generated_seed": int(spec.seed),
+        "generated_spec_path": str(spec_path),
+    }
+    return spec.name, lambda: compile_generated_game(spec), metadata
 
 
 def _create_model(game: Any, *, role_heads: bool) -> PolicyValueNet:
@@ -328,6 +371,7 @@ def _summarize_run(
     *,
     config: dict[str, Any],
     game_name: str,
+    generated_metadata: dict[str, Any],
     run_dir: Path,
     device_requested: str,
     device_used: str,
@@ -383,6 +427,7 @@ def _summarize_run(
         "metrics_rows": len(metrics),
         "by_variant": by_variant,
         "checkpoints": checkpoints,
+        **generated_metadata,
     }
 
 

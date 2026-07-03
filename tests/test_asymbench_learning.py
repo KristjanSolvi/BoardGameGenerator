@@ -7,6 +7,8 @@ import pytest
 torch = pytest.importorskip("torch")
 
 from research.asymbench.experiments.run_role_heads import run_experiment
+from research.asymbench.generation.escape_capture import EscapeCaptureGenerator
+from research.asymbench.generation.specs import GenerationConstraints
 from research.asymbench.games.base import RoleResult
 from research.asymbench.games.breaker_builder import BreakerBuilder
 from research.asymbench.learning import selfplay as selfplay_module
@@ -699,3 +701,57 @@ def test_role_head_runner_variant_seed_does_not_depend_on_variant_order(tmp_path
         rows_by_run[0]["shared_heads"]["variant_seed"]
         != rows_by_run[0]["role_heads"]["variant_seed"]
     )
+
+
+def test_role_head_runner_accepts_generated_game_source(tmp_path):
+    generator = EscapeCaptureGenerator()
+    spec = generator.generate(
+        seed=77,
+        constraints=GenerationConstraints(
+            board_sizes=((5, 5),),
+            max_plies_range=(20, 20),
+        ),
+    )
+    spec_path = tmp_path / "generated_spec.json"
+    spec_path.write_text(json.dumps(spec.to_dict()))
+
+    config = {
+        "game_source": {"type": "generated_spec", "path": str(spec_path)},
+        "device": "cpu",
+        "seeds": [1],
+        "model_variants": ["shared_heads", "role_heads"],
+        "iterations": 1,
+        "selfplay_games_per_iteration": 1,
+        "train_steps_per_iteration": 1,
+        "batch_size": 2,
+        "replay_capacity": 64,
+        "mcts_simulations": 1,
+        "eval_games": 2,
+        "eval_simulations": 1,
+        "learning_rate": 0.001,
+        "output_root": str(tmp_path / "runs"),
+    }
+    config_path = tmp_path / "generated_runner_config.json"
+    config_path.write_text(json.dumps(config))
+
+    run_dir = run_experiment(config_path, device_override="cpu")
+
+    rows = [
+        json.loads(line)
+        for line in (run_dir / "metrics.jsonl").read_text().splitlines()
+    ]
+    assert {row["variant"] for row in rows} == {"shared_heads", "role_heads"}
+    assert all(row["game"] == spec.name for row in rows)
+    assert all(row["generated_family"] == "escape_capture" for row in rows)
+    assert all(row["generated_name"] == spec.name for row in rows)
+    assert all(row["generated_seed"] == 77 for row in rows)
+    assert all(row["generated_spec_path"] == str(spec_path) for row in rows)
+
+    written_config = json.loads((run_dir / "config.json").read_text())
+    assert written_config["game_source"]["type"] == "generated_spec"
+
+    summary = json.loads((run_dir / "role_summary.json").read_text())
+    assert summary["generated_family"] == "escape_capture"
+    assert summary["generated_name"] == spec.name
+    assert summary["generated_seed"] == 77
+    assert summary["generated_spec_path"] == str(spec_path)

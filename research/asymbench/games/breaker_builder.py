@@ -52,12 +52,13 @@ class BreakerBuilder:
     ) -> BreakerBuilderState:
         if len(seat_roles) != 2 or set(seat_roles) != {self.BUILDER, self.BREAKER}:
             raise ValueError("seat_roles must assign builder and breaker once each")
+        normalized_seat_roles = tuple(seat_roles)
 
         board = [self.EMPTY] * self._CELL_COUNT
         for cell in self._INITIAL_BLOCKERS:
             board[self.cell_index(cell)] = self.BREAKER_BLOCKER
         return BreakerBuilderState(
-            board=tuple(board), to_move=0, seat_roles=seat_roles, plies=0
+            board=tuple(board), to_move=0, seat_roles=normalized_seat_roles, plies=0
         )
 
     def current_player(self, state: BreakerBuilderState) -> int:

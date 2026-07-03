@@ -259,11 +259,40 @@ def test_breaker_builder_initial_state_roles_and_actions():
 def test_breaker_builder_observation_shape():
     game = BreakerBuilder()
     state = game.initial_state()
+    state = game.apply_action(state, game.encode_place("a3"))
+
+    builder_obs = game.observation_tensor(state, player=0)
+    breaker_obs = game.observation_tensor(state, player=1)
+    builder_row, builder_col = divmod(game.cell_index("a3"), 5)
+    blocker_row, blocker_col = divmod(game.cell_index("b2"), 5)
+
+    assert builder_obs.shape == (6, 5, 5)
+    assert builder_obs.dtype == np.float32
+    assert builder_obs[0, builder_row, builder_col] == 1.0
+    assert builder_obs[1, blocker_row, blocker_col] == 1.0
+    assert builder_obs[2, builder_row, builder_col] == 1.0
+    assert builder_obs[3, blocker_row, blocker_col] == 1.0
+    assert builder_obs[5].max() == 0.0
+
+    assert breaker_obs[2, blocker_row, blocker_col] == 1.0
+    assert breaker_obs[3, builder_row, builder_col] == 1.0
+    assert breaker_obs[5].min() == 1.0
+
+
+def test_breaker_builder_swapped_role_observation_perspective():
+    game = BreakerBuilder()
+    state = game.initial_state(
+        seat_roles=(BreakerBuilder.BREAKER, BreakerBuilder.BUILDER)
+    )
+    blocker_row, blocker_col = divmod(game.cell_index("d4"), 5)
 
     obs = game.observation_tensor(state, player=0)
 
-    assert obs.shape == (6, 5, 5)
-    assert obs.dtype == np.float32
+    assert obs[1, blocker_row, blocker_col] == 1.0
+    assert obs[2, blocker_row, blocker_col] == 1.0
+    assert obs[3].sum() == 0.0
+    assert obs[4].min() == 1.0
+    assert obs[5].min() == 1.0
 
 
 def test_breaker_builder_known_connection_win():
@@ -322,6 +351,31 @@ def test_breaker_builder_initial_state_accepts_seat_role_swap():
     assert game.player_role(state, 0) == BreakerBuilder.BREAKER
     assert game.player_role(state, 1) == BreakerBuilder.BUILDER
     assert all(action >= 25 for action in game.legal_actions(state))
+
+
+def test_breaker_builder_initial_state_normalizes_list_seat_roles():
+    game = BreakerBuilder()
+
+    state = game.initial_state(
+        seat_roles=[BreakerBuilder.BUILDER, BreakerBuilder.BREAKER]
+    )
+
+    assert state.seat_roles == (BreakerBuilder.BUILDER, BreakerBuilder.BREAKER)
+    assert isinstance(state.seat_roles, tuple)
+
+
+def test_breaker_builder_swapped_role_max_plies_winner_is_breaker_player():
+    game = BreakerBuilder(max_plies=1)
+    state = game.initial_state(
+        seat_roles=(BreakerBuilder.BREAKER, BreakerBuilder.BUILDER)
+    )
+    state = game.apply_action(state, game.encode_move("b2", "b1"))
+
+    result = game.result(state)
+
+    assert game.is_terminal(state)
+    assert result.winner == 0
+    assert result.reason == "max_plies"
 
 
 def test_breaker_builder_cell_validation_rejects_malformed_cells():

@@ -168,3 +168,127 @@ def test_validation_report_round_trips_and_records_rejections():
         terminal_reasons={"builder_connection": 4},
     )
     assert ValidationReport.from_dict(report.to_dict()) == report
+
+
+def test_generated_game_spec_rejects_bool_numeric_fields():
+    base = {
+        "family": "escape_capture",
+        "name": "escape_capture_seed_3",
+        "seed": 3,
+        "board": {"rows": 5, "cols": 5},
+        "roles": ("attacker", "defender"),
+        "max_plies": 50,
+    }
+    for field, value in (("seed", True), ("max_plies", False)):
+        with pytest.raises(ValueError, match=field):
+            GeneratedGameSpec(**{**base, field: value})
+    for board in ({"rows": True, "cols": 5}, {"rows": 5, "cols": False}):
+        with pytest.raises(ValueError, match="board"):
+            GeneratedGameSpec(**{**base, "board": board})
+
+
+def test_generation_constraints_rejects_bool_numeric_fields():
+    with pytest.raises(ValueError, match="max_attempts"):
+        GenerationConstraints(max_attempts=True)
+    with pytest.raises(ValueError, match="board_sizes"):
+        GenerationConstraints(board_sizes=((True, 5),))
+
+
+def test_validation_report_from_dict_rejects_non_bool_valid():
+    base = ValidationReport(
+        family="connection_disruption",
+        name="bad_game",
+        valid=False,
+        reasons=("builder already connected",),
+    ).to_dict()
+    for value in ("false", 1):
+        with pytest.raises(ValueError, match="valid"):
+            ValidationReport.from_dict({**base, "valid": value})
+
+
+def test_validation_report_rejects_invalid_values():
+    base = {
+        "family": "connection_disruption",
+        "name": "bad_game",
+        "valid": False,
+        "reasons": ("builder already connected",),
+    }
+    cases = [
+        ({**base, "family": "unknown"}, "unknown family"),
+        ({**base, "random_role_win_rates": {"0": 1.1}}, "win rate"),
+        ({**base, "terminal_reasons": {"builder_connection": -1}}, "terminal"),
+        ({**base, "average_random_plies": float("nan")}, "average_random_plies"),
+        ({**base, "reasons": ()}, "reason"),
+    ]
+    for kwargs, match in cases:
+        with pytest.raises(ValueError, match=match):
+            ValidationReport(**kwargs)
+
+
+def test_generated_artifacts_do_not_alias_nested_mutable_inputs_or_outputs():
+    setup = {"attackers": [1, 3], "nested": {"key": 6}}
+    actions = {"movement": {"kind": "orthogonal_step"}}
+    spec = GeneratedGameSpec(
+        family="escape_capture",
+        name="escape_capture_seed_3",
+        seed=3,
+        board={"rows": 5, "cols": 5},
+        roles=("attacker", "defender"),
+        setup=setup,
+        actions=actions,
+        terminal_rules={"capture": {"kind": "sandwich"}},
+        max_plies=50,
+    )
+    setup["attackers"].append(9)
+    actions["movement"]["kind"] = "diagonal_step"
+    spec_dict = spec.to_dict()
+    spec_dict["setup"]["nested"]["key"] = 99
+    spec_dict["actions"]["movement"]["kind"] = "slide"
+    assert spec.setup["attackers"] == [1, 3]
+    assert spec.setup["nested"]["key"] == 6
+    assert spec.actions["movement"]["kind"] == "orthogonal_step"
+
+    rates = {"0": 0.5}
+    terminals = {"max_plies": 1}
+    report = ValidationReport(
+        family="escape_capture",
+        name="report",
+        valid=True,
+        random_role_win_rates=rates,
+        terminal_reasons=terminals,
+    )
+    rates["0"] = 1.0
+    terminals["max_plies"] = 3
+    report_dict = report.to_dict()
+    report_dict["random_role_win_rates"]["0"] = 0.0
+    report_dict["terminal_reasons"]["max_plies"] = 7
+    assert report.random_role_win_rates["0"] == 0.5
+    assert report.terminal_reasons["max_plies"] == 1
+
+
+def test_generated_artifacts_reject_non_string_text_fields():
+    with pytest.raises(ValueError, match="name"):
+        GeneratedGameSpec(
+            family="escape_capture",
+            name=3,
+            seed=3,
+            board={"rows": 5, "cols": 5},
+            roles=("attacker", "defender"),
+            max_plies=50,
+        )
+    with pytest.raises(ValueError, match="roles"):
+        GeneratedGameSpec(
+            family="escape_capture",
+            name="escape_capture_seed_3",
+            seed=3,
+            board={"rows": 5, "cols": 5},
+            roles=("attacker", 4),
+            max_plies=50,
+        )
+    with pytest.raises(ValueError, match="reasons"):
+        ValidationReport(
+            family="connection_disruption",
+            name="bad_game",
+            valid=False,
+            reasons=(None,),
+        )

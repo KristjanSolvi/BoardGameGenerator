@@ -630,19 +630,44 @@ def test_role_head_runner_variant_seed_does_not_depend_on_variant_order(tmp_path
         config_path.write_text(json.dumps(config))
         config_paths.append(config_path)
 
-    variant_seeds_by_run = []
+    checkpoints_by_run = []
+    rows_by_run = []
     for config_path in config_paths:
         run_dir = run_experiment(config_path, device_override="cpu")
         rows = [
             json.loads(line)
             for line in (run_dir / "metrics.jsonl").read_text().splitlines()
         ]
-        variant_seeds_by_run.append(
-            {row["variant"]: row["variant_seed"] for row in rows}
+        rows_by_run.append({row["variant"]: row for row in rows})
+        checkpoints_by_run.append(
+            {
+                variant: torch.load(
+                    run_dir / variant / "seed_11" / "final_checkpoint.pt",
+                    map_location="cpu",
+                )
+                for variant in ("shared_heads", "role_heads")
+            }
         )
 
-    assert variant_seeds_by_run[0] == variant_seeds_by_run[1]
+    for variant in ("shared_heads", "role_heads"):
+        assert (
+            rows_by_run[0][variant]["variant_seed"]
+            == rows_by_run[1][variant]["variant_seed"]
+        )
+        assert (
+            checkpoints_by_run[0][variant]["variant_seed"]
+            == checkpoints_by_run[1][variant]["variant_seed"]
+        )
+
+        forward_state = checkpoints_by_run[0][variant]["model_state_dict"]
+        reversed_state = checkpoints_by_run[1][variant]["model_state_dict"]
+        assert forward_state.keys() == reversed_state.keys()
+        for key in forward_state:
+            assert torch.equal(forward_state[key], reversed_state[key]), (
+                f"{variant} checkpoint tensor changed across variant order: {key}"
+            )
+
     assert (
-        variant_seeds_by_run[0]["shared_heads"]
-        != variant_seeds_by_run[0]["role_heads"]
+        rows_by_run[0]["shared_heads"]["variant_seed"]
+        != rows_by_run[0]["role_heads"]["variant_seed"]
     )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass
 import random
 from typing import Any
@@ -31,6 +32,10 @@ KEY = 3
 
 ROLE_ATTACKER = 0
 ROLE_DEFENDER = 1
+
+
+class _CandidateRejected(Exception):
+    """Expected rejection for sampled generator layouts."""
 
 
 @dataclass(frozen=True)
@@ -412,23 +417,19 @@ class EscapeCaptureGenerator:
         seed: int,
         constraints: GenerationConstraints,
     ) -> GeneratedGameSpec:
+        self._validate_inputs(seed=seed, constraints=constraints)
         rng = random.Random(seed)
-        last_error: Exception | None = None
+        last_rejection: _CandidateRejected | None = None
 
         for _ in range(constraints.max_attempts):
             try:
                 spec = self._candidate_spec(seed=seed, constraints=constraints, rng=rng)
-                game = self.compile(spec)
-                state = game.initial_state()
-                if game.is_terminal(state):
-                    raise ValueError("initial state is terminal")
-                if not game.legal_actions(state):
-                    raise ValueError("initial state has no legal actions")
+                self._validate_candidate_spec(spec)
                 return spec
-            except ValueError as exc:
-                last_error = exc
+            except _CandidateRejected as exc:
+                last_rejection = exc
 
-        detail = f": {last_error}" if last_error is not None else ""
+        detail = f": {last_rejection}" if last_rejection is not None else ""
         raise RuntimeError(f"failed to generate escape_capture spec{detail}")
 
     def compile(self, spec: GeneratedGameSpec) -> EscapeCaptureGame:
@@ -464,11 +465,11 @@ class EscapeCaptureGenerator:
         occupied.update(exits)
 
         key_row, key_col = index_to_coord(key, cols=cols)
-        guard_candidates = [
-            coord_to_index(row, col, rows=rows, cols=cols)
-            for row, col in neighbors(key_row, key_col, rows=rows, cols=cols)
-            if coord_to_index(row, col, rows=rows, cols=cols) not in occupied
-        ]
+        guard_candidates = []
+        for row, col in neighbors(key_row, key_col, rows=rows, cols=cols):
+            index = coord_to_index(row, col, rows=rows, cols=cols)
+            if index not in occupied:
+                guard_candidates.append(index)
         guard_count = 0
         if guard_candidates:
             guard_count = rng.randint(
@@ -490,7 +491,7 @@ class EscapeCaptureGenerator:
 
         return GeneratedGameSpec(
             family=self.family,
-            name=f"escape_capture_seed_{seed}",
+            name=f"escape_capture_{rows}x{cols}_seed_{seed}",
             seed=seed,
             board={"rows": rows, "cols": cols},
             roles=("attacker", "defender"),
@@ -505,6 +506,123 @@ class EscapeCaptureGenerator:
             terminal_rules={"capture": "opposite_sides"},
             max_plies=max_plies_value,
         )
+
+    def _validate_inputs(
+        self,
+        *,
+        seed: int,
+        constraints: GenerationConstraints,
+    ) -> None:
+        if type(seed) is not int:
+            raise ValueError("seed must be an int")
+        for rows, cols in constraints.board_sizes:
+            if rows < 5 or cols < 5:
+                raise ValueError("board_sizes entries must be at least 5x5")
+
+    def _validate_candidate_spec(self, spec: GeneratedGameSpec) -> None:
+        if not self._has_escape_path(spec):
+            raise _CandidateRejected("no plausible key escape path")
+        if not self._has_capture_potential(spec):
+            raise _CandidateRejected("no plausible key capture configuration")
+
+        try:
+            game = self.compile(spec)
+        except ValueError as exc:
+            raise _CandidateRejected(str(exc)) from exc
+
+        state = game.initial_state()
+        if game.is_terminal(state):
+            raise _CandidateRejected("initial state is terminal")
+        if not game.legal_actions(state):
+            raise _CandidateRejected("initial state has no legal actions")
+
+    def _has_escape_path(self, spec: GeneratedGameSpec) -> bool:
+        rows = spec.board["rows"]
+        cols = spec.board["cols"]
+        setup = spec.setup
+        key = setup["key"]
+        exits = set(setup["exits"])
+        blockers = set(setup["attackers"]) | set(setup["guards"])
+        return self._reachable_target_exists(
+            starts={key},
+            targets=exits,
+            rows=rows,
+            cols=cols,
+            blocked=blockers,
+        )
+
+    def _has_capture_potential(self, spec: GeneratedGameSpec) -> bool:
+        rows = spec.board["rows"]
+        cols = spec.board["cols"]
+        setup = spec.setup
+        key = setup["key"]
+        attackers = set(setup["attackers"])
+        guards = set(setup["guards"])
+        exits = set(setup["exits"])
+        hostile = set(setup["hostile"])
+        key_row, key_col = index_to_coord(key, cols=cols)
+        reachable_by_attackers = self._reachable_cells(
+            starts=attackers,
+            rows=rows,
+            cols=cols,
+            blocked=attackers | guards | exits | {key},
+        )
+
+        def support_exists(row: int, col: int) -> bool:
+            if not in_bounds(row, col, rows=rows, cols=cols):
+                return True
+            index = coord_to_index(row, col, rows=rows, cols=cols)
+            if index in attackers or index in hostile:
+                return True
+            if index in guards or index == key or index in exits:
+                return False
+            return index in reachable_by_attackers
+
+        return any(
+            support_exists(key_row + dr, key_col + dc)
+            and support_exists(key_row - dr, key_col - dc)
+            for dr, dc in ((1, 0), (0, 1))
+        )
+
+    def _reachable_target_exists(
+        self,
+        *,
+        starts: set[int],
+        targets: set[int],
+        rows: int,
+        cols: int,
+        blocked: set[int],
+    ) -> bool:
+        return bool(
+            self._reachable_cells(
+                starts=starts,
+                rows=rows,
+                cols=cols,
+                blocked=blocked - starts,
+            )
+            & targets
+        )
+
+    @staticmethod
+    def _reachable_cells(
+        *,
+        starts: set[int],
+        rows: int,
+        cols: int,
+        blocked: set[int],
+    ) -> set[int]:
+        reachable = set(starts)
+        queue: deque[int] = deque(starts)
+        while queue:
+            current = queue.popleft()
+            row, col = index_to_coord(current, cols=cols)
+            for next_row, next_col in neighbors(row, col, rows=rows, cols=cols):
+                index = coord_to_index(next_row, next_col, rows=rows, cols=cols)
+                if index in reachable or index in blocked:
+                    continue
+                reachable.add(index)
+                queue.append(index)
+        return reachable
 
     @staticmethod
     def _outer_ring(rows: int, cols: int) -> list[int]:

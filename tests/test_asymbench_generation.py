@@ -637,3 +637,55 @@ def test_escape_capture_generator_compiles_to_playable_game():
     assert not game.is_terminal(state)
     assert len(game.legal_actions(state)) > 0
     assert game.action_mask(state).shape == (game.action_size,)
+
+
+def test_escape_capture_generator_rejects_unsupported_board_sizes_immediately():
+    generator = EscapeCaptureGenerator()
+    constraints = GenerationConstraints(board_sizes=((3, 3),), max_attempts=1)
+    with pytest.raises(ValueError, match="board_sizes.*at least 5"):
+        generator.generate(seed=19, constraints=constraints)
+
+
+@pytest.mark.parametrize("seed", [True, "abc"])
+def test_escape_capture_generator_rejects_invalid_seed_types(seed):
+    generator = EscapeCaptureGenerator()
+    with pytest.raises(ValueError, match="seed"):
+        generator.generate(seed=seed, constraints=GenerationConstraints())
+
+
+def test_escape_capture_generator_seed_range_has_structural_invariants():
+    generator = EscapeCaptureGenerator()
+    constraints = GenerationConstraints(
+        board_sizes=((5, 5), (6, 6), (7, 7)),
+        max_plies_range=(40, 40),
+    )
+    for seed in range(20, 30):
+        spec = generator.generate(seed=seed, constraints=constraints)
+        rows = spec.board["rows"]
+        cols = spec.board["cols"]
+        setup = spec.setup
+        key = setup["key"]
+        key_row, key_col = index_to_coord(key, cols=cols)
+        outer_ring = set(EscapeCaptureGenerator._outer_ring(rows, cols))
+        occupied = list(setup["attackers"]) + list(setup["guards"]) + [key]
+
+        assert spec.name == f"escape_capture_{rows}x{cols}_seed_{seed}"
+        assert set(setup) == {"attackers", "guards", "key", "exits", "hostile"}
+        assert len(occupied) == len(set(occupied))
+        assert not set(setup["exits"]) & set(occupied)
+        assert set(setup["exits"]) <= outer_ring
+        assert set(setup["attackers"]) <= outer_ring
+        assert all(
+            guard in {
+                coord_to_index(row, col, rows=rows, cols=cols)
+                for row, col in neighbors(key_row, key_col, rows=rows, cols=cols)
+            }
+            for guard in setup["guards"]
+        )
+        assert generator._has_escape_path(spec)
+        assert generator._has_capture_potential(spec)
+
+        game = generator.compile(spec)
+        state = game.initial_state()
+        assert not game.is_terminal(state)
+        assert len(game.legal_actions(state)) > 0

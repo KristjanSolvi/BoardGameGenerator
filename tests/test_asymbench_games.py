@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from research.asymbench.games.base import make_action_mask, RoleResult
 
@@ -10,12 +11,8 @@ def test_make_action_mask_marks_only_legal_actions():
 
 
 def test_make_action_mask_rejects_out_of_range_action():
-    try:
+    with pytest.raises(ValueError, match="outside action space"):
         make_action_mask(action_size=3, legal_actions=[0, 3])
-    except ValueError as exc:
-        assert "outside action space" in str(exc)
-    else:
-        raise AssertionError("expected ValueError")
 
 
 def test_role_result_value_for_player():

@@ -440,7 +440,9 @@ def test_train_steps_updates_model_and_returns_metrics():
     [
         ([0.0, 0.0], [True, True], "positive probability mass"),
         ([0.5, 0.5], [True, False], "illegal actions"),
+        ([1.0 - 1e-6, 1e-6], [True, False], "illegal actions"),
         ([-0.1, 1.1], [True, True], "negative probabilities"),
+        ([-1e-9, 1.0 + 1e-9], [True, True], "negative probabilities"),
         ([float("nan"), 1.0], [True, True], "finite values"),
         ([0.4, 0.4], [True, True], "normalized"),
     ],

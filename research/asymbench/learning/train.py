@@ -100,9 +100,9 @@ def _validate_target_policies(policies: np.ndarray, action_masks: np.ndarray) ->
         raise ValueError("target policies must have the same shape as action masks")
     if not np.all(np.isfinite(policies)):
         raise ValueError("target policies must contain only finite values")
-    if np.any(policies < -1e-8):
+    if np.any(policies < 0.0):
         raise ValueError("target policies must not contain negative probabilities")
-    if float(np.abs(policies[~action_masks]).sum()) > 1e-6:
+    if np.any(policies[~action_masks] != 0.0):
         raise ValueError("target policies must assign zero mass to illegal actions")
     row_sums = policies.sum(axis=1)
     if not np.all(row_sums > 0.0):

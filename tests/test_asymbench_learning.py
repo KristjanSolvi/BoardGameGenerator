@@ -6,9 +6,11 @@ torch = pytest.importorskip("torch")
 from research.asymbench.games.base import RoleResult
 from research.asymbench.games.breaker_builder import BreakerBuilder
 from research.asymbench.learning import selfplay as selfplay_module
+from research.asymbench.learning.evaluate import evaluate_model_vs_random
 from research.asymbench.learning.model import PolicyValueNet
 from research.asymbench.learning.replay import ReplayBuffer, TrainingExample
 from research.asymbench.learning.selfplay import NeuralEvaluator, generate_selfplay_game
+from research.asymbench.learning.train import train_steps
 
 
 class _TinyEvaluatorGame:
@@ -383,3 +385,48 @@ def test_generate_selfplay_game_rejects_illegal_policy_mass(monkeypatch):
             simulations=1,
             seed=123,
         )
+
+
+def test_train_steps_updates_model_and_returns_metrics():
+    game = BreakerBuilder(max_plies=8)
+    model = PolicyValueNet((6, 5, 5), game.action_size, num_roles=2, role_heads=True)
+    buffer = ReplayBuffer(capacity=16, seed=3)
+    examples, _ = generate_selfplay_game(
+        game=game,
+        model=model,
+        device="cpu",
+        simulations=2,
+        seed=4,
+    )
+    for example in examples:
+        buffer.add(example)
+
+    before = [parameter.detach().clone() for parameter in model.parameters()]
+
+    metrics = train_steps(model, buffer, batch_size=2, steps=2, lr=1e-3, device="cpu")
+
+    assert metrics["steps"] == 2
+    assert np.isfinite(metrics["policy_loss"])
+    assert np.isfinite(metrics["value_loss"])
+    assert model.training is True
+    assert any(
+        not torch.allclose(old, new)
+        for old, new in zip(before, model.parameters(), strict=True)
+    )
+
+
+def test_evaluate_model_vs_random_returns_role_summary():
+    game = BreakerBuilder(max_plies=8)
+    model = PolicyValueNet((6, 5, 5), game.action_size, num_roles=2, role_heads=True)
+    summary = evaluate_model_vs_random(
+        game=game,
+        model=model,
+        device="cpu",
+        games=4,
+        simulations=2,
+        seed=99,
+    )
+    assert summary["games"] == 4
+    assert "role_win_rates" in summary
+    assert "model_win_rate" in summary
+    assert model.training is True

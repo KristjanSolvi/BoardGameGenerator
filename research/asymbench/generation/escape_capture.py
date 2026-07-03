@@ -542,7 +542,7 @@ class EscapeCaptureGenerator:
         setup = spec.setup
         key = setup["key"]
         exits = set(setup["exits"])
-        blockers = set(setup["attackers"]) | set(setup["guards"])
+        blockers = set(setup["attackers"])
         return self._reachable_target_exists(
             starts={key},
             targets=exits,
@@ -557,32 +557,59 @@ class EscapeCaptureGenerator:
         setup = spec.setup
         key = setup["key"]
         attackers = set(setup["attackers"])
-        guards = set(setup["guards"])
         exits = set(setup["exits"])
         hostile = set(setup["hostile"])
-        key_row, key_col = index_to_coord(key, cols=cols)
-        reachable_by_attackers = self._reachable_cells(
-            starts=attackers,
+        key_reachable = self._reachable_cells(
+            starts={key},
             rows=rows,
             cols=cols,
-            blocked=attackers | guards | exits | {key},
+            blocked=attackers,
         )
+        key_positions = key_reachable - exits
 
-        def support_exists(row: int, col: int) -> bool:
+        def support_exists(
+            *,
+            row: int,
+            col: int,
+            key_position: int,
+            reachable_by_attackers: set[int],
+        ) -> bool:
             if not in_bounds(row, col, rows=rows, cols=cols):
                 return True
             index = coord_to_index(row, col, rows=rows, cols=cols)
+            if index == key_position:
+                return False
             if index in attackers or index in hostile:
                 return True
-            if index in guards or index == key or index in exits:
+            if index in exits:
                 return False
             return index in reachable_by_attackers
 
-        return any(
-            support_exists(key_row + dr, key_col + dc)
-            and support_exists(key_row - dr, key_col - dc)
-            for dr, dc in ((1, 0), (0, 1))
-        )
+        for key_position in key_positions:
+            reachable_by_attackers = self._reachable_cells(
+                starts=attackers,
+                rows=rows,
+                cols=cols,
+                blocked=(exits - hostile) | {key_position},
+            )
+            key_row, key_col = index_to_coord(key_position, cols=cols)
+            if any(
+                support_exists(
+                    row=key_row + dr,
+                    col=key_col + dc,
+                    key_position=key_position,
+                    reachable_by_attackers=reachable_by_attackers,
+                )
+                and support_exists(
+                    row=key_row - dr,
+                    col=key_col - dc,
+                    key_position=key_position,
+                    reachable_by_attackers=reachable_by_attackers,
+                )
+                for dr, dc in ((1, 0), (0, 1))
+            ):
+                return True
+        return False
 
     def _reachable_target_exists(
         self,

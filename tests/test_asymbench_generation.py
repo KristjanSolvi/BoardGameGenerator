@@ -689,3 +689,43 @@ def test_escape_capture_generator_seed_range_has_structural_invariants():
         state = game.initial_state()
         assert not game.is_terminal(state)
         assert len(game.legal_actions(state)) > 0
+
+
+def test_escape_capture_generator_preserves_guard_count_diversity_on_5x5():
+    generator = EscapeCaptureGenerator()
+    constraints = GenerationConstraints(board_sizes=((5, 5),), max_plies_range=(40, 40))
+    guard_counts = []
+    for seed in range(51):
+        spec = generator.generate(seed=seed, constraints=constraints)
+        guard_counts.append(len(spec.setup["guards"]))
+
+        game = generator.compile(spec)
+        state = game.initial_state()
+        assert not game.is_terminal(state)
+        assert len(game.legal_actions(state)) > 0
+
+    assert all(2 <= count <= 4 for count in guard_counts)
+    assert any(count > 2 for count in guard_counts)
+
+
+def test_escape_capture_capture_potential_treats_guards_as_vacatable():
+    generator = EscapeCaptureGenerator()
+    spec = GeneratedGameSpec(
+        family="escape_capture",
+        name="escape_capture_5x5_seed_303",
+        seed=303,
+        board={"rows": 5, "cols": 5},
+        roles=("attacker", "defender"),
+        setup={
+            "attackers": [0, 4, 20, 24],
+            "guards": [7, 11, 13],
+            "key": 12,
+            "exits": [2],
+            "hostile": [],
+        },
+        actions={"movement": "orthogonal_step"},
+        terminal_rules={"capture": "opposite_sides"},
+        max_plies=40,
+    )
+
+    assert generator._has_capture_potential(spec)

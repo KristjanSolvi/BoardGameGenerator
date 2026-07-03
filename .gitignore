@@ -6,5 +6,5 @@ runs/
 
 # AsymBench research outputs
 research_runs/
-*.pt
-*.pth
+/research_runs/**/*.pt
+/research_runs/**/*.pth

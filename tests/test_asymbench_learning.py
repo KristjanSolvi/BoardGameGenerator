@@ -6,6 +6,7 @@ torch = pytest.importorskip("torch")
 from research.asymbench.games.breaker_builder import BreakerBuilder
 from research.asymbench.learning.model import PolicyValueNet
 from research.asymbench.learning.replay import ReplayBuffer, TrainingExample
+from research.asymbench.learning.selfplay import NeuralEvaluator, generate_selfplay_game
 
 
 def test_policy_value_net_shared_and_role_heads_shapes():
@@ -172,3 +173,33 @@ def test_replay_buffer_sampling_is_deterministic_for_seed():
     right_values = [example.value for example in right.sample(3)]
 
     assert left_values == right_values
+
+
+def test_neural_evaluator_returns_legal_prior_and_value():
+    game = BreakerBuilder(max_plies=8)
+    state = game.initial_state()
+    model = PolicyValueNet((6, 5, 5), game.action_size, num_roles=2, role_heads=True)
+    evaluator = NeuralEvaluator(model, device="cpu")
+    prior, value = evaluator.evaluate(game, state, player=0)
+    assert prior.shape == (game.action_size,)
+    assert np.isclose(prior.sum(), 1.0)
+    assert set(np.flatnonzero(prior)).issubset(set(game.legal_actions(state)))
+    assert -1.0 <= value <= 1.0
+
+
+def test_generate_selfplay_game_produces_training_examples():
+    game = BreakerBuilder(max_plies=8)
+    model = PolicyValueNet((6, 5, 5), game.action_size, num_roles=2, role_heads=True)
+    examples, outcome = generate_selfplay_game(
+        game=game,
+        model=model,
+        device="cpu",
+        simulations=4,
+        seed=123,
+    )
+    assert len(examples) > 0
+    assert outcome["plies"] == len(examples)
+    assert all(ex.observation.shape == (6, 5, 5) for ex in examples)
+    assert all(ex.action_mask.dtype == np.bool_ for ex in examples)
+    assert all(ex.policy.shape == (game.action_size,) for ex in examples)
+    assert all(-1.0 <= ex.value <= 1.0 for ex in examples)

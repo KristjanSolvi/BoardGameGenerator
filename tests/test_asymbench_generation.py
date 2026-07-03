@@ -1,5 +1,12 @@
+import json
+
 import pytest
 
+from research.asymbench.generation.specs import (
+    GeneratedGameSpec,
+    GenerationConstraints,
+    ValidationReport,
+)
 from research.asymbench.games.grid import (
     connected_component,
     coord_to_index,
@@ -121,3 +128,43 @@ def test_edge_paths_require_connected_occupied_cells():
 def test_edge_cells_rejects_unknown_edge_name():
     with pytest.raises(ValueError, match="unknown edge"):
         edge_cells(rows=3, cols=3, edge="middle")
+
+
+def test_generated_game_spec_round_trips_through_json_dict():
+    spec = GeneratedGameSpec(
+        family="escape_capture",
+        name="escape_capture_seed_3",
+        seed=3,
+        board={"rows": 5, "cols": 5},
+        roles=("attacker", "defender"),
+        setup={"attackers": [1, 3], "guards": [12], "key": 6, "exits": [0]},
+        actions={"movement": "orthogonal_step"},
+        terminal_rules={"capture": "sandwich"},
+        max_plies=50,
+    )
+    encoded = json.dumps(spec.to_dict(), sort_keys=True)
+    decoded = GeneratedGameSpec.from_dict(json.loads(encoded))
+    assert decoded == spec
+    assert decoded.roles == ("attacker", "defender")
+
+
+def test_generation_constraints_defaults_are_small_and_deterministic():
+    constraints = GenerationConstraints()
+    assert constraints.board_sizes == ((5, 5), (6, 6), (7, 7))
+    assert constraints.max_plies_range == (40, 120)
+    assert constraints.max_attempts == 100
+
+
+def test_validation_report_round_trips_and_records_rejections():
+    report = ValidationReport(
+        family="connection_disruption",
+        name="bad_game",
+        valid=False,
+        reasons=("builder already connected",),
+        initial_branching_factor=0,
+        random_role_win_rates={"0": 0.0, "1": 1.0},
+        mcts_role_win_rates={},
+        average_random_plies=3.5,
+        terminal_reasons={"builder_connection": 4},
+    )
+    assert ValidationReport.from_dict(report.to_dict()) == report

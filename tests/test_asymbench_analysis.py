@@ -3,7 +3,102 @@ from pathlib import Path
 
 import pytest
 
+from research.asymbench.analysis.disagreement import (
+    OutcomeVector,
+    architecture_delta,
+    evaluator_disagreement,
+    hidden_role_collapse,
+    role_inversion,
+    role_seat_separation,
+)
 from research.asymbench.analysis.summarize import main, summarize_metrics
+
+
+def test_evaluator_disagreement_uses_largest_pairwise_outcome_distance():
+    score = evaluator_disagreement(
+        {
+            "random": OutcomeVector(role0=0.031, role1=0.969, draw=0.0),
+            "mcts_vs_random": OutcomeVector(role0=0.375, role1=0.625, draw=0.0),
+            "mcts_vs_mcts": OutcomeVector(role0=1.0, role1=0.0, draw=0.0),
+        }
+    )
+
+    assert score == pytest.approx(0.969)
+
+
+def test_role_seat_separation_distinguishes_role_bias_from_first_player_bias():
+    metrics = role_seat_separation(
+        OutcomeVector(role0=1.0, role1=0.0, draw=0.0),
+        first_player_win_rate=0.5,
+    )
+
+    assert metrics.role_bias == pytest.approx(1.0)
+    assert metrics.seat_bias == pytest.approx(0.0)
+    assert metrics.role_seat_separation == pytest.approx(1.0)
+
+
+def test_role_seat_separation_exposes_seat_confounds():
+    metrics = role_seat_separation(
+        OutcomeVector(role0=0.5417, role1=0.4583, draw=0.0),
+        first_player_win_rate=0.8333,
+    )
+
+    assert metrics.role_bias == pytest.approx(0.0834)
+    assert metrics.seat_bias == pytest.approx(0.6666)
+    assert metrics.role_seat_separation == pytest.approx(-0.5832)
+
+
+def test_hidden_role_collapse_flags_random_balanced_planning_collapse():
+    score = hidden_role_collapse(
+        random_outcome=OutcomeVector(role0=0.531, role1=0.469, draw=0.0),
+        planned_outcome=OutcomeVector(role0=1.0, role1=0.0, draw=0.0),
+    )
+
+    assert score == pytest.approx(1.0)
+
+
+def test_hidden_role_collapse_ignores_games_not_balanced_under_random_play():
+    score = hidden_role_collapse(
+        random_outcome=OutcomeVector(role0=0.031, role1=0.969, draw=0.0),
+        planned_outcome=OutcomeVector(role0=1.0, role1=0.0, draw=0.0),
+    )
+
+    assert score == 0.0
+
+
+def test_role_inversion_measures_role0_advantage_reversal_under_skill():
+    score = role_inversion(
+        random_outcome=OutcomeVector(role0=0.031, role1=0.969, draw=0.0),
+        planned_outcome=OutcomeVector(role0=1.0, role1=0.0, draw=0.0),
+    )
+
+    assert score == pytest.approx(0.969)
+
+
+def test_role_inversion_is_zero_without_sign_reversal():
+    score = role_inversion(
+        random_outcome=OutcomeVector(role0=0.531, role1=0.469, draw=0.0),
+        planned_outcome=OutcomeVector(role0=1.0, role1=0.0, draw=0.0),
+    )
+
+    assert score == 0.0
+
+
+def test_architecture_delta_is_role_heads_minus_shared_heads():
+    assert architecture_delta(
+        role_heads_win_rate=0.611,
+        shared_heads_win_rate=0.389,
+    ) == pytest.approx(0.222)
+
+
+def test_outcome_vector_rejects_invalid_probability_mass():
+    with pytest.raises(ValueError, match="sum to 1"):
+        OutcomeVector(role0=0.5, role1=0.5, draw=0.5)
+
+
+def test_outcome_vector_rejects_negative_probability():
+    with pytest.raises(ValueError, match="non-negative"):
+        OutcomeVector(role0=-0.1, role1=1.1, draw=0.0)
 
 
 def test_summarize_metrics_groups_by_variant(tmp_path: Path):

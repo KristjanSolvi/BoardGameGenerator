@@ -7,15 +7,23 @@ import numpy as np
 from research.asymbench.baselines import RandomAgent, evaluate_matchup
 from research.asymbench.generation.loader import compile_generated_game
 from research.asymbench.generation.specs import GeneratedGameSpec, ValidationReport
+from research.asymbench.search.mcts import MCTSAgent, UniformEvaluator
 
 
 def validate_generated_game(
     spec: GeneratedGameSpec,
     random_games: int = 8,
     seed: int = 0,
+    *,
+    mcts_games: int = 0,
+    mcts_simulations: int = 0,
 ) -> ValidationReport:
     if random_games <= 0:
         raise ValueError("random_games must be positive")
+    if mcts_games < 0:
+        raise ValueError("mcts_games must be non-negative")
+    if mcts_games > 0 and mcts_simulations <= 0:
+        raise ValueError("mcts_simulations must be positive when mcts_games is set")
 
     reasons: list[str] = []
     game: Any | None = None
@@ -75,6 +83,27 @@ def validate_generated_game(
         valid = False
         reasons.append("all random rollouts ended by max plies")
 
+    mcts_role_win_rates = {}
+    if mcts_games > 0:
+        mcts_summary = evaluate_matchup(
+            game,
+            agent_factories={
+                0: lambda s: MCTSAgent(
+                    evaluator=UniformEvaluator(),
+                    simulations=mcts_simulations,
+                    seed=s,
+                ),
+                1: lambda s: MCTSAgent(
+                    evaluator=UniformEvaluator(),
+                    simulations=mcts_simulations,
+                    seed=s,
+                ),
+            },
+            games=mcts_games,
+            seed=seed ^ 0x5EED5,
+        )
+        mcts_role_win_rates = dict(mcts_summary["role_win_rates"])
+
     return ValidationReport(
         family=spec.family,
         name=spec.name,
@@ -82,7 +111,7 @@ def validate_generated_game(
         reasons=tuple(reasons),
         initial_branching_factor=len(legal_actions),
         random_role_win_rates=dict(summary["role_win_rates"]),
-        mcts_role_win_rates={},
+        mcts_role_win_rates=mcts_role_win_rates,
         average_random_plies=summary["avg_plies"],
         terminal_reasons=terminal_reasons,
     )

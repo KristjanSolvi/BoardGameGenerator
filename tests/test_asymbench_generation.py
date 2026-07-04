@@ -822,6 +822,33 @@ def test_connection_disruption_generator_is_deterministic_and_playable():
     assert len(game.legal_actions(state)) > 0
 
 
+def test_connection_disruption_stress_profile_preserves_default_sampling():
+    constraints = GenerationConstraints(board_sizes=((7, 7),), max_plies_range=(40, 40))
+    default = ConnectionDisruptionGenerator()
+    stress = ConnectionDisruptionGenerator(profile="stress")
+
+    assert stress.generate(seed=33, constraints=constraints) == default.generate(
+        seed=33,
+        constraints=constraints,
+    )
+
+
+def test_connection_disruption_fair_agent_profile_uses_denser_breaker_starts():
+    generator = ConnectionDisruptionGenerator(profile="fair_agent")
+    constraints = GenerationConstraints(board_sizes=((7, 7),), max_plies_range=(40, 40))
+
+    specs = [generator.generate(seed=seed, constraints=constraints) for seed in range(33, 38)]
+
+    assert all(spec.name.startswith("connection_disruption_fair_agent_") for spec in specs)
+    assert all(5 <= len(spec.setup["blockers"]) <= 8 for spec in specs)
+    assert all(spec.setup["protected"] == () for spec in specs)
+
+
+def test_connection_disruption_generator_rejects_unknown_profile():
+    with pytest.raises(ValueError, match="profile"):
+        ConnectionDisruptionGenerator(profile="unknown")
+
+
 def test_connection_disruption_rejects_reversed_roles():
     with pytest.raises(ValueError, match="roles"):
         ConnectionDisruptionGame(
@@ -1074,6 +1101,71 @@ def test_generate_grid_games_cli_writes_accepted_specs(tmp_path):
     )
 
 
+def test_generate_grid_games_cli_passes_connection_profile_and_mcts_options(
+    monkeypatch, tmp_path
+):
+    calls = {}
+
+    class FakeConnectionGenerator:
+        def generate(self, *, seed, constraints):
+            del seed, constraints
+            calls["generator_profile"] = self.profile
+            return _connection_disruption_spec()
+
+    def fake_generator_factory(*, profile):
+        generator = FakeConnectionGenerator()
+        generator.profile = profile
+        return generator
+
+    def fake_validate(*, spec, random_games, seed, mcts_games, mcts_simulations):
+        calls["validation"] = {
+            "random_games": random_games,
+            "seed": seed,
+            "mcts_games": mcts_games,
+            "mcts_simulations": mcts_simulations,
+        }
+        return ValidationReport(family=spec.family, name=spec.name, valid=True)
+
+    monkeypatch.setattr(
+        generate_grid_games_module,
+        "ConnectionDisruptionGenerator",
+        fake_generator_factory,
+    )
+    monkeypatch.setattr(generate_grid_games_module, "validate_generated_game", fake_validate)
+
+    exit_code = generate_main(
+        [
+            "--family",
+            "connection_disruption",
+            "--count",
+            "1",
+            "--seed",
+            "100",
+            "--output",
+            str(tmp_path),
+            "--random-games",
+            "2",
+            "--connection-profile",
+            "fair_agent",
+            "--mcts-games",
+            "3",
+            "--mcts-simulations",
+            "5",
+        ]
+    )
+
+    assert exit_code == 0
+    assert calls == {
+        "generator_profile": "fair_agent",
+        "validation": {
+            "random_games": 2,
+            "seed": 0,
+            "mcts_games": 3,
+            "mcts_simulations": 5,
+        },
+    }
+
+
 def test_generate_grid_games_cli_propagates_generator_runtime_error(monkeypatch, tmp_path):
     def boom(*, seed, constraints):
         raise RuntimeError("internal generator bug")
@@ -1220,6 +1312,25 @@ def test_validate_generated_game_accepts_escape_capture_smoke():
     assert report.family == "escape_capture"
     assert report.initial_branching_factor > 0
     assert sum(report.terminal_reasons.values()) == 4
+
+
+def test_validate_generated_game_populates_mcts_role_win_rates_when_requested():
+    generator = ConnectionDisruptionGenerator(profile="fair_agent")
+    spec = generator.generate(
+        seed=55,
+        constraints=GenerationConstraints(board_sizes=((5, 5),), max_plies_range=(30, 30)),
+    )
+
+    report = validate_generated_game(
+        spec,
+        random_games=2,
+        seed=9,
+        mcts_games=2,
+        mcts_simulations=2,
+    )
+
+    assert set(report.mcts_role_win_rates) == {"0", "1"}
+    assert sum(report.mcts_role_win_rates.values()) <= 1.0
 
 
 def test_validate_generated_game_rejects_terminal_initial_connection():

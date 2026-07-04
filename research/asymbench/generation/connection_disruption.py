@@ -439,6 +439,14 @@ class ConnectionDisruptionGame:
 
 class ConnectionDisruptionGenerator:
     family = "connection_disruption"
+    _SUPPORTED_PROFILES = {"stress", "fair_agent"}
+
+    def __init__(self, profile: str = "stress") -> None:
+        if type(profile) is not str or profile not in self._SUPPORTED_PROFILES:
+            raise ValueError(
+                f"profile must be one of {sorted(self._SUPPORTED_PROFILES)}"
+            )
+        self.profile = profile
 
     def generate(
         self,
@@ -494,12 +502,19 @@ class ConnectionDisruptionGenerator:
         ]
         if not candidates:
             raise ValueError("no legal blocker cells")
-        blocker_count = rng.randint(1, min(4, len(candidates)))
+        min_blockers, max_blockers = self._blocker_count_range(
+            rows=rows,
+            candidate_count=len(candidates),
+        )
+        blocker_count = rng.randint(min_blockers, max_blockers)
         blockers = sorted(rng.sample(candidates, blocker_count))
+        name_prefix = "connection_disruption"
+        if self.profile != "stress":
+            name_prefix = f"{name_prefix}_{self.profile}"
 
         return GeneratedGameSpec(
             family=self.family,
-            name=f"connection_disruption_{rows}x{cols}_seed_{seed}",
+            name=f"{name_prefix}_{rows}x{cols}_seed_{seed}",
             seed=seed,
             board={"rows": rows, "cols": cols},
             roles=("builder", "breaker"),
@@ -552,6 +567,19 @@ class ConnectionDisruptionGenerator:
             raise _CandidateRejected("breaker has no meaningful opening response")
         if self._random_rollouts_all_max_plies(spec):
             raise _CandidateRejected("all sampled random rollouts ended by max plies")
+
+    def _blocker_count_range(
+        self,
+        *,
+        rows: int,
+        candidate_count: int,
+    ) -> tuple[int, int]:
+        if self.profile == "stress":
+            return 1, min(4, candidate_count)
+
+        min_blockers = min(max(rows - 2, 3), candidate_count)
+        max_blockers = min(min_blockers + 3, candidate_count)
+        return min_blockers, max_blockers
 
     @staticmethod
     def _minimum_connection_plies(cols: int) -> int:

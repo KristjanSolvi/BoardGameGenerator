@@ -38,6 +38,14 @@ def main(argv: list[str] | None = None) -> int:
         default=Path("research_runs/asymbench/generated"),
     )
     parser.add_argument("--random-games", type=_positive_int, default=8)
+    parser.add_argument(
+        "--connection-profile",
+        choices=("stress", "fair_agent"),
+        default="stress",
+        help="Sampling profile for generated connection_disruption games.",
+    )
+    parser.add_argument("--mcts-games", type=_non_negative_int, default=0)
+    parser.add_argument("--mcts-simulations", type=_positive_int, default=16)
     args = parser.parse_args(argv)
 
     constraints = GenerationConstraints()
@@ -49,6 +57,9 @@ def main(argv: list[str] | None = None) -> int:
             seed=args.seed,
             output=args.output,
             random_games=args.random_games,
+            connection_profile=args.connection_profile,
+            mcts_games=args.mcts_games,
+            mcts_simulations=args.mcts_simulations,
             constraints=constraints,
         )
         if accepted < args.count:
@@ -68,9 +79,15 @@ def _generate_family(
     seed: int,
     output: Path,
     random_games: int,
+    connection_profile: str,
+    mcts_games: int,
+    mcts_simulations: int,
     constraints: GenerationConstraints,
 ) -> int:
-    generator = GENERATOR_REGISTRY[family]
+    generator = _generator_for_family(
+        family=family,
+        connection_profile=connection_profile,
+    )
     accepted = 0
     attempts = 0
     candidate_seed = seed
@@ -84,9 +101,13 @@ def _generate_family(
             continue
 
         report = validate_generated_game(
-            spec,
+            spec=spec,
             random_games=random_games,
             seed=seed ^ candidate_seed,
+            **_mcts_validation_kwargs(
+                mcts_games=mcts_games,
+                mcts_simulations=mcts_simulations,
+            ),
         )
         if not report.valid:
             candidate_seed += 1
@@ -101,6 +122,18 @@ def _generate_family(
         candidate_seed += 1
 
     return accepted
+
+
+def _generator_for_family(family: str, *, connection_profile: str):
+    if family == "connection_disruption":
+        return ConnectionDisruptionGenerator(profile=connection_profile)
+    return GENERATOR_REGISTRY[family]
+
+
+def _mcts_validation_kwargs(*, mcts_games: int, mcts_simulations: int) -> dict[str, int]:
+    if mcts_games <= 0:
+        return {}
+    return {"mcts_games": mcts_games, "mcts_simulations": mcts_simulations}
 
 
 def _families_for_selection(family: str) -> tuple[str, ...]:
@@ -120,6 +153,16 @@ def _positive_int(value: str) -> int:
         raise argparse.ArgumentTypeError("must be a positive int") from exc
     if result <= 0:
         raise argparse.ArgumentTypeError("must be a positive int")
+    return result
+
+
+def _non_negative_int(value: str) -> int:
+    try:
+        result = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be a non-negative int") from exc
+    if result < 0:
+        raise argparse.ArgumentTypeError("must be a non-negative int")
     return result
 
 

@@ -1,0 +1,4109 @@
+{
+  "embed_specs": true,
+  "input_roots": [
+    "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+    "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+    "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+    "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705"
+  ],
+  "limit_per_stratum": 10,
+  "require_mcts": true,
+  "schema_version": 2,
+  "strata": {
+    "clean_control": [
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.5,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9124",
+        "random_max_ply_rate": 0.25,
+        "random_role_bias": 0.5,
+        "rank": 1,
+        "role_inversion_score": 0.0,
+        "seed": 9124,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 74,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9124",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9124,
+          "setup": {
+            "blockers": [
+              7,
+              10,
+              15,
+              16,
+              20,
+              22,
+              31
+            ],
+            "protected": [
+              3,
+              9,
+              21,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9124\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9124\\validation.json",
+        "verification_labels": [
+          "near_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 61.08,
+          "mcts_first_player_win_rate": 0.583,
+          "mcts_max_ply_rate": 0.5833333333333334,
+          "mcts_role_bias": 0.16599999999999998,
+          "mcts_role_win_rates": {
+            "0": 0.417,
+            "1": 0.583
+          },
+          "mcts_seat_bias": 0.16599999999999993,
+          "mcts_terminal_reasons": {
+            "builder_connection": 5,
+            "max_plies": 7
+          },
+          "name": "connection_disruption_wall_breaker_6x6_seed_9124",
+          "role_inversion_score": 0.0,
+          "seed": 9124,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9100_clean_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_5x5_seed_8003",
+        "random_max_ply_rate": 0.3125,
+        "random_role_bias": 0.37599999999999995,
+        "rank": 2,
+        "role_inversion_score": 0.0,
+        "seed": 8003,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 102,
+          "name": "connection_disruption_wall_breaker_5x5_seed_8003",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8003,
+          "setup": {
+            "blockers": [
+              1,
+              2,
+              3,
+              7,
+              8,
+              23
+            ],
+            "protected": [
+              17,
+              22
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8003\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8003\\validation.json",
+        "verification_labels": [
+          "strict_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 61.42,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.5,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.5,
+            "1": 0.5
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "builder_connection": 6,
+            "max_plies": 6
+          },
+          "name": "connection_disruption_wall_breaker_5x5_seed_8003",
+          "role_inversion_score": 0.0,
+          "seed": 8003,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9109",
+        "random_max_ply_rate": 0.375,
+        "random_role_bias": 0.25,
+        "rank": 3,
+        "role_inversion_score": 0.0,
+        "seed": 9109,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 103,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9109",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9109,
+          "setup": {
+            "blockers": [
+              2,
+              4,
+              13,
+              19,
+              25,
+              27,
+              34
+            ],
+            "protected": [
+              3,
+              9,
+              21,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9109\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9109\\validation.json",
+        "verification_labels": [
+          "strict_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 53.67,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.3333333333333333,
+          "mcts_role_bias": 0.334,
+          "mcts_role_win_rates": {
+            "0": 0.667,
+            "1": 0.333
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "builder_connection": 8,
+            "max_plies": 4
+          },
+          "name": "connection_disruption_wall_breaker_6x6_seed_9109",
+          "role_inversion_score": 0.0,
+          "seed": 9109,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9100_clean_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_5x5_seed_9142",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 4,
+        "role_inversion_score": 0.0,
+        "seed": 9142,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 65,
+          "name": "connection_disruption_wall_breaker_5x5_seed_9142",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9142,
+          "setup": {
+            "blockers": [
+              3,
+              6,
+              7,
+              8
+            ],
+            "protected": [
+              2,
+              17,
+              22
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9142\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9142\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 37.92,
+          "mcts_first_player_win_rate": 0.333,
+          "mcts_max_ply_rate": 0.3333333333333333,
+          "mcts_role_bias": 0.334,
+          "mcts_role_win_rates": {
+            "0": 0.667,
+            "1": 0.333
+          },
+          "mcts_seat_bias": 0.33399999999999996,
+          "mcts_terminal_reasons": {
+            "builder_connection": 8,
+            "max_plies": 4
+          },
+          "name": "connection_disruption_wall_breaker_5x5_seed_9142",
+          "role_inversion_score": 0.0,
+          "seed": 9142,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9100_clean_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9180",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 5,
+        "role_inversion_score": 0.0,
+        "seed": 9180,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 84,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9180",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9180,
+          "setup": {
+            "blockers": [
+              1,
+              16,
+              25,
+              33
+            ],
+            "protected": [
+              3,
+              9,
+              15,
+              27
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9180\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9180\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 52.58,
+          "mcts_first_player_win_rate": 0.667,
+          "mcts_max_ply_rate": 0.3333333333333333,
+          "mcts_role_bias": 0.334,
+          "mcts_role_win_rates": {
+            "0": 0.667,
+            "1": 0.333
+          },
+          "mcts_seat_bias": 0.3340000000000001,
+          "mcts_terminal_reasons": {
+            "builder_connection": 8,
+            "max_plies": 4
+          },
+          "name": "connection_disruption_wall_breaker_6x6_seed_9180",
+          "role_inversion_score": 0.0,
+          "seed": 9180,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9100_clean_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9193",
+        "random_max_ply_rate": 0.1875,
+        "random_role_bias": 0.6240000000000001,
+        "rank": 6,
+        "role_inversion_score": 0.0,
+        "seed": 9193,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 100,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9193",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9193,
+          "setup": {
+            "blockers": [
+              2,
+              3,
+              10,
+              28,
+              34
+            ],
+            "protected": [
+              9,
+              15,
+              27,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9193\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9193\\validation.json",
+        "verification_labels": [
+          "near_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 58.08,
+          "mcts_first_player_win_rate": 0.417,
+          "mcts_max_ply_rate": 0.4166666666666667,
+          "mcts_role_bias": 0.16599999999999998,
+          "mcts_role_win_rates": {
+            "0": 0.583,
+            "1": 0.417
+          },
+          "mcts_seat_bias": 0.16600000000000004,
+          "mcts_terminal_reasons": {
+            "builder_connection": 7,
+            "max_plies": 5
+          },
+          "name": "connection_disruption_wall_breaker_6x6_seed_9193",
+          "role_inversion_score": 0.0,
+          "seed": 9193,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9100_clean_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9198",
+        "random_max_ply_rate": 0.4375,
+        "random_role_bias": 0.12400000000000005,
+        "rank": 7,
+        "role_inversion_score": 0.0,
+        "seed": 9198,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 70,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9198",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9198,
+          "setup": {
+            "blockers": [
+              3,
+              13,
+              16,
+              26
+            ],
+            "protected": [
+              9,
+              15,
+              27,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9198\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9198\\validation.json",
+        "verification_labels": [
+          "high_sim_collapsed",
+          "verified_role_inversion"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 20.67,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.0,
+          "mcts_role_bias": 1.0,
+          "mcts_role_win_rates": {
+            "0": 1.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "builder_connection": 12
+          },
+          "name": "connection_disruption_wall_breaker_6x6_seed_9198",
+          "role_inversion_score": 0.688,
+          "seed": 9198,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9100_clean_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control",
+          "role_inversion"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9217",
+        "random_max_ply_rate": 0.625,
+        "random_role_bias": 0.25,
+        "rank": 8,
+        "role_inversion_score": 0.29200000000000004,
+        "seed": 9217,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 105,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9217",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9217,
+          "setup": {
+            "blockers": [
+              2,
+              18,
+              22,
+              30,
+              39,
+              45
+            ],
+            "protected": [
+              3,
+              10,
+              17,
+              31,
+              38
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9217\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9217\\validation.json",
+        "verification_labels": [
+          "near_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 80.58,
+          "mcts_first_player_win_rate": 0.417,
+          "mcts_max_ply_rate": 0.5833333333333334,
+          "mcts_role_bias": 0.16599999999999998,
+          "mcts_role_win_rates": {
+            "0": 0.417,
+            "1": 0.583
+          },
+          "mcts_seat_bias": 0.16600000000000004,
+          "mcts_terminal_reasons": {
+            "builder_connection": 5,
+            "max_plies": 7
+          },
+          "name": "connection_disruption_wall_breaker_7x7_seed_9217",
+          "role_inversion_score": 0.0,
+          "seed": 9217,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9200_clean_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9227",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 9,
+        "role_inversion_score": 0.0,
+        "seed": 9227,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 78,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9227",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9227,
+          "setup": {
+            "blockers": [
+              4,
+              7,
+              10,
+              13,
+              16,
+              19
+            ],
+            "protected": [
+              3,
+              9,
+              15,
+              27,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9227\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9227\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 59.0,
+          "mcts_first_player_win_rate": 0.333,
+          "mcts_max_ply_rate": 0.5,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.5,
+            "1": 0.5
+          },
+          "mcts_seat_bias": 0.33399999999999996,
+          "mcts_terminal_reasons": {
+            "builder_connection": 6,
+            "max_plies": 6
+          },
+          "name": "connection_disruption_wall_breaker_6x6_seed_9227",
+          "role_inversion_score": 0.0,
+          "seed": 9227,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9200_clean_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9263",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 10,
+        "role_inversion_score": 0.0,
+        "seed": 9263,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 61,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9263",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9263,
+          "setup": {
+            "blockers": [
+              1,
+              2,
+              4,
+              15,
+              20
+            ],
+            "protected": [
+              3,
+              9,
+              21,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9263\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9263\\validation.json",
+        "verification_labels": [
+          "high_sim_collapsed"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 41.17,
+          "mcts_first_player_win_rate": 0.417,
+          "mcts_max_ply_rate": 0.08333333333333333,
+          "mcts_role_bias": 0.8340000000000001,
+          "mcts_role_win_rates": {
+            "0": 0.917,
+            "1": 0.083
+          },
+          "mcts_seat_bias": 0.16600000000000004,
+          "mcts_terminal_reasons": {
+            "builder_connection": 11,
+            "max_plies": 1
+          },
+          "name": "connection_disruption_wall_breaker_6x6_seed_9263",
+          "role_inversion_score": 0.0,
+          "seed": 9263,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9200_clean_high_sim_probe.json"
+        }
+      }
+    ],
+    "hidden_collapse": [
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9029",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 1,
+        "role_inversion_score": 0.0,
+        "seed": 9029,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 108,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9029",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9029,
+          "setup": {
+            "blockers": [
+              9,
+              26,
+              31,
+              33,
+              39,
+              44,
+              47
+            ],
+            "protected": [
+              3,
+              10,
+              24,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9029\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9029\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9078",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 2,
+        "role_inversion_score": 0.0,
+        "seed": 9078,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 68,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9078",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9078,
+          "setup": {
+            "blockers": [
+              2,
+              7,
+              21,
+              25,
+              33,
+              34
+            ],
+            "protected": [
+              3,
+              9
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9078\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9078\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9082",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 3,
+        "role_inversion_score": 0.0,
+        "seed": 9082,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 77,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9082",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9082,
+          "setup": {
+            "blockers": [
+              4,
+              9,
+              15,
+              21,
+              22
+            ],
+            "protected": [
+              3,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9082\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9082\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_5x5_seed_9086",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 4,
+        "role_inversion_score": 0.0,
+        "seed": 9086,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 52,
+          "name": "connection_disruption_wall_breaker_5x5_seed_9086",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9086,
+          "setup": {
+            "blockers": [
+              1,
+              7,
+              17,
+              18,
+              22,
+              23
+            ],
+            "protected": [
+              2
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9086\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9086\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9165",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 5,
+        "role_inversion_score": 0.0,
+        "seed": 9165,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 80,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9165",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9165,
+          "setup": {
+            "blockers": [
+              1,
+              7,
+              15,
+              32
+            ],
+            "protected": [
+              3,
+              9,
+              21,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9165\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9165\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9184",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 6,
+        "role_inversion_score": 0.0,
+        "seed": 9184,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 110,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9184",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9184,
+          "setup": {
+            "blockers": [
+              2,
+              3,
+              4,
+              16,
+              39
+            ],
+            "protected": [
+              10,
+              24,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9184\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9184\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9241",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 7,
+        "role_inversion_score": 0.0,
+        "seed": 9241,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 109,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9241",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9241,
+          "setup": {
+            "blockers": [
+              5,
+              11,
+              22,
+              30,
+              32,
+              38,
+              46
+            ],
+            "protected": [
+              3,
+              10,
+              24,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9241\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9241\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_5x5_seed_9288",
+        "random_max_ply_rate": 0.5,
+        "random_role_bias": 0.0,
+        "rank": 8,
+        "role_inversion_score": 0.0,
+        "seed": 9288,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 51,
+          "name": "connection_disruption_wall_breaker_5x5_seed_9288",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9288,
+          "setup": {
+            "blockers": [
+              3,
+              7,
+              17,
+              18,
+              21,
+              23
+            ],
+            "protected": [
+              2,
+              22
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9288\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9288\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9080",
+        "random_max_ply_rate": 0.4375,
+        "random_role_bias": 0.12400000000000005,
+        "rank": 9,
+        "role_inversion_score": 0.0,
+        "seed": 9080,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 87,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9080",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9080,
+          "setup": {
+            "blockers": [
+              25,
+              27,
+              32,
+              33,
+              34
+            ],
+            "protected": [
+              3,
+              9,
+              15
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9080\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9080\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_inversion",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_5x5_seed_9103",
+        "random_max_ply_rate": 0.5625,
+        "random_role_bias": 0.12400000000000005,
+        "rank": 10,
+        "role_inversion_score": 0.562,
+        "seed": 9103,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 58,
+          "name": "connection_disruption_wall_breaker_5x5_seed_9103",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9103,
+          "setup": {
+            "blockers": [
+              17,
+              21,
+              22,
+              23
+            ],
+            "protected": [
+              2,
+              7
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9103\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9103\\validation.json"
+      }
+    ],
+    "horizon_stress": [
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_8002",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 1,
+        "role_inversion_score": 0.938,
+        "seed": 8002,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 67,
+          "name": "connection_disruption_wall_breaker_7x7_seed_8002",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8002,
+          "setup": {
+            "blockers": [
+              10,
+              11,
+              15,
+              19,
+              23,
+              29,
+              39,
+              43
+            ],
+            "protected": [
+              3,
+              24,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8002\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8002\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_8027",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 2,
+        "role_inversion_score": 0.938,
+        "seed": 8027,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 87,
+          "name": "connection_disruption_wall_breaker_7x7_seed_8027",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8027,
+          "setup": {
+            "blockers": [
+              4,
+              22,
+              36,
+              38,
+              40,
+              44
+            ],
+            "protected": [
+              3,
+              10,
+              17,
+              31,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8027\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8027\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.5833333333333334,
+        "mcts_role_bias": 0.16599999999999998,
+        "mcts_seat_bias": 0.16599999999999993,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9004",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 3,
+        "role_inversion_score": 0.0,
+        "seed": 9004,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 61,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9004",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9004,
+          "setup": {
+            "blockers": [
+              1,
+              2,
+              10,
+              13,
+              19,
+              26
+            ],
+            "protected": [
+              3,
+              9,
+              15,
+              27,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9004\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9004\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.16666666666666666,
+        "mcts_role_bias": 0.6659999999999999,
+        "mcts_seat_bias": 0.33399999999999996,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9033",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 4,
+        "role_inversion_score": 0.7709999999999999,
+        "seed": 9033,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 75,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9033",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9033,
+          "setup": {
+            "blockers": [
+              1,
+              3,
+              4,
+              23,
+              26,
+              30,
+              32
+            ],
+            "protected": [
+              10,
+              24,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9033\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9033\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.4166666666666667,
+        "mcts_role_bias": 0.16599999999999998,
+        "mcts_seat_bias": 0.5,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9089",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 5,
+        "role_inversion_score": 0.5209999999999999,
+        "seed": 9089,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 59,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9089",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9089,
+          "setup": {
+            "blockers": [
+              2,
+              12,
+              16,
+              29,
+              40,
+              45
+            ],
+            "protected": [
+              3,
+              10,
+              24,
+              38
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9089\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9089\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9129",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 6,
+        "role_inversion_score": 0.938,
+        "seed": 9129,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 82,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9129",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9129,
+          "setup": {
+            "blockers": [
+              2,
+              5,
+              19,
+              26,
+              37
+            ],
+            "protected": [
+              3,
+              10,
+              24,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9129\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9129\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.25,
+        "mcts_role_bias": 0.5,
+        "mcts_seat_bias": 0.5,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9154",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 7,
+        "role_inversion_score": 0.688,
+        "seed": 9154,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 76,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9154",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9154,
+          "setup": {
+            "blockers": [
+              2,
+              4,
+              10,
+              18,
+              36,
+              40,
+              44,
+              46
+            ],
+            "protected": [
+              3,
+              17,
+              31,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9154\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9154\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.3340000000000001,
+        "name": "connection_disruption_wall_breaker_5x5_seed_9167",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 8,
+        "role_inversion_score": 0.605,
+        "seed": 9167,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 43,
+          "name": "connection_disruption_wall_breaker_5x5_seed_9167",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9167,
+          "setup": {
+            "blockers": [
+              6,
+              18,
+              21
+            ],
+            "protected": [
+              2,
+              7,
+              17,
+              22
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9167\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9167\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9199",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 9,
+        "role_inversion_score": 0.938,
+        "seed": 9199,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 49,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9199",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9199,
+          "setup": {
+            "blockers": [
+              3,
+              4,
+              10,
+              15,
+              32
+            ],
+            "protected": [
+              9,
+              27,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9199\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9199\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9222",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 10,
+        "role_inversion_score": 0.938,
+        "seed": 9222,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 61,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9222",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9222,
+          "setup": {
+            "blockers": [
+              3,
+              15,
+              32,
+              33,
+              36,
+              43
+            ],
+            "protected": [
+              10,
+              17,
+              31,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9222\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9222\\validation.json"
+      }
+    ],
+    "role_collapse": [
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_5x5_seed_8000",
+        "random_max_ply_rate": 0.25,
+        "random_role_bias": 0.5,
+        "rank": 1,
+        "role_inversion_score": 0.0,
+        "seed": 8000,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 61,
+          "name": "connection_disruption_wall_breaker_5x5_seed_8000",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8000,
+          "setup": {
+            "blockers": [
+              2,
+              22,
+              23
+            ],
+            "protected": [
+              7,
+              17
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8000\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8000\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_5x5_seed_8001",
+        "random_max_ply_rate": 0.125,
+        "random_role_bias": 0.75,
+        "rank": 2,
+        "role_inversion_score": 0.0,
+        "seed": 8001,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 57,
+          "name": "connection_disruption_wall_breaker_5x5_seed_8001",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8001,
+          "setup": {
+            "blockers": [
+              2,
+              17,
+              23
+            ],
+            "protected": [
+              7,
+              22
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8001\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8001\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_8002",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 3,
+        "role_inversion_score": 0.938,
+        "seed": 8002,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 67,
+          "name": "connection_disruption_wall_breaker_7x7_seed_8002",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8002,
+          "setup": {
+            "blockers": [
+              10,
+              11,
+              15,
+              19,
+              23,
+              29,
+              39,
+              43
+            ],
+            "protected": [
+              3,
+              24,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8002\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8002\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_8004",
+        "random_max_ply_rate": 0.0625,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 4,
+        "role_inversion_score": 0.0,
+        "seed": 8004,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 104,
+          "name": "connection_disruption_wall_breaker_6x6_seed_8004",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8004,
+          "setup": {
+            "blockers": [
+              3,
+              9,
+              25,
+              27,
+              32
+            ],
+            "protected": [
+              21,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8004\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8004\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_8005",
+        "random_max_ply_rate": 0.0625,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 5,
+        "role_inversion_score": 0.0,
+        "seed": 8005,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 102,
+          "name": "connection_disruption_wall_breaker_6x6_seed_8005",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8005,
+          "setup": {
+            "blockers": [
+              1,
+              7,
+              25,
+              33
+            ],
+            "protected": [
+              3,
+              9,
+              15,
+              27
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8005\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8005\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_8006",
+        "random_max_ply_rate": 0.25,
+        "random_role_bias": 0.5,
+        "rank": 6,
+        "role_inversion_score": 0.0,
+        "seed": 8006,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 105,
+          "name": "connection_disruption_wall_breaker_6x6_seed_8006",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8006,
+          "setup": {
+            "blockers": [
+              1,
+              7,
+              9,
+              25,
+              28,
+              31
+            ],
+            "protected": [
+              3,
+              21,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8006\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8006\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_8008",
+        "random_max_ply_rate": 0.1875,
+        "random_role_bias": 0.6240000000000001,
+        "rank": 7,
+        "role_inversion_score": 0.0,
+        "seed": 8008,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 115,
+          "name": "connection_disruption_wall_breaker_6x6_seed_8008",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8008,
+          "setup": {
+            "blockers": [
+              2,
+              15,
+              16,
+              21,
+              22,
+              25
+            ],
+            "protected": [
+              3,
+              9,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8008\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8008\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_8016",
+        "random_max_ply_rate": 0.0625,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 8,
+        "role_inversion_score": 0.0,
+        "seed": 8016,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 109,
+          "name": "connection_disruption_wall_breaker_6x6_seed_8016",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8016,
+          "setup": {
+            "blockers": [
+              3,
+              10,
+              14,
+              20,
+              31
+            ],
+            "protected": [
+              9,
+              21,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8016\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8016\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_5x5_seed_8020",
+        "random_max_ply_rate": 0.0625,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 9,
+        "role_inversion_score": 0.0,
+        "seed": 8020,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 72,
+          "name": "connection_disruption_wall_breaker_5x5_seed_8020",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8020,
+          "setup": {
+            "blockers": [
+              7,
+              17,
+              22
+            ],
+            "protected": [
+              2
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8020\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8020\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_5x5_seed_8021",
+        "random_max_ply_rate": 0.25,
+        "random_role_bias": 0.5,
+        "rank": 10,
+        "role_inversion_score": 0.0,
+        "seed": 8021,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 66,
+          "name": "connection_disruption_wall_breaker_5x5_seed_8021",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8021,
+          "setup": {
+            "blockers": [
+              1,
+              2,
+              7,
+              17,
+              18
+            ],
+            "protected": [
+              22
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8021\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8021\\validation.json"
+      }
+    ],
+    "role_inversion": [
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_8002",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 1,
+        "role_inversion_score": 0.938,
+        "seed": 8002,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 67,
+          "name": "connection_disruption_wall_breaker_7x7_seed_8002",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8002,
+          "setup": {
+            "blockers": [
+              10,
+              11,
+              15,
+              19,
+              23,
+              29,
+              39,
+              43
+            ],
+            "protected": [
+              3,
+              24,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8002\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8002\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_8027",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 2,
+        "role_inversion_score": 0.938,
+        "seed": 8027,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 87,
+          "name": "connection_disruption_wall_breaker_7x7_seed_8027",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8027,
+          "setup": {
+            "blockers": [
+              4,
+              22,
+              36,
+              38,
+              40,
+              44
+            ],
+            "protected": [
+              3,
+              10,
+              17,
+              31,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8027\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8027\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9129",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 3,
+        "role_inversion_score": 0.938,
+        "seed": 9129,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 82,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9129",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9129,
+          "setup": {
+            "blockers": [
+              2,
+              5,
+              19,
+              26,
+              37
+            ],
+            "protected": [
+              3,
+              10,
+              24,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9129\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9129\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9199",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 4,
+        "role_inversion_score": 0.938,
+        "seed": 9199,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 49,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9199",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9199,
+          "setup": {
+            "blockers": [
+              3,
+              4,
+              10,
+              15,
+              32
+            ],
+            "protected": [
+              9,
+              27,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9199\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9199\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9222",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 5,
+        "role_inversion_score": 0.938,
+        "seed": 9222,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 61,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9222",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9222,
+          "setup": {
+            "blockers": [
+              3,
+              15,
+              32,
+              33,
+              36,
+              43
+            ],
+            "protected": [
+              10,
+              17,
+              31,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9222\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9222\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9243",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 6,
+        "role_inversion_score": 0.938,
+        "seed": 9243,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 72,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9243",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9243,
+          "setup": {
+            "blockers": [
+              2,
+              4,
+              29,
+              31,
+              39,
+              46
+            ],
+            "protected": [
+              3,
+              10,
+              17,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9243\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9243\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9160",
+        "random_max_ply_rate": 0.875,
+        "random_role_bias": 0.75,
+        "rank": 7,
+        "role_inversion_score": 0.875,
+        "seed": 9160,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 80,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9160",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9160,
+          "setup": {
+            "blockers": [
+              1,
+              2,
+              24,
+              30,
+              36
+            ],
+            "protected": [
+              3,
+              10,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9160\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9160\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9212",
+        "random_max_ply_rate": 0.875,
+        "random_role_bias": 0.75,
+        "rank": 8,
+        "role_inversion_score": 0.875,
+        "seed": 9212,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 78,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9212",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9212,
+          "setup": {
+            "blockers": [
+              10,
+              15,
+              17,
+              33,
+              46
+            ],
+            "protected": [
+              3,
+              31,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9212\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9212\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.8340000000000001,
+        "mcts_seat_bias": 0.16600000000000004,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9272",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 9,
+        "role_inversion_score": 0.855,
+        "seed": 9272,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 74,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9272",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9272,
+          "setup": {
+            "blockers": [
+              1,
+              2,
+              5,
+              16,
+              18,
+              19,
+              31
+            ],
+            "protected": [
+              3,
+              10,
+              17,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9272\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9272\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "horizon_stress",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9020",
+        "random_max_ply_rate": 0.8125,
+        "random_role_bias": 0.6240000000000001,
+        "rank": 10,
+        "role_inversion_score": 0.812,
+        "seed": 9020,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 87,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9020",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9020,
+          "setup": {
+            "blockers": [
+              16,
+              24,
+              33,
+              38,
+              46
+            ],
+            "protected": [
+              3,
+              10,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9020\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9020\\validation.json"
+      }
+    ],
+    "seat_confound": [
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "seat_confound"
+        ],
+        "mcts_max_ply_rate": 0.5,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.6659999999999999,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9181",
+        "random_max_ply_rate": 0.25,
+        "random_role_bias": 0.5,
+        "rank": 1,
+        "role_inversion_score": 0.0,
+        "seed": 9181,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 86,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9181",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9181,
+          "setup": {
+            "blockers": [
+              2,
+              4,
+              8,
+              20,
+              22,
+              26,
+              33
+            ],
+            "protected": [
+              3,
+              9,
+              21
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9181\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9181\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.5833333333333334,
+        "mcts_role_bias": 0.16599999999999998,
+        "mcts_seat_bias": 0.5,
+        "name": "connection_disruption_wall_breaker_6x6_seed_8011",
+        "random_max_ply_rate": 0.8125,
+        "random_role_bias": 0.6240000000000001,
+        "rank": 2,
+        "role_inversion_score": 0.0,
+        "seed": 8011,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 56,
+          "name": "connection_disruption_wall_breaker_6x6_seed_8011",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8011,
+          "setup": {
+            "blockers": [
+              2,
+              13,
+              14,
+              15
+            ],
+            "protected": [
+              3,
+              9,
+              21,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8011\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8011\\validation.json",
+        "verification_labels": [
+          "near_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 46.83,
+          "mcts_first_player_win_rate": 0.583,
+          "mcts_max_ply_rate": 0.4166666666666667,
+          "mcts_role_bias": 0.16599999999999998,
+          "mcts_role_win_rates": {
+            "0": 0.583,
+            "1": 0.417
+          },
+          "mcts_seat_bias": 0.16599999999999993,
+          "mcts_terminal_reasons": {
+            "builder_connection": 7,
+            "max_plies": 5
+          },
+          "name": "connection_disruption_wall_breaker_6x6_seed_8011",
+          "role_inversion_score": 0.0,
+          "seed": 8011,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "seat_confound"
+        ],
+        "mcts_max_ply_rate": 0.4166666666666667,
+        "mcts_role_bias": 0.16599999999999998,
+        "mcts_seat_bias": 0.5,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9084",
+        "random_max_ply_rate": 0.5625,
+        "random_role_bias": 0.12400000000000005,
+        "rank": 3,
+        "role_inversion_score": 0.14499999999999996,
+        "seed": 9084,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 111,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9084",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9084,
+          "setup": {
+            "blockers": [
+              11,
+              16,
+              22,
+              26,
+              43
+            ],
+            "protected": [
+              3,
+              10,
+              17,
+              31,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9084\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9084\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.4166666666666667,
+        "mcts_role_bias": 0.16599999999999998,
+        "mcts_seat_bias": 0.5,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9089",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 4,
+        "role_inversion_score": 0.5209999999999999,
+        "seed": 9089,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 59,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9089",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9089,
+          "setup": {
+            "blockers": [
+              2,
+              12,
+              16,
+              29,
+              40,
+              45
+            ],
+            "protected": [
+              3,
+              10,
+              24,
+              38
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9089\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9089\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "seat_confound"
+        ],
+        "mcts_max_ply_rate": 0.4166666666666667,
+        "mcts_role_bias": 0.16599999999999998,
+        "mcts_seat_bias": 0.5,
+        "name": "connection_disruption_wall_breaker_5x5_seed_9289",
+        "random_max_ply_rate": 0.4375,
+        "random_role_bias": 0.12400000000000005,
+        "rank": 5,
+        "role_inversion_score": 0.0,
+        "seed": 9289,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 62,
+          "name": "connection_disruption_wall_breaker_5x5_seed_9289",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9289,
+          "setup": {
+            "blockers": [
+              3,
+              6,
+              7,
+              16,
+              18,
+              23
+            ],
+            "protected": [
+              2,
+              17,
+              22
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9289\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9200_20260705\\connection_disruption_9289\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "seat_confound"
+        ],
+        "mcts_max_ply_rate": 0.25,
+        "mcts_role_bias": 0.5,
+        "mcts_seat_bias": 0.5,
+        "name": "connection_disruption_wall_breaker_5x5_seed_9114",
+        "random_max_ply_rate": 0.3125,
+        "random_role_bias": 0.37599999999999995,
+        "rank": 6,
+        "role_inversion_score": 0.0,
+        "seed": 9114,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "connection_disruption",
+          "max_plies": 96,
+          "name": "connection_disruption_wall_breaker_5x5_seed_9114",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9114,
+          "setup": {
+            "blockers": [
+              3,
+              6,
+              7,
+              8,
+              18
+            ],
+            "protected": [
+              2,
+              17,
+              22
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9114\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9114\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.25,
+        "mcts_role_bias": 0.5,
+        "mcts_seat_bias": 0.5,
+        "name": "connection_disruption_wall_breaker_7x7_seed_9154",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.8759999999999999,
+        "rank": 7,
+        "role_inversion_score": 0.688,
+        "seed": 9154,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "connection_disruption",
+          "max_plies": 76,
+          "name": "connection_disruption_wall_breaker_7x7_seed_9154",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9154,
+          "setup": {
+            "blockers": [
+              2,
+              4,
+              10,
+              18,
+              36,
+              40,
+              44,
+              46
+            ],
+            "protected": [
+              3,
+              17,
+              31,
+              38,
+              45
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9154\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_9100_20260705\\connection_disruption_9154\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.5,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.3340000000000001,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9074",
+        "random_max_ply_rate": 0.8125,
+        "random_role_bias": 0.6240000000000001,
+        "rank": 8,
+        "role_inversion_score": 0.0,
+        "seed": 9074,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 63,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9074",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9074,
+          "setup": {
+            "blockers": [
+              1,
+              8,
+              14,
+              34
+            ],
+            "protected": [
+              3,
+              9,
+              15,
+              27,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9074\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9074\\validation.json"
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "role_inversion",
+          "seat_confound"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.3340000000000001,
+        "name": "connection_disruption_wall_breaker_6x6_seed_8019",
+        "random_max_ply_rate": 0.625,
+        "random_role_bias": 0.25,
+        "rank": 9,
+        "role_inversion_score": 0.29200000000000004,
+        "seed": 8019,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 88,
+          "name": "connection_disruption_wall_breaker_6x6_seed_8019",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 8019,
+          "setup": {
+            "blockers": [
+              7,
+              10,
+              26,
+              32
+            ],
+            "protected": [
+              3,
+              9,
+              15,
+              27,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8019\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker\\connection_disruption_8019\\validation.json",
+        "verification_labels": [
+          "near_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 61.08,
+          "mcts_first_player_win_rate": 0.417,
+          "mcts_max_ply_rate": 0.4166666666666667,
+          "mcts_role_bias": 0.16599999999999998,
+          "mcts_role_win_rates": {
+            "0": 0.583,
+            "1": 0.417
+          },
+          "mcts_seat_bias": 0.16600000000000004,
+          "mcts_terminal_reasons": {
+            "builder_connection": 7,
+            "max_plies": 5
+          },
+          "name": "connection_disruption_wall_breaker_6x6_seed_8019",
+          "role_inversion_score": 0.0,
+          "seed": 8019,
+          "source_path": "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker_high_sim_probe.json"
+        }
+      },
+      {
+        "family": "connection_disruption",
+        "labels": [
+          "seat_confound"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.334,
+        "mcts_seat_bias": 0.3340000000000001,
+        "name": "connection_disruption_wall_breaker_6x6_seed_9014",
+        "random_max_ply_rate": 0.375,
+        "random_role_bias": 0.25,
+        "rank": 10,
+        "role_inversion_score": 0.0,
+        "seed": 9014,
+        "source_root": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705",
+        "spec": {
+          "actions": {
+            "breaker": [
+              "orthogonal_step",
+              "adjacent_remove",
+              "line_remove"
+            ],
+            "builder": "place"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "connection_disruption",
+          "max_plies": 102,
+          "name": "connection_disruption_wall_breaker_6x6_seed_9014",
+          "roles": [
+            "builder",
+            "breaker"
+          ],
+          "seed": 9014,
+          "setup": {
+            "blockers": [
+              7,
+              8,
+              13,
+              19,
+              28,
+              32
+            ],
+            "protected": [
+              3,
+              9,
+              15,
+              27,
+              33
+            ]
+          },
+          "terminal_rules": {
+            "connect": [
+              "west",
+              "east"
+            ]
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9014\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\profile_split_20260704\\wall_breaker_large_20260705\\connection_disruption_9014\\validation.json"
+      }
+    ]
+  },
+  "thresholds": {
+    "hidden_collapse_mcts_role_bias": 0.9,
+    "hidden_collapse_random_min_role_win_rate": 0.25,
+    "horizon_stress_rate": 0.7,
+    "main_band_mcts_max_ply_rate": 0.5,
+    "main_band_role_bias": 0.6,
+    "main_band_seat_bias": 0.15,
+    "seat_confound_bias": 0.25
+  },
+  "verification_reports": [
+    "research_runs\\asymbench\\profile_split_20260704\\matched_sweep\\wall_breaker_high_sim_probe.json",
+    "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9100_clean_high_sim_probe.json",
+    "research_runs\\asymbench\\profile_split_20260704\\strata_selection_20260705\\wall_9200_clean_high_sim_probe.json"
+  ],
+  "verification_thresholds": {
+    "high_sim_collapse_role_bias": 0.8,
+    "near_mcts_max_ply_rate": 0.6,
+    "near_role_bias": 0.6,
+    "near_seat_bias": 0.2,
+    "seat_sensitive_bias": 0.25,
+    "strict_mcts_max_ply_rate": 0.5,
+    "strict_role_bias": 0.6,
+    "strict_seat_bias": 0.15,
+    "verified_role_inversion_score": 0.4
+  }
+}

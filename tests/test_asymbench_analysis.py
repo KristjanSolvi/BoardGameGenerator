@@ -236,16 +236,248 @@ def test_build_selection_manifest_exports_ranked_paths_and_thresholds(tmp_path: 
         limit_per_stratum=1,
     )
 
-    assert manifest["schema_version"] == 1
+    assert manifest["schema_version"] == 2
     assert manifest["limit_per_stratum"] == 1
     assert manifest["input_roots"] == [str(second_root), str(first_root)]
     assert manifest["thresholds"]["main_band_role_bias"] == 0.6
+    assert manifest["verification_reports"] == []
     assert manifest["strata"]["clean_control"][0]["name"] == "clean"
     assert manifest["strata"]["clean_control"][0]["rank"] == 1
     assert manifest["strata"]["clean_control"][0]["spec_path"].endswith(
         str(Path("clean") / "spec.json")
     )
     assert manifest["strata"]["hidden_collapse"][0]["name"] == "collapse"
+
+
+def test_build_selection_manifest_adds_second_stage_verification_labels(
+    tmp_path: Path,
+):
+    root = tmp_path / "root"
+    for dirname, seed, first_pass_report in [
+        (
+            "strict",
+            1,
+            {
+                "valid": True,
+                "random_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_first_player_win_rate": 0.5,
+                "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+                "mcts_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+            },
+        ),
+        (
+            "near",
+            2,
+            {
+                "valid": True,
+                "random_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_role_win_rates": {"0": 0.667, "1": 0.333},
+                "mcts_first_player_win_rate": 0.5,
+                "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+                "mcts_terminal_reasons": {"builder_connection": 8, "max_plies": 4},
+            },
+        ),
+        (
+            "seat",
+            3,
+            {
+                "valid": True,
+                "random_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_first_player_win_rate": 0.5,
+                "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+                "mcts_terminal_reasons": {"builder_connection": 8, "max_plies": 4},
+            },
+        ),
+        (
+            "collapsed",
+            4,
+            {
+                "valid": True,
+                "random_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_first_player_win_rate": 0.5,
+                "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+                "mcts_terminal_reasons": {"builder_connection": 8, "max_plies": 4},
+            },
+        ),
+    ]:
+        _write_generated_validation(
+            root / dirname,
+            spec={"family": "connection_disruption", "name": dirname, "seed": seed},
+            report=first_pass_report,
+        )
+    verification = tmp_path / "verification.json"
+    verification.write_text(
+        json.dumps(
+            [
+                {
+                    "name": "strict",
+                    "seed": 1,
+                    "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+                    "mcts_first_player_win_rate": 0.5,
+                    "mcts_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+                },
+                {
+                    "name": "near",
+                    "seed": 2,
+                    "mcts_role_win_rates": {"0": 0.417, "1": 0.583},
+                    "mcts_first_player_win_rate": 0.583,
+                    "mcts_terminal_reasons": {"builder_connection": 5, "max_plies": 7},
+                },
+                {
+                    "name": "seat",
+                    "seed": 3,
+                    "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+                    "mcts_first_player_win_rate": 0.333,
+                    "mcts_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+                },
+                {
+                    "name": "collapsed",
+                    "seed": 4,
+                    "mcts_role_win_rates": {"0": 0.917, "1": 0.083},
+                    "mcts_first_player_win_rate": 0.5,
+                    "mcts_terminal_reasons": {"builder_connection": 11, "max_plies": 1},
+                },
+            ]
+        )
+    )
+
+    manifest = build_selection_manifest(
+        input_roots=[root],
+        limit_per_stratum=4,
+        verification_reports=[verification],
+    )
+    by_name = {
+        entry["name"]: entry
+        for entry in manifest["strata"]["clean_control"]
+    }
+
+    assert by_name["strict"]["verification_labels"] == ["strict_clean"]
+    assert by_name["near"]["verification_labels"] == ["near_clean"]
+    assert by_name["seat"]["verification_labels"] == ["seat_sensitive"]
+    assert by_name["collapsed"]["verification_labels"] == ["high_sim_collapsed"]
+    assert by_name["strict"]["verification_metrics"]["mcts_role_bias"] == 0.0
+    assert by_name["strict"]["verification_metrics"]["source_path"] == str(verification)
+
+
+def test_build_selection_manifest_marks_verified_inversion_and_hidden_collapse(
+    tmp_path: Path,
+):
+    root = tmp_path / "root"
+    _write_generated_validation(
+        root / "inversion",
+        spec={"family": "connection_disruption", "name": "inversion", "seed": 1},
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.25, "1": 0.75},
+            "mcts_role_win_rates": {"0": 1.0, "1": 0.0},
+            "mcts_first_player_win_rate": 0.5,
+            "terminal_reasons": {"builder_connection": 4, "max_plies": 12},
+            "mcts_terminal_reasons": {"builder_connection": 12},
+        },
+    )
+    verification = tmp_path / "verification.json"
+    verification.write_text(
+        json.dumps(
+            [
+                {
+                    "name": "inversion",
+                    "seed": 1,
+                    "random_role_win_rates": {"0": 0.25, "1": 0.75},
+                    "mcts_role_win_rates": {"0": 0.917, "1": 0.083},
+                    "mcts_first_player_win_rate": 0.5,
+                    "mcts_terminal_reasons": {"builder_connection": 11, "max_plies": 1},
+                }
+            ]
+        )
+    )
+
+    manifest = build_selection_manifest(
+        input_roots=[root],
+        limit_per_stratum=1,
+        verification_reports=[verification],
+    )
+    entry = manifest["strata"]["role_inversion"][0]
+
+    assert "verified_hidden_collapse" in entry["verification_labels"]
+    assert "verified_role_inversion" in entry["verification_labels"]
+
+
+def test_build_selection_manifest_supports_mcts64_verification_format(
+    tmp_path: Path,
+):
+    root = tmp_path / "root"
+    _write_generated_validation(
+        root / "clean",
+        spec={"family": "connection_disruption", "name": "clean", "seed": 1},
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_first_player_win_rate": 0.5,
+            "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+            "mcts_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+        },
+    )
+    verification = tmp_path / "mcts64.json"
+    verification.write_text(
+        json.dumps(
+            [
+                {
+                    "name": "clean",
+                    "seed": 1,
+                    "mcts64_role0": 0.5,
+                    "mcts64_role1": 0.5,
+                    "mcts64_first_player": 0.5,
+                    "mcts64_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+                }
+            ]
+        )
+    )
+
+    manifest = build_selection_manifest(
+        input_roots=[root],
+        limit_per_stratum=1,
+        verification_reports=[verification],
+    )
+
+    assert manifest["verification_reports"] == [str(verification)]
+    assert manifest["strata"]["clean_control"][0]["verification_labels"] == [
+        "strict_clean"
+    ]
+
+
+def test_build_selection_manifest_can_embed_specs(tmp_path: Path):
+    root = tmp_path / "root"
+    spec = {
+        "family": "connection_disruption",
+        "name": "clean",
+        "seed": 1,
+        "board": {"rows": 5, "cols": 5},
+    }
+    _write_generated_validation(
+        root / "clean",
+        spec=spec,
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_first_player_win_rate": 0.5,
+            "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+            "mcts_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+        },
+    )
+
+    manifest = build_selection_manifest(
+        input_roots=[root],
+        limit_per_stratum=1,
+        embed_specs=True,
+    )
+
+    assert manifest["embed_specs"] is True
+    assert manifest["strata"]["clean_control"][0]["spec"] == spec
 
 
 def test_load_classified_validation_entries_requires_mcts_fields(tmp_path: Path):
@@ -317,6 +549,7 @@ def test_strata_cli_writes_selection_json_and_role_configs(
                 "1",
                 "--output",
                 str(output),
+                "--embed-specs",
                 "--role-config-template",
                 str(template),
                 "--role-config-output",
@@ -332,6 +565,7 @@ def test_strata_cli_writes_selection_json_and_role_configs(
     manifest = json.loads(output.read_text())
     config_path = Path(manifest["strata"]["clean_control"][0]["role_config_path"])
     config = json.loads(config_path.read_text())
+    assert manifest["strata"]["clean_control"][0]["spec"]["name"] == "clean"
     assert "game" not in config
     assert config["game_source"] == {
         "type": "generated_spec",

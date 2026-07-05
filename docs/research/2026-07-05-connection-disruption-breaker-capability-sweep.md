@@ -290,6 +290,27 @@ more honestly:
 This suggests the selector should eventually support a second-stage verification
 field rather than treating the first-pass `clean_control` label as final.
 
+That verification field is now implemented in the formal benchmark manifest:
+
+```text
+docs/research/2026-07-05-connection-disruption-benchmark-manifest.json
+```
+
+The manifest embeds each selected `spec.json`, keeps the first-pass stratum
+labels, and adds high-simulation `verification_labels` when a stronger MCTS
+probe is available. Current second-stage labels include:
+
+- `strict_clean`
+- `near_clean`
+- `seat_sensitive`
+- `high_sim_collapsed`
+- `verified_hidden_collapse`
+- `verified_role_inversion`
+
+This turns the exploratory wall-breaker runs into a reusable
+`connection_disruption` benchmark slice while preserving the distinction between
+cheap screening and stronger verification.
+
 ## Role-Head Strata Probe
 
 Five selected `wall_breaker` strata were also probed with the existing

@@ -261,6 +261,35 @@ recoverable, while diagnostic stress cases are abundant. The next filter should
 probably split `clean_control` into strict clean, near-clean with mild seat
 sensitivity, and high-simulation survivors.
 
+The later `9200` batch accepted 90 more games and brought the combined
+clean-screen pool to 10 selected candidates:
+
+| Rank | Seed | 16-Sim MCTS Bias | Seat Bias | MCTS Max-Ply |
+| ---: | ---: | ---: | ---: | ---: |
+| 1 | `9124` | 0.000 | 0.000 | 0.500 |
+| 2 | `8003` | 0.334 | 0.000 | 0.333 |
+| 3 | `9109` | 0.334 | 0.000 | 0.333 |
+| 4 | `9142` | 0.334 | 0.000 | 0.333 |
+| 5 | `9180` | 0.334 | 0.000 | 0.333 |
+| 6 | `9193` | 0.334 | 0.000 | 0.333 |
+| 7 | `9198` | 0.334 | 0.000 | 0.333 |
+| 8 | `9217` | 0.334 | 0.000 | 0.333 |
+| 9 | `9227` | 0.334 | 0.000 | 0.333 |
+| 10 | `9263` | 0.334 | 0.000 | 0.333 |
+
+After 64-simulation rechecks of these clean-screen candidates, the pool splits
+more honestly:
+
+| Bucket | Seeds | Interpretation |
+| --- | --- | --- |
+| Strict high-sim clean | `8003`, `9109` | Pass role, seat, and max-ply thresholds under 64-sim MCTS. |
+| Near clean | `9124`, `9193`, `9217` | Role-balanced, but just above the original seat or max-ply threshold. |
+| Seat-sensitive | `9142`, `9180`, `9227` | Role-balanced but first-player sensitive under stronger MCTS. |
+| Collapsed | `9198`, `9263` | Revert to strong builder advantage under stronger MCTS. |
+
+This suggests the selector should eventually support a second-stage verification
+field rather than treating the first-pass `clean_control` label as final.
+
 ## Role-Head Strata Probe
 
 Five selected `wall_breaker` strata were also probed with the existing

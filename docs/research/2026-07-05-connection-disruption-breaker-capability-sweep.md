@@ -261,6 +261,44 @@ recoverable, while diagnostic stress cases are abundant. The next filter should
 probably split `clean_control` into strict clean, near-clean with mild seat
 sensitivity, and high-simulation survivors.
 
+## Role-Head Strata Probe
+
+Five selected `wall_breaker` strata were also probed with the existing
+AlphaZero-lite shared-head vs role-head runner on the local RTX 4080. This was a
+small pilot, not a significance result:
+
+```text
+training seeds = [1, 2]
+iterations = 4
+selfplay_games_per_iteration = 4
+train_steps_per_iteration = 8
+mcts_simulations = 16
+eval_games = 8
+eval_simulations = 8
+```
+
+| Seed | Stratum | Mean Shared Win | Mean Role-Head Win | Mean Delta | Per-Seed Deltas |
+| ---: | --- | ---: | ---: | ---: | --- |
+| `8003` | clean control | 0.812 | 0.188 | -0.625 | `-0.750`, `-0.500` |
+| `9109` | clean control | 0.812 | 0.688 | -0.125 | `-0.125`, `-0.125` |
+| `9181` | seat confound | 0.625 | 0.500 | -0.125 | `-0.625`, `+0.375` |
+| `8002` | role inversion / horizon / collapse | 0.312 | 0.562 | +0.250 | `+0.250`, `+0.250` |
+| `9029` | hidden collapse / role collapse | 0.188 | 0.188 | +0.000 | `+0.375`, `-0.375` |
+
+The useful interpretation is not "role heads are better." They are not, at
+least not uniformly. The useful interpretation is stratum-dependent architecture
+sensitivity:
+
+- clean-control seeds can favor the simpler shared-head model;
+- a role-inversion stress seed consistently favored role heads in this tiny
+  probe;
+- hidden-collapse and seat-confound seeds were unstable across two training
+  seeds.
+
+This is exactly the kind of result AsymBench should be built to expose: generated
+asymmetric game strata can separate evaluator balance from learning-architecture
+sensitivity.
+
 ## Next Implementation Step
 
 Run a completed larger `wall_breaker` sweep or continue the 9100-series search

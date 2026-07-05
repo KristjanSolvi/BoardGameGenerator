@@ -1,0 +1,4114 @@
+{
+  "embed_specs": true,
+  "input_roots": [
+    "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool"
+  ],
+  "limit_per_stratum": 10,
+  "require_mcts": true,
+  "schema_version": 2,
+  "strata": {
+    "clean_control": [
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5062",
+        "random_max_ply_rate": 0.03125,
+        "random_role_bias": 0.15600000000000003,
+        "rank": 1,
+        "role_inversion_score": 0.0,
+        "seed": 5062,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 86,
+          "name": "escape_capture_5x5_seed_5062",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5062,
+          "setup": {
+            "attackers": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              14,
+              20
+            ],
+            "exits": [
+              10
+            ],
+            "guards": [
+              13,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5062\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5062\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 15.42,
+          "mcts_first_player_win_rate": 0.75,
+          "mcts_max_ply_rate": 0.08333333333333333,
+          "mcts_role_bias": 0.24999999999999994,
+          "mcts_role_win_rates": {
+            "0": 0.583,
+            "1": 0.333
+          },
+          "mcts_seat_bias": 0.5,
+          "mcts_terminal_reasons": {
+            "key_capture": 7,
+            "key_escape": 4,
+            "max_plies": 1
+          },
+          "name": "escape_capture_5x5_seed_5062",
+          "role_inversion_score": 0.0,
+          "seed": 5062,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5073",
+        "random_max_ply_rate": 0.03125,
+        "random_role_bias": 0.4069999999999999,
+        "rank": 2,
+        "role_inversion_score": 0.0,
+        "seed": 5073,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 78,
+          "name": "escape_capture_5x5_seed_5073",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5073,
+          "setup": {
+            "attackers": [
+              1,
+              2,
+              4,
+              15,
+              19,
+              21,
+              23,
+              24
+            ],
+            "exits": [
+              0,
+              5,
+              9,
+              14
+            ],
+            "guards": [
+              7,
+              11,
+              13,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5073\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5073\\validation.json",
+        "verification_labels": [
+          "strict_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 42.75,
+          "mcts_first_player_win_rate": 0.417,
+          "mcts_max_ply_rate": 0.25,
+          "mcts_role_bias": 0.08399999999999996,
+          "mcts_role_win_rates": {
+            "0": 0.417,
+            "1": 0.333
+          },
+          "mcts_seat_bias": 0.16600000000000004,
+          "mcts_terminal_reasons": {
+            "key_capture": 5,
+            "key_escape": 4,
+            "max_plies": 3
+          },
+          "name": "escape_capture_5x5_seed_5073",
+          "role_inversion_score": 0.177,
+          "seed": 5073,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5182",
+        "random_max_ply_rate": 0.0,
+        "random_role_bias": 0.062000000000000055,
+        "rank": 3,
+        "role_inversion_score": 0.0,
+        "seed": 5182,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 100,
+          "name": "escape_capture_5x5_seed_5182",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5182,
+          "setup": {
+            "attackers": [
+              1,
+              4,
+              10,
+              19,
+              20
+            ],
+            "exits": [
+              2,
+              9,
+              21
+            ],
+            "guards": [
+              7,
+              11
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5182\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5182\\validation.json",
+        "verification_labels": [
+          "near_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 37.83,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.08333333333333333,
+          "mcts_role_bias": 0.583,
+          "mcts_role_win_rates": {
+            "0": 0.167,
+            "1": 0.75
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 2,
+            "key_escape": 9,
+            "max_plies": 1
+          },
+          "name": "escape_capture_5x5_seed_5182",
+          "role_inversion_score": 0.0,
+          "seed": 5182,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5216",
+        "random_max_ply_rate": 0.09375,
+        "random_role_bias": 0.030999999999999972,
+        "rank": 4,
+        "role_inversion_score": 0.0,
+        "seed": 5216,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 47,
+          "name": "escape_capture_5x5_seed_5216",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5216,
+          "setup": {
+            "attackers": [
+              2,
+              3,
+              10,
+              14,
+              19,
+              20
+            ],
+            "exits": [
+              4,
+              9,
+              22
+            ],
+            "guards": [
+              11,
+              13
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5216\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5216\\validation.json",
+        "verification_labels": [
+          "near_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 15.17,
+          "mcts_first_player_win_rate": 0.417,
+          "mcts_max_ply_rate": 0.08333333333333333,
+          "mcts_role_bias": 0.583,
+          "mcts_role_win_rates": {
+            "0": 0.167,
+            "1": 0.75
+          },
+          "mcts_seat_bias": 0.16600000000000004,
+          "mcts_terminal_reasons": {
+            "key_capture": 2,
+            "key_escape": 9,
+            "max_plies": 1
+          },
+          "name": "escape_capture_5x5_seed_5216",
+          "role_inversion_score": 0.0,
+          "seed": 5216,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.16666666666666666,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_6x6_seed_5127",
+        "random_max_ply_rate": 0.25,
+        "random_role_bias": 0.37400000000000005,
+        "rank": 5,
+        "role_inversion_score": 0.0,
+        "seed": 5127,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 77,
+          "name": "escape_capture_6x6_seed_5127",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5127,
+          "setup": {
+            "attackers": [
+              1,
+              4,
+              6,
+              11,
+              17
+            ],
+            "exits": [
+              2,
+              32,
+              33
+            ],
+            "guards": [
+              15,
+              20,
+              22
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5127\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5127\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 48.0,
+          "mcts_first_player_win_rate": 0.083,
+          "mcts_max_ply_rate": 0.25,
+          "mcts_role_bias": 0.25,
+          "mcts_role_win_rates": {
+            "0": 0.25,
+            "1": 0.5
+          },
+          "mcts_seat_bias": 0.834,
+          "mcts_terminal_reasons": {
+            "key_capture": 3,
+            "key_escape": 6,
+            "max_plies": 3
+          },
+          "name": "escape_capture_6x6_seed_5127",
+          "role_inversion_score": 0.0,
+          "seed": 5127,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.16666666666666666,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_6x6_seed_5162",
+        "random_max_ply_rate": 0.40625,
+        "random_role_bias": 0.09399999999999997,
+        "rank": 6,
+        "role_inversion_score": 0.0,
+        "seed": 5162,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 69,
+          "name": "escape_capture_6x6_seed_5162",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5162,
+          "setup": {
+            "attackers": [
+              1,
+              18,
+              29,
+              31,
+              33,
+              34
+            ],
+            "exits": [
+              23
+            ],
+            "guards": [
+              15,
+              27
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5162\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5162\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 67.58,
+          "mcts_first_player_win_rate": 0.083,
+          "mcts_max_ply_rate": 0.8333333333333334,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.083,
+            "1": 0.083
+          },
+          "mcts_seat_bias": 0.834,
+          "mcts_terminal_reasons": {
+            "key_capture": 1,
+            "key_escape": 1,
+            "max_plies": 10
+          },
+          "name": "escape_capture_6x6_seed_5162",
+          "role_inversion_score": 0.0,
+          "seed": 5162,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_6x6_seed_5103",
+        "random_max_ply_rate": 0.09375,
+        "random_role_bias": 0.5309999999999999,
+        "rank": 7,
+        "role_inversion_score": 0.0,
+        "seed": 5103,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 64,
+          "name": "escape_capture_6x6_seed_5103",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5103,
+          "setup": {
+            "attackers": [
+              0,
+              2,
+              3,
+              11,
+              17,
+              24,
+              34
+            ],
+            "exits": [
+              18,
+              23,
+              29,
+              33
+            ],
+            "guards": [
+              15,
+              20
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5103\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5103\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 63.5,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 0.9166666666666666,
+          "mcts_role_bias": 0.083,
+          "mcts_role_win_rates": {
+            "0": 0.083,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 1,
+            "max_plies": 11
+          },
+          "name": "escape_capture_6x6_seed_5103",
+          "role_inversion_score": 0.0,
+          "seed": 5103,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5124",
+        "random_max_ply_rate": 0.375,
+        "random_role_bias": 0.06299999999999994,
+        "rank": 8,
+        "role_inversion_score": 0.0,
+        "seed": 5124,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 97,
+          "name": "escape_capture_5x5_seed_5124",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5124,
+          "setup": {
+            "attackers": [
+              5,
+              10,
+              15,
+              21
+            ],
+            "exits": [
+              1,
+              22,
+              23,
+              24
+            ],
+            "guards": [
+              7,
+              11,
+              13,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5124\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5124\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 86.08,
+          "mcts_first_player_win_rate": 0.25,
+          "mcts_max_ply_rate": 0.6666666666666666,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.167,
+            "1": 0.167
+          },
+          "mcts_seat_bias": 0.5,
+          "mcts_terminal_reasons": {
+            "key_capture": 2,
+            "key_escape": 2,
+            "max_plies": 8
+          },
+          "name": "escape_capture_5x5_seed_5124",
+          "role_inversion_score": 0.0,
+          "seed": 5124,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.08300000000000002,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5095",
+        "random_max_ply_rate": 0.0,
+        "random_role_bias": 0.31200000000000006,
+        "rank": 9,
+        "role_inversion_score": 0.0,
+        "seed": 5095,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 92,
+          "name": "escape_capture_5x5_seed_5095",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5095,
+          "setup": {
+            "attackers": [
+              2,
+              4,
+              10,
+              14,
+              19,
+              21
+            ],
+            "exits": [
+              1,
+              9,
+              15,
+              22
+            ],
+            "guards": [
+              7,
+              11,
+              13
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5095\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5095\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 29.0,
+          "mcts_first_player_win_rate": 0.667,
+          "mcts_max_ply_rate": 0.08333333333333333,
+          "mcts_role_bias": 0.41700000000000004,
+          "mcts_role_win_rates": {
+            "0": 0.25,
+            "1": 0.667
+          },
+          "mcts_seat_bias": 0.3340000000000001,
+          "mcts_terminal_reasons": {
+            "key_capture": 3,
+            "key_escape": 8,
+            "max_plies": 1
+          },
+          "name": "escape_capture_5x5_seed_5095",
+          "role_inversion_score": 0.31200000000000006,
+          "seed": 5095,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "clean_control"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.08300000000000002,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5175",
+        "random_max_ply_rate": 0.125,
+        "random_role_bias": 0.125,
+        "rank": 10,
+        "role_inversion_score": 0.0,
+        "seed": 5175,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 101,
+          "name": "escape_capture_5x5_seed_5175",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5175,
+          "setup": {
+            "attackers": [
+              0,
+              2,
+              3,
+              14
+            ],
+            "exits": [
+              5,
+              19
+            ],
+            "guards": [
+              13,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5175\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5175\\validation.json",
+        "verification_labels": [
+          "near_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 11.42,
+          "mcts_first_player_win_rate": 0.583,
+          "mcts_max_ply_rate": 0.0,
+          "mcts_role_bias": 0.5,
+          "mcts_role_win_rates": {
+            "0": 0.25,
+            "1": 0.75
+          },
+          "mcts_seat_bias": 0.16599999999999993,
+          "mcts_terminal_reasons": {
+            "key_capture": 3,
+            "key_escape": 9
+          },
+          "name": "escape_capture_5x5_seed_5175",
+          "role_inversion_score": 0.0,
+          "seed": 5175,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      }
+    ],
+    "hidden_collapse": [
+      {
+        "family": "escape_capture",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_6x6_seed_5160",
+        "random_max_ply_rate": 0.15625,
+        "random_role_bias": 0.281,
+        "rank": 1,
+        "role_inversion_score": 0.0,
+        "seed": 5160,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 116,
+          "name": "escape_capture_6x6_seed_5160",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5160,
+          "setup": {
+            "attackers": [
+              1,
+              2,
+              11,
+              18,
+              23,
+              31,
+              32,
+              34
+            ],
+            "exits": [
+              24,
+              29
+            ],
+            "guards": [
+              22,
+              27
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5160\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5160\\validation.json",
+        "verification_labels": [
+          "high_sim_collapsed",
+          "verified_hidden_collapse"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 9.83,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.0,
+          "mcts_role_bias": 1.0,
+          "mcts_role_win_rates": {
+            "0": 1.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 12
+          },
+          "name": "escape_capture_6x6_seed_5160",
+          "role_inversion_score": 0.0,
+          "seed": 5160,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.917,
+        "mcts_seat_bias": 0.16600000000000004,
+        "name": "escape_capture_6x6_seed_5161",
+        "random_max_ply_rate": 0.15625,
+        "random_role_bias": 0.21900000000000003,
+        "rank": 2,
+        "role_inversion_score": 0.0,
+        "seed": 5161,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 116,
+          "name": "escape_capture_6x6_seed_5161",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5161,
+          "setup": {
+            "attackers": [
+              0,
+              1,
+              5,
+              11,
+              12,
+              17,
+              30
+            ],
+            "exits": [
+              6,
+              24,
+              29
+            ],
+            "guards": [
+              15,
+              20,
+              22,
+              27
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5161\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5161\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 92.17,
+          "mcts_first_player_win_rate": 0.167,
+          "mcts_max_ply_rate": 0.5,
+          "mcts_role_bias": 0.5,
+          "mcts_role_win_rates": {
+            "0": 0.5,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.6659999999999999,
+          "mcts_terminal_reasons": {
+            "key_capture": 6,
+            "max_plies": 6
+          },
+          "name": "escape_capture_6x6_seed_5161",
+          "role_inversion_score": 0.0,
+          "seed": 5161,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      }
+    ],
+    "horizon_stress": [
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5009",
+        "random_max_ply_rate": 0.78125,
+        "random_role_bias": 0.219,
+        "rank": 1,
+        "role_inversion_score": 0.0,
+        "seed": 5009,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 80,
+          "name": "escape_capture_7x7_seed_5009",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5009,
+          "setup": {
+            "attackers": [
+              3,
+              4,
+              13,
+              20
+            ],
+            "exits": [
+              41,
+              48
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5009\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5009\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 74.67,
+          "mcts_first_player_win_rate": 0.167,
+          "mcts_max_ply_rate": 0.75,
+          "mcts_role_bias": 0.25,
+          "mcts_role_win_rates": {
+            "0": 0.25,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.6659999999999999,
+          "mcts_terminal_reasons": {
+            "key_capture": 3,
+            "max_plies": 9
+          },
+          "name": "escape_capture_7x7_seed_5009",
+          "role_inversion_score": 0.0,
+          "seed": 5009,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_6x6_seed_5015",
+        "random_max_ply_rate": 0.21875,
+        "random_role_bias": 0.21899999999999997,
+        "rank": 2,
+        "role_inversion_score": 0.0,
+        "seed": 5015,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 100,
+          "name": "escape_capture_6x6_seed_5015",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5015,
+          "setup": {
+            "attackers": [
+              1,
+              18,
+              32,
+              33
+            ],
+            "exits": [
+              29
+            ],
+            "guards": [
+              15,
+              20
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5015\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5015\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 92.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 0.8333333333333334,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.083,
+            "1": 0.083
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 1,
+            "key_escape": 1,
+            "max_plies": 10
+          },
+          "name": "escape_capture_6x6_seed_5015",
+          "role_inversion_score": 0.0,
+          "seed": 5015,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_6x6_seed_5091",
+        "random_max_ply_rate": 0.8125,
+        "random_role_bias": 0.125,
+        "rank": 3,
+        "role_inversion_score": 0.0,
+        "seed": 5091,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 44,
+          "name": "escape_capture_6x6_seed_5091",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5091,
+          "setup": {
+            "attackers": [
+              2,
+              3,
+              6,
+              18
+            ],
+            "exits": [
+              31
+            ],
+            "guards": [
+              15,
+              20
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5091\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5091\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 44.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 1.0,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "max_plies": 12
+          },
+          "name": "escape_capture_6x6_seed_5091",
+          "role_inversion_score": 0.0,
+          "seed": 5091,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_6x6_seed_5149",
+        "random_max_ply_rate": 0.5625,
+        "random_role_bias": 0.375,
+        "rank": 4,
+        "role_inversion_score": 0.0,
+        "seed": 5149,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 46,
+          "name": "escape_capture_6x6_seed_5149",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5149,
+          "setup": {
+            "attackers": [
+              1,
+              4,
+              6,
+              11,
+              24,
+              32,
+              34,
+              35
+            ],
+            "exits": [
+              23
+            ],
+            "guards": [
+              15,
+              20,
+              22
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5149\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5149\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 44.17,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 0.8333333333333334,
+          "mcts_role_bias": 0.167,
+          "mcts_role_win_rates": {
+            "0": 0.167,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 2,
+            "max_plies": 10
+          },
+          "name": "escape_capture_6x6_seed_5149",
+          "role_inversion_score": 0.0,
+          "seed": 5149,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5192",
+        "random_max_ply_rate": 0.90625,
+        "random_role_bias": 0.031,
+        "rank": 5,
+        "role_inversion_score": 0.0,
+        "seed": 5192,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 50,
+          "name": "escape_capture_7x7_seed_5192",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5192,
+          "setup": {
+            "attackers": [
+              1,
+              7,
+              13,
+              14,
+              20,
+              28,
+              44
+            ],
+            "exits": [
+              42,
+              43,
+              45,
+              47
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5192\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5192\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 48.33,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 0.9166666666666666,
+          "mcts_role_bias": 0.083,
+          "mcts_role_win_rates": {
+            "0": 0.083,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 1,
+            "max_plies": 11
+          },
+          "name": "escape_capture_7x7_seed_5192",
+          "role_inversion_score": 0.0,
+          "seed": 5192,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5205",
+        "random_max_ply_rate": 0.8125,
+        "random_role_bias": 0.0,
+        "rank": 6,
+        "role_inversion_score": 0.0,
+        "seed": 5205,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 44,
+          "name": "escape_capture_7x7_seed_5205",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5205,
+          "setup": {
+            "attackers": [
+              13,
+              14,
+              27,
+              35,
+              43
+            ],
+            "exits": [
+              41
+            ],
+            "guards": [
+              17,
+              23
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5205\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5205\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 44.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 1.0,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "max_plies": 12
+          },
+          "name": "escape_capture_7x7_seed_5205",
+          "role_inversion_score": 0.0,
+          "seed": 5205,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5236",
+        "random_max_ply_rate": 0.875,
+        "random_role_bias": 0.063,
+        "rank": 7,
+        "role_inversion_score": 0.0,
+        "seed": 5236,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 51,
+          "name": "escape_capture_7x7_seed_5236",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5236,
+          "setup": {
+            "attackers": [
+              0,
+              4,
+              7,
+              21,
+              27,
+              42
+            ],
+            "exits": [
+              1,
+              28
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5236\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5236\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 51.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 1.0,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "max_plies": 12
+          },
+          "name": "escape_capture_7x7_seed_5236",
+          "role_inversion_score": 0.0,
+          "seed": 5236,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.9166666666666666,
+        "mcts_role_bias": 0.083,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5040",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.062,
+        "rank": 8,
+        "role_inversion_score": 0.0,
+        "seed": 5040,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 40,
+          "name": "escape_capture_7x7_seed_5040",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5040,
+          "setup": {
+            "attackers": [
+              20,
+              28,
+              44,
+              47,
+              48
+            ],
+            "exits": [
+              3,
+              6,
+              21,
+              41
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5040\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5040\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 40.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 1.0,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "max_plies": 12
+          },
+          "name": "escape_capture_7x7_seed_5040",
+          "role_inversion_score": 0.0,
+          "seed": 5040,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.6666666666666666,
+        "mcts_role_bias": 0.16699999999999998,
+        "mcts_seat_bias": 0.834,
+        "name": "escape_capture_7x7_seed_5081",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.062,
+        "rank": 9,
+        "role_inversion_score": 0.0,
+        "seed": 5081,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 65,
+          "name": "escape_capture_7x7_seed_5081",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5081,
+          "setup": {
+            "attackers": [
+              1,
+              2,
+              20,
+              44
+            ],
+            "exits": [
+              6,
+              7,
+              35
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5081\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5081\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 58.75,
+          "mcts_first_player_win_rate": 0.083,
+          "mcts_max_ply_rate": 0.8333333333333334,
+          "mcts_role_bias": 0.167,
+          "mcts_role_win_rates": {
+            "0": 0.167,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.834,
+          "mcts_terminal_reasons": {
+            "key_capture": 2,
+            "max_plies": 10
+          },
+          "name": "escape_capture_7x7_seed_5081",
+          "role_inversion_score": 0.0,
+          "seed": 5081,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.9166666666666666,
+        "mcts_role_bias": 0.083,
+        "mcts_seat_bias": 0.834,
+        "name": "escape_capture_7x7_seed_5037",
+        "random_max_ply_rate": 0.90625,
+        "random_role_bias": 0.031,
+        "rank": 10,
+        "role_inversion_score": 0.0,
+        "seed": 5037,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 60,
+          "name": "escape_capture_7x7_seed_5037",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5037,
+          "setup": {
+            "attackers": [
+              2,
+              5,
+              7,
+              20,
+              21,
+              42,
+              44,
+              47
+            ],
+            "exits": [
+              6,
+              35,
+              43,
+              48
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5037\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5037\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 49.75,
+          "mcts_first_player_win_rate": 0.25,
+          "mcts_max_ply_rate": 0.5,
+          "mcts_role_bias": 0.5,
+          "mcts_role_win_rates": {
+            "0": 0.5,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.5,
+          "mcts_terminal_reasons": {
+            "key_capture": 6,
+            "max_plies": 6
+          },
+          "name": "escape_capture_7x7_seed_5037",
+          "role_inversion_score": 0.0,
+          "seed": 5037,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      }
+    ],
+    "role_collapse": [
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5003",
+        "random_max_ply_rate": 0.03125,
+        "random_role_bias": 0.531,
+        "rank": 1,
+        "role_inversion_score": 0.0,
+        "seed": 5003,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 91,
+          "name": "escape_capture_5x5_seed_5003",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5003,
+          "setup": {
+            "attackers": [
+              3,
+              4,
+              10,
+              19,
+              23
+            ],
+            "exits": [
+              15,
+              20,
+              21
+            ],
+            "guards": [
+              7,
+              11,
+              13,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5003\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5003\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 52.42,
+          "mcts_first_player_win_rate": 0.333,
+          "mcts_max_ply_rate": 0.25,
+          "mcts_role_bias": 0.5840000000000001,
+          "mcts_role_win_rates": {
+            "0": 0.667,
+            "1": 0.083
+          },
+          "mcts_seat_bias": 0.33399999999999996,
+          "mcts_terminal_reasons": {
+            "key_capture": 8,
+            "key_escape": 1,
+            "max_plies": 3
+          },
+          "name": "escape_capture_5x5_seed_5003",
+          "role_inversion_score": 0.0,
+          "seed": 5003,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5051",
+        "random_max_ply_rate": 0.09375,
+        "random_role_bias": 0.469,
+        "rank": 2,
+        "role_inversion_score": 0.0,
+        "seed": 5051,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 58,
+          "name": "escape_capture_5x5_seed_5051",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5051,
+          "setup": {
+            "attackers": [
+              0,
+              2,
+              5,
+              14,
+              19,
+              20,
+              23,
+              24
+            ],
+            "exits": [
+              1,
+              3
+            ],
+            "guards": [
+              11,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5051\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5051\\validation.json",
+        "verification_labels": [],
+        "verification_metrics": {
+          "average_mcts_plies": 30.5,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.16666666666666666,
+          "mcts_role_bias": 0.667,
+          "mcts_role_win_rates": {
+            "0": 0.75,
+            "1": 0.083
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 9,
+            "key_escape": 1,
+            "max_plies": 2
+          },
+          "name": "escape_capture_5x5_seed_5051",
+          "role_inversion_score": 0.0,
+          "seed": 5051,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_5x5_seed_5115",
+        "random_max_ply_rate": 0.15625,
+        "random_role_bias": 0.844,
+        "rank": 3,
+        "role_inversion_score": 0.0,
+        "seed": 5115,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 53,
+          "name": "escape_capture_5x5_seed_5115",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5115,
+          "setup": {
+            "attackers": [
+              0,
+              5,
+              9,
+              14,
+              15,
+              21,
+              23
+            ],
+            "exits": [
+              24
+            ],
+            "guards": [
+              13,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5115\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5115\\validation.json",
+        "verification_labels": [
+          "high_sim_collapsed"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 8.0,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.0,
+          "mcts_role_bias": 1.0,
+          "mcts_role_win_rates": {
+            "0": 1.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 12
+          },
+          "name": "escape_capture_5x5_seed_5115",
+          "role_inversion_score": 0.0,
+          "seed": 5115,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.0,
+        "mcts_role_bias": 1.0,
+        "mcts_seat_bias": 0.0,
+        "name": "escape_capture_6x6_seed_5160",
+        "random_max_ply_rate": 0.15625,
+        "random_role_bias": 0.281,
+        "rank": 4,
+        "role_inversion_score": 0.0,
+        "seed": 5160,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 116,
+          "name": "escape_capture_6x6_seed_5160",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5160,
+          "setup": {
+            "attackers": [
+              1,
+              2,
+              11,
+              18,
+              23,
+              31,
+              32,
+              34
+            ],
+            "exits": [
+              24,
+              29
+            ],
+            "guards": [
+              22,
+              27
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5160\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5160\\validation.json",
+        "verification_labels": [
+          "high_sim_collapsed",
+          "verified_hidden_collapse"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 9.83,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.0,
+          "mcts_role_bias": 1.0,
+          "mcts_role_win_rates": {
+            "0": 1.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 12
+          },
+          "name": "escape_capture_6x6_seed_5160",
+          "role_inversion_score": 0.0,
+          "seed": 5160,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.917,
+        "mcts_seat_bias": 0.16600000000000004,
+        "name": "escape_capture_5x5_seed_5005",
+        "random_max_ply_rate": 0.1875,
+        "random_role_bias": 0.5,
+        "rank": 5,
+        "role_inversion_score": 0.0,
+        "seed": 5005,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 64,
+          "name": "escape_capture_5x5_seed_5005",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5005,
+          "setup": {
+            "attackers": [
+              1,
+              2,
+              21,
+              22,
+              24
+            ],
+            "exits": [
+              9
+            ],
+            "guards": [
+              11,
+              13,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5005\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5005\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 46.83,
+          "mcts_first_player_win_rate": 0.333,
+          "mcts_max_ply_rate": 0.4166666666666667,
+          "mcts_role_bias": 0.417,
+          "mcts_role_win_rates": {
+            "0": 0.5,
+            "1": 0.083
+          },
+          "mcts_seat_bias": 0.33399999999999996,
+          "mcts_terminal_reasons": {
+            "key_capture": 6,
+            "key_escape": 1,
+            "max_plies": 5
+          },
+          "name": "escape_capture_5x5_seed_5005",
+          "role_inversion_score": 0.0,
+          "seed": 5005,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.917,
+        "mcts_seat_bias": 0.16600000000000004,
+        "name": "escape_capture_5x5_seed_5121",
+        "random_max_ply_rate": 0.0625,
+        "random_role_bias": 0.813,
+        "rank": 6,
+        "role_inversion_score": 0.0,
+        "seed": 5121,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 108,
+          "name": "escape_capture_5x5_seed_5121",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5121,
+          "setup": {
+            "attackers": [
+              0,
+              2,
+              9,
+              10,
+              22,
+              24
+            ],
+            "exits": [
+              4
+            ],
+            "guards": [
+              7,
+              11,
+              13,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5121\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5121\\validation.json",
+        "verification_labels": [
+          "high_sim_collapsed"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 44.58,
+          "mcts_first_player_win_rate": 0.417,
+          "mcts_max_ply_rate": 0.08333333333333333,
+          "mcts_role_bias": 0.917,
+          "mcts_role_win_rates": {
+            "0": 0.917,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.16600000000000004,
+          "mcts_terminal_reasons": {
+            "key_capture": 11,
+            "max_plies": 1
+          },
+          "name": "escape_capture_5x5_seed_5121",
+          "role_inversion_score": 0.0,
+          "seed": 5121,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "hidden_collapse",
+          "role_collapse"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.917,
+        "mcts_seat_bias": 0.16600000000000004,
+        "name": "escape_capture_6x6_seed_5161",
+        "random_max_ply_rate": 0.15625,
+        "random_role_bias": 0.21900000000000003,
+        "rank": 7,
+        "role_inversion_score": 0.0,
+        "seed": 5161,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 116,
+          "name": "escape_capture_6x6_seed_5161",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5161,
+          "setup": {
+            "attackers": [
+              0,
+              1,
+              5,
+              11,
+              12,
+              17,
+              30
+            ],
+            "exits": [
+              6,
+              24,
+              29
+            ],
+            "guards": [
+              15,
+              20,
+              22,
+              27
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5161\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5161\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 92.17,
+          "mcts_first_player_win_rate": 0.167,
+          "mcts_max_ply_rate": 0.5,
+          "mcts_role_bias": 0.5,
+          "mcts_role_win_rates": {
+            "0": 0.5,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.6659999999999999,
+          "mcts_terminal_reasons": {
+            "key_capture": 6,
+            "max_plies": 6
+          },
+          "name": "escape_capture_6x6_seed_5161",
+          "role_inversion_score": 0.0,
+          "seed": 5161,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      }
+    ],
+    "role_inversion": [
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion"
+        ],
+        "mcts_max_ply_rate": 0.16666666666666666,
+        "mcts_role_bias": 0.667,
+        "mcts_seat_bias": 0.5,
+        "name": "escape_capture_7x7_seed_5145",
+        "random_max_ply_rate": 0.5625,
+        "random_role_bias": 0.0,
+        "rank": 1,
+        "role_inversion_score": 0.531,
+        "seed": 5145,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 80,
+          "name": "escape_capture_7x7_seed_5145",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5145,
+          "setup": {
+            "attackers": [
+              0,
+              1,
+              5,
+              43,
+              45
+            ],
+            "exits": [
+              14,
+              27,
+              42,
+              46
+            ],
+            "guards": [
+              17,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5145\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5145\\validation.json",
+        "verification_labels": [
+          "strict_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 48.67,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.16666666666666666,
+          "mcts_role_bias": 0.16699999999999998,
+          "mcts_role_win_rates": {
+            "0": 0.333,
+            "1": 0.5
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 4,
+            "key_escape": 6,
+            "max_plies": 2
+          },
+          "name": "escape_capture_7x7_seed_5145",
+          "role_inversion_score": 0.0,
+          "seed": 5145,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion",
+          "seat_confound"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.49999999999999994,
+        "mcts_seat_bias": 0.834,
+        "name": "escape_capture_6x6_seed_5232",
+        "random_max_ply_rate": 0.28125,
+        "random_role_bias": 0.469,
+        "rank": 2,
+        "role_inversion_score": 0.511,
+        "seed": 5232,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 97,
+          "name": "escape_capture_6x6_seed_5232",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5232,
+          "setup": {
+            "attackers": [
+              3,
+              5,
+              12,
+              23,
+              24,
+              31,
+              34,
+              35
+            ],
+            "exits": [
+              0,
+              4,
+              18
+            ],
+            "guards": [
+              15,
+              22,
+              27
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5232\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5232\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 47.67,
+          "mcts_first_player_win_rate": 0.333,
+          "mcts_max_ply_rate": 0.16666666666666666,
+          "mcts_role_bias": 0.33299999999999996,
+          "mcts_role_win_rates": {
+            "0": 0.583,
+            "1": 0.25
+          },
+          "mcts_seat_bias": 0.33399999999999996,
+          "mcts_terminal_reasons": {
+            "key_capture": 7,
+            "key_escape": 3,
+            "max_plies": 2
+          },
+          "name": "escape_capture_6x6_seed_5232",
+          "role_inversion_score": 0.0,
+          "seed": 5232,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion"
+        ],
+        "mcts_max_ply_rate": 0.25,
+        "mcts_role_bias": 0.75,
+        "mcts_seat_bias": 0.33399999999999996,
+        "name": "escape_capture_7x7_seed_5033",
+        "random_max_ply_rate": 0.5625,
+        "random_role_bias": 0.062,
+        "rank": 3,
+        "role_inversion_score": 0.5,
+        "seed": 5033,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 83,
+          "name": "escape_capture_7x7_seed_5033",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5033,
+          "setup": {
+            "attackers": [
+              0,
+              1,
+              2,
+              5,
+              6,
+              7,
+              35,
+              48
+            ],
+            "exits": [
+              42,
+              43,
+              44
+            ],
+            "guards": [
+              23,
+              25
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5033\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5033\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 69.08,
+          "mcts_first_player_win_rate": 0.25,
+          "mcts_max_ply_rate": 0.5,
+          "mcts_role_bias": 0.5,
+          "mcts_role_win_rates": {
+            "0": 0.5,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.5,
+          "mcts_terminal_reasons": {
+            "key_capture": 6,
+            "max_plies": 6
+          },
+          "name": "escape_capture_7x7_seed_5033",
+          "role_inversion_score": 0.0,
+          "seed": 5033,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.583,
+        "mcts_seat_bias": 0.16600000000000004,
+        "name": "escape_capture_7x7_seed_5096",
+        "random_max_ply_rate": 0.3125,
+        "random_role_bias": 0.125,
+        "rank": 4,
+        "role_inversion_score": 0.469,
+        "seed": 5096,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 96,
+          "name": "escape_capture_7x7_seed_5096",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5096,
+          "setup": {
+            "attackers": [
+              1,
+              2,
+              14,
+              41,
+              45,
+              46
+            ],
+            "exits": [
+              21,
+              34,
+              35,
+              48
+            ],
+            "guards": [
+              23,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5096\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5096\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 69.0,
+          "mcts_first_player_win_rate": 0.167,
+          "mcts_max_ply_rate": 0.5,
+          "mcts_role_bias": 0.5,
+          "mcts_role_win_rates": {
+            "0": 0.5,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.6659999999999999,
+          "mcts_terminal_reasons": {
+            "key_capture": 6,
+            "max_plies": 6
+          },
+          "name": "escape_capture_7x7_seed_5096",
+          "role_inversion_score": 0.0,
+          "seed": 5096,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion",
+          "seat_confound"
+        ],
+        "mcts_max_ply_rate": 0.6666666666666666,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 0.5,
+        "name": "escape_capture_6x6_seed_5076",
+        "random_max_ply_rate": 0.28125,
+        "random_role_bias": 0.531,
+        "rank": 5,
+        "role_inversion_score": 0.45799999999999996,
+        "seed": 5076,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 91,
+          "name": "escape_capture_6x6_seed_5076",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5076,
+          "setup": {
+            "attackers": [
+              0,
+              11,
+              17,
+              18,
+              23,
+              24,
+              29,
+              35
+            ],
+            "exits": [
+              2
+            ],
+            "guards": [
+              15,
+              20,
+              22
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5076\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5076\\validation.json",
+        "verification_labels": [
+          "seat_sensitive",
+          "verified_role_inversion"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 79.75,
+          "mcts_first_player_win_rate": 0.25,
+          "mcts_max_ply_rate": 0.6666666666666666,
+          "mcts_role_bias": 0.16699999999999998,
+          "mcts_role_win_rates": {
+            "0": 0.25,
+            "1": 0.083
+          },
+          "mcts_seat_bias": 0.5,
+          "mcts_terminal_reasons": {
+            "key_capture": 3,
+            "key_escape": 1,
+            "max_plies": 8
+          },
+          "name": "escape_capture_6x6_seed_5076",
+          "role_inversion_score": 0.406,
+          "seed": 5076,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.75,
+        "mcts_seat_bias": 0.16599999999999993,
+        "name": "escape_capture_6x6_seed_5178",
+        "random_max_ply_rate": 0.28125,
+        "random_role_bias": 0.09400000000000003,
+        "rank": 6,
+        "role_inversion_score": 0.42699999999999994,
+        "seed": 5178,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 92,
+          "name": "escape_capture_6x6_seed_5178",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5178,
+          "setup": {
+            "attackers": [
+              0,
+              5,
+              6,
+              11,
+              17,
+              30,
+              32
+            ],
+            "exits": [
+              18,
+              23,
+              35
+            ],
+            "guards": [
+              22,
+              27
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5178\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5178\\validation.json",
+        "verification_labels": [
+          "high_sim_collapsed"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 20.5,
+          "mcts_first_player_win_rate": 0.5,
+          "mcts_max_ply_rate": 0.0,
+          "mcts_role_bias": 1.0,
+          "mcts_role_win_rates": {
+            "0": 1.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 12
+          },
+          "name": "escape_capture_6x6_seed_5178",
+          "role_inversion_score": 0.0,
+          "seed": 5178,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.583,
+        "mcts_seat_bias": 0.16600000000000004,
+        "name": "escape_capture_5x5_seed_5204",
+        "random_max_ply_rate": 0.0,
+        "random_role_bias": 0.18799999999999994,
+        "rank": 7,
+        "role_inversion_score": 0.42699999999999994,
+        "seed": 5204,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 5,
+            "rows": 5
+          },
+          "family": "escape_capture",
+          "max_plies": 85,
+          "name": "escape_capture_5x5_seed_5204",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5204,
+          "setup": {
+            "attackers": [
+              3,
+              9,
+              19,
+              20,
+              24
+            ],
+            "exits": [
+              0,
+              5,
+              15
+            ],
+            "guards": [
+              13,
+              17
+            ],
+            "hostile": [],
+            "key": 12
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5204\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5204\\validation.json",
+        "verification_labels": [
+          "near_clean"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 6.75,
+          "mcts_first_player_win_rate": 0.417,
+          "mcts_max_ply_rate": 0.0,
+          "mcts_role_bias": 0.5,
+          "mcts_role_win_rates": {
+            "0": 0.25,
+            "1": 0.75
+          },
+          "mcts_seat_bias": 0.16600000000000004,
+          "mcts_terminal_reasons": {
+            "key_capture": 3,
+            "key_escape": 9
+          },
+          "name": "escape_capture_5x5_seed_5204",
+          "role_inversion_score": 0.0,
+          "seed": 5204,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion"
+        ],
+        "mcts_max_ply_rate": 0.3333333333333333,
+        "mcts_role_bias": 0.667,
+        "mcts_seat_bias": 0.33399999999999996,
+        "name": "escape_capture_7x7_seed_5203",
+        "random_max_ply_rate": 0.6875,
+        "random_role_bias": 0.188,
+        "rank": 8,
+        "role_inversion_score": 0.41700000000000004,
+        "seed": 5203,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 68,
+          "name": "escape_capture_7x7_seed_5203",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5203,
+          "setup": {
+            "attackers": [
+              7,
+              13,
+              14,
+              20,
+              34,
+              43,
+              46
+            ],
+            "exits": [
+              5,
+              44,
+              48
+            ],
+            "guards": [
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5203\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5203\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 45.5,
+          "mcts_first_player_win_rate": 0.333,
+          "mcts_max_ply_rate": 0.5,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.25,
+            "1": 0.25
+          },
+          "mcts_seat_bias": 0.33399999999999996,
+          "mcts_terminal_reasons": {
+            "key_capture": 3,
+            "key_escape": 3,
+            "max_plies": 6
+          },
+          "name": "escape_capture_7x7_seed_5203",
+          "role_inversion_score": 0.0,
+          "seed": 5203,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion",
+          "seat_confound"
+        ],
+        "mcts_max_ply_rate": 0.08333333333333333,
+        "mcts_role_bias": 0.24999999999999994,
+        "mcts_seat_bias": 0.6659999999999999,
+        "name": "escape_capture_6x6_seed_5174",
+        "random_max_ply_rate": 0.0,
+        "random_role_bias": 0.43799999999999994,
+        "rank": 9,
+        "role_inversion_score": 0.38599999999999995,
+        "seed": 5174,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 119,
+          "name": "escape_capture_6x6_seed_5174",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5174,
+          "setup": {
+            "attackers": [
+              2,
+              18,
+              23,
+              24,
+              29,
+              32,
+              35
+            ],
+            "exits": [
+              1,
+              4,
+              11
+            ],
+            "guards": [
+              22,
+              27
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5174\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5174\\validation.json",
+        "verification_labels": [
+          "high_sim_collapsed",
+          "verified_role_inversion"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 11.58,
+          "mcts_first_player_win_rate": 0.583,
+          "mcts_max_ply_rate": 0.0,
+          "mcts_role_bias": 0.8340000000000001,
+          "mcts_role_win_rates": {
+            "0": 0.083,
+            "1": 0.917
+          },
+          "mcts_seat_bias": 0.16599999999999993,
+          "mcts_terminal_reasons": {
+            "key_capture": 1,
+            "key_escape": 11
+          },
+          "name": "escape_capture_6x6_seed_5174",
+          "role_inversion_score": 0.5730000000000001,
+          "seed": 5174,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "role_inversion"
+        ],
+        "mcts_max_ply_rate": 0.4166666666666667,
+        "mcts_role_bias": 0.583,
+        "mcts_seat_bias": 0.5,
+        "name": "escape_capture_7x7_seed_5129",
+        "random_max_ply_rate": 0.6875,
+        "random_role_bias": 0.125,
+        "rank": 10,
+        "role_inversion_score": 0.364,
+        "seed": 5129,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 86,
+          "name": "escape_capture_7x7_seed_5129",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5129,
+          "setup": {
+            "attackers": [
+              20,
+              43,
+              44,
+              45
+            ],
+            "exits": [
+              35
+            ],
+            "guards": [
+              17,
+              23,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5129\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5129\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 81.83,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 0.8333333333333334,
+          "mcts_role_bias": 0.167,
+          "mcts_role_win_rates": {
+            "0": 0.167,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 2,
+            "max_plies": 10
+          },
+          "name": "escape_capture_7x7_seed_5129",
+          "role_inversion_score": 0.0,
+          "seed": 5129,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      }
+    ],
+    "seat_confound": [
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5009",
+        "random_max_ply_rate": 0.78125,
+        "random_role_bias": 0.219,
+        "rank": 1,
+        "role_inversion_score": 0.0,
+        "seed": 5009,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 80,
+          "name": "escape_capture_7x7_seed_5009",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5009,
+          "setup": {
+            "attackers": [
+              3,
+              4,
+              13,
+              20
+            ],
+            "exits": [
+              41,
+              48
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5009\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5009\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 74.67,
+          "mcts_first_player_win_rate": 0.167,
+          "mcts_max_ply_rate": 0.75,
+          "mcts_role_bias": 0.25,
+          "mcts_role_win_rates": {
+            "0": 0.25,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.6659999999999999,
+          "mcts_terminal_reasons": {
+            "key_capture": 3,
+            "max_plies": 9
+          },
+          "name": "escape_capture_7x7_seed_5009",
+          "role_inversion_score": 0.0,
+          "seed": 5009,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_6x6_seed_5015",
+        "random_max_ply_rate": 0.21875,
+        "random_role_bias": 0.21899999999999997,
+        "rank": 2,
+        "role_inversion_score": 0.0,
+        "seed": 5015,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 100,
+          "name": "escape_capture_6x6_seed_5015",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5015,
+          "setup": {
+            "attackers": [
+              1,
+              18,
+              32,
+              33
+            ],
+            "exits": [
+              29
+            ],
+            "guards": [
+              15,
+              20
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5015\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5015\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 92.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 0.8333333333333334,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.083,
+            "1": 0.083
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 1,
+            "key_escape": 1,
+            "max_plies": 10
+          },
+          "name": "escape_capture_6x6_seed_5015",
+          "role_inversion_score": 0.0,
+          "seed": 5015,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_6x6_seed_5091",
+        "random_max_ply_rate": 0.8125,
+        "random_role_bias": 0.125,
+        "rank": 3,
+        "role_inversion_score": 0.0,
+        "seed": 5091,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 44,
+          "name": "escape_capture_6x6_seed_5091",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5091,
+          "setup": {
+            "attackers": [
+              2,
+              3,
+              6,
+              18
+            ],
+            "exits": [
+              31
+            ],
+            "guards": [
+              15,
+              20
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5091\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5091\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 44.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 1.0,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "max_plies": 12
+          },
+          "name": "escape_capture_6x6_seed_5091",
+          "role_inversion_score": 0.0,
+          "seed": 5091,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_6x6_seed_5149",
+        "random_max_ply_rate": 0.5625,
+        "random_role_bias": 0.375,
+        "rank": 4,
+        "role_inversion_score": 0.0,
+        "seed": 5149,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 46,
+          "name": "escape_capture_6x6_seed_5149",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5149,
+          "setup": {
+            "attackers": [
+              1,
+              4,
+              6,
+              11,
+              24,
+              32,
+              34,
+              35
+            ],
+            "exits": [
+              23
+            ],
+            "guards": [
+              15,
+              20,
+              22
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5149\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5149\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 44.17,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 0.8333333333333334,
+          "mcts_role_bias": 0.167,
+          "mcts_role_win_rates": {
+            "0": 0.167,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 2,
+            "max_plies": 10
+          },
+          "name": "escape_capture_6x6_seed_5149",
+          "role_inversion_score": 0.0,
+          "seed": 5149,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5192",
+        "random_max_ply_rate": 0.90625,
+        "random_role_bias": 0.031,
+        "rank": 5,
+        "role_inversion_score": 0.0,
+        "seed": 5192,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 50,
+          "name": "escape_capture_7x7_seed_5192",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5192,
+          "setup": {
+            "attackers": [
+              1,
+              7,
+              13,
+              14,
+              20,
+              28,
+              44
+            ],
+            "exits": [
+              42,
+              43,
+              45,
+              47
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5192\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5192\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 48.33,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 0.9166666666666666,
+          "mcts_role_bias": 0.083,
+          "mcts_role_win_rates": {
+            "0": 0.083,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 1,
+            "max_plies": 11
+          },
+          "name": "escape_capture_7x7_seed_5192",
+          "role_inversion_score": 0.0,
+          "seed": 5192,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5205",
+        "random_max_ply_rate": 0.8125,
+        "random_role_bias": 0.0,
+        "rank": 6,
+        "role_inversion_score": 0.0,
+        "seed": 5205,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 44,
+          "name": "escape_capture_7x7_seed_5205",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5205,
+          "setup": {
+            "attackers": [
+              13,
+              14,
+              27,
+              35,
+              43
+            ],
+            "exits": [
+              41
+            ],
+            "guards": [
+              17,
+              23
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5205\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5205\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 44.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 1.0,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "max_plies": 12
+          },
+          "name": "escape_capture_7x7_seed_5205",
+          "role_inversion_score": 0.0,
+          "seed": 5205,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 1.0,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5236",
+        "random_max_ply_rate": 0.875,
+        "random_role_bias": 0.063,
+        "rank": 7,
+        "role_inversion_score": 0.0,
+        "seed": 5236,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 51,
+          "name": "escape_capture_7x7_seed_5236",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5236,
+          "setup": {
+            "attackers": [
+              0,
+              4,
+              7,
+              21,
+              27,
+              42
+            ],
+            "exits": [
+              1,
+              28
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5236\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5236\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 51.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 1.0,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "max_plies": 12
+          },
+          "name": "escape_capture_7x7_seed_5236",
+          "role_inversion_score": 0.0,
+          "seed": 5236,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.8333333333333334,
+        "mcts_role_bias": 0.0,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_6x6_seed_5252",
+        "random_max_ply_rate": 0.71875,
+        "random_role_bias": 0.157,
+        "rank": 8,
+        "role_inversion_score": 0.0,
+        "seed": 5252,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 6,
+            "rows": 6
+          },
+          "family": "escape_capture",
+          "max_plies": 43,
+          "name": "escape_capture_6x6_seed_5252",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5252,
+          "setup": {
+            "attackers": [
+              5,
+              6,
+              11,
+              12,
+              23,
+              31,
+              33
+            ],
+            "exits": [
+              17,
+              35
+            ],
+            "guards": [
+              15,
+              20,
+              22,
+              27
+            ],
+            "hostile": [],
+            "key": 21
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5252\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5252\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 39.67,
+          "mcts_first_player_win_rate": 0.083,
+          "mcts_max_ply_rate": 0.75,
+          "mcts_role_bias": 0.25,
+          "mcts_role_win_rates": {
+            "0": 0.25,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 0.834,
+          "mcts_terminal_reasons": {
+            "key_capture": 3,
+            "max_plies": 9
+          },
+          "name": "escape_capture_6x6_seed_5252",
+          "role_inversion_score": 0.0,
+          "seed": 5252,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.9166666666666666,
+        "mcts_role_bias": 0.083,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5040",
+        "random_max_ply_rate": 0.9375,
+        "random_role_bias": 0.062,
+        "rank": 9,
+        "role_inversion_score": 0.0,
+        "seed": 5040,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 40,
+          "name": "escape_capture_7x7_seed_5040",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5040,
+          "setup": {
+            "attackers": [
+              20,
+              28,
+              44,
+              47,
+              48
+            ],
+            "exits": [
+              3,
+              6,
+              21,
+              41
+            ],
+            "guards": [
+              17,
+              23,
+              25,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5040\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5040\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 40.0,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 1.0,
+          "mcts_role_bias": 0.0,
+          "mcts_role_win_rates": {
+            "0": 0.0,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "max_plies": 12
+          },
+          "name": "escape_capture_7x7_seed_5040",
+          "role_inversion_score": 0.0,
+          "seed": 5040,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      },
+      {
+        "family": "escape_capture",
+        "labels": [
+          "seat_confound",
+          "horizon_stress"
+        ],
+        "mcts_max_ply_rate": 0.9166666666666666,
+        "mcts_role_bias": 0.083,
+        "mcts_seat_bias": 1.0,
+        "name": "escape_capture_7x7_seed_5084",
+        "random_max_ply_rate": 0.8125,
+        "random_role_bias": 0.188,
+        "rank": 10,
+        "role_inversion_score": 0.0,
+        "seed": 5084,
+        "source_root": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool",
+        "spec": {
+          "actions": {
+            "movement": "orthogonal_step"
+          },
+          "board": {
+            "cols": 7,
+            "rows": 7
+          },
+          "family": "escape_capture",
+          "max_plies": 46,
+          "name": "escape_capture_7x7_seed_5084",
+          "roles": [
+            "attacker",
+            "defender"
+          ],
+          "seed": 5084,
+          "setup": {
+            "attackers": [
+              3,
+              5,
+              13,
+              20
+            ],
+            "exits": [
+              14,
+              45,
+              48
+            ],
+            "guards": [
+              17,
+              23,
+              31
+            ],
+            "hostile": [],
+            "key": 24
+          },
+          "terminal_rules": {
+            "capture": "opposite_sides"
+          }
+        },
+        "spec_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5084\\spec.json",
+        "valid": true,
+        "validation_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\mcts16_pool\\escape_capture_5084\\validation.json",
+        "verification_labels": [
+          "seat_sensitive"
+        ],
+        "verification_metrics": {
+          "average_mcts_plies": 44.5,
+          "mcts_first_player_win_rate": 0.0,
+          "mcts_max_ply_rate": 0.9166666666666666,
+          "mcts_role_bias": 0.083,
+          "mcts_role_win_rates": {
+            "0": 0.083,
+            "1": 0.0
+          },
+          "mcts_seat_bias": 1.0,
+          "mcts_terminal_reasons": {
+            "key_capture": 1,
+            "max_plies": 11
+          },
+          "name": "escape_capture_7x7_seed_5084",
+          "role_inversion_score": 0.0,
+          "seed": 5084,
+          "source_path": "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+        }
+      }
+    ]
+  },
+  "thresholds": {
+    "hidden_collapse_mcts_role_bias": 0.9,
+    "hidden_collapse_random_min_role_win_rate": 0.25,
+    "horizon_stress_rate": 0.7,
+    "main_band_mcts_max_ply_rate": 0.5,
+    "main_band_role_bias": 0.6,
+    "main_band_seat_bias": 0.15,
+    "seat_confound_bias": 0.25
+  },
+  "verification_reports": [
+    "research_runs\\asymbench\\escape_capture_manifest_20260705\\escape_high_sim_mcts64.json"
+  ],
+  "verification_thresholds": {
+    "high_sim_collapse_role_bias": 0.8,
+    "near_mcts_max_ply_rate": 0.6,
+    "near_role_bias": 0.6,
+    "near_seat_bias": 0.2,
+    "seat_sensitive_bias": 0.25,
+    "strict_mcts_max_ply_rate": 0.5,
+    "strict_role_bias": 0.25,
+    "strict_seat_bias": 0.2,
+    "verified_role_inversion_score": 0.4
+  }
+}

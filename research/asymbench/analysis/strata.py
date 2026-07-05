@@ -99,8 +99,8 @@ class StrataThresholds:
 
 @dataclass(frozen=True)
 class VerificationThresholds:
-    strict_role_bias: float = 0.60
-    strict_seat_bias: float = 0.15
+    strict_role_bias: float = 0.25
+    strict_seat_bias: float = 0.20
     strict_mcts_max_ply_rate: float = 0.50
     near_role_bias: float = 0.60
     near_seat_bias: float = 0.20

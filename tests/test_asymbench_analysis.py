@@ -302,6 +302,18 @@ def test_build_selection_manifest_adds_second_stage_verification_labels(
                 "mcts_terminal_reasons": {"builder_connection": 8, "max_plies": 4},
             },
         ),
+        (
+            "role_skew",
+            5,
+            {
+                "valid": True,
+                "random_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_first_player_win_rate": 0.5,
+                "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+                "mcts_terminal_reasons": {"builder_connection": 8, "max_plies": 4},
+            },
+        ),
     ]:
         _write_generated_validation(
             root / dirname,
@@ -340,13 +352,20 @@ def test_build_selection_manifest_adds_second_stage_verification_labels(
                     "mcts_first_player_win_rate": 0.5,
                     "mcts_terminal_reasons": {"builder_connection": 11, "max_plies": 1},
                 },
+                {
+                    "name": "role_skew",
+                    "seed": 5,
+                    "mcts_role_win_rates": {"0": 0.75, "1": 0.25},
+                    "mcts_first_player_win_rate": 0.5,
+                    "mcts_terminal_reasons": {"builder_connection": 10, "max_plies": 2},
+                },
             ]
         )
     )
 
     manifest = build_selection_manifest(
         input_roots=[root],
-        limit_per_stratum=4,
+        limit_per_stratum=5,
         verification_reports=[verification],
     )
     by_name = {
@@ -358,6 +377,7 @@ def test_build_selection_manifest_adds_second_stage_verification_labels(
     assert by_name["near"]["verification_labels"] == ["near_clean"]
     assert by_name["seat"]["verification_labels"] == ["seat_sensitive"]
     assert by_name["collapsed"]["verification_labels"] == ["high_sim_collapsed"]
+    assert by_name["role_skew"]["verification_labels"] == ["near_clean"]
     assert by_name["strict"]["verification_metrics"]["mcts_role_bias"] == 0.0
     assert by_name["strict"]["verification_metrics"]["source_path"] == str(verification)
 

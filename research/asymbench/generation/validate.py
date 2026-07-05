@@ -84,6 +84,9 @@ def validate_generated_game(
         reasons.append("all random rollouts ended by max plies")
 
     mcts_role_win_rates = {}
+    mcts_first_player_win_rate = 0.0
+    average_mcts_plies = 0.0
+    mcts_terminal_reasons = {}
     if mcts_games > 0:
         mcts_summary = evaluate_matchup(
             game,
@@ -103,6 +106,9 @@ def validate_generated_game(
             seed=seed ^ 0x5EED5,
         )
         mcts_role_win_rates = dict(mcts_summary["role_win_rates"])
+        mcts_first_player_win_rate = mcts_summary["first_player_win_rate"]
+        average_mcts_plies = mcts_summary["avg_plies"]
+        mcts_terminal_reasons = dict(mcts_summary["termination_reasons"])
 
     return ValidationReport(
         family=spec.family,
@@ -112,8 +118,12 @@ def validate_generated_game(
         initial_branching_factor=len(legal_actions),
         random_role_win_rates=dict(summary["role_win_rates"]),
         mcts_role_win_rates=mcts_role_win_rates,
+        random_first_player_win_rate=summary["first_player_win_rate"],
+        mcts_first_player_win_rate=mcts_first_player_win_rate,
         average_random_plies=summary["avg_plies"],
+        average_mcts_plies=average_mcts_plies,
         terminal_reasons=terminal_reasons,
+        mcts_terminal_reasons=mcts_terminal_reasons,
     )
 
 

@@ -183,8 +183,12 @@ class ValidationReport:
     initial_branching_factor: int = 0
     random_role_win_rates: dict[str, float] = field(default_factory=dict)
     mcts_role_win_rates: dict[str, float] = field(default_factory=dict)
+    random_first_player_win_rate: float = 0.0
+    mcts_first_player_win_rate: float = 0.0
     average_random_plies: float = 0.0
+    average_mcts_plies: float = 0.0
     terminal_reasons: dict[str, int] = field(default_factory=dict)
+    mcts_terminal_reasons: dict[str, int] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         family = _require_string(self.family, "family")
@@ -211,13 +215,30 @@ class ValidationReport:
             self.mcts_role_win_rates,
             "mcts_role_win_rates",
         )
+        random_first_player_win_rate = self._validated_probability(
+            self.random_first_player_win_rate,
+            "random_first_player_win_rate",
+        )
+        mcts_first_player_win_rate = self._validated_probability(
+            self.mcts_first_player_win_rate,
+            "mcts_first_player_win_rate",
+        )
         average_random_plies = _require_finite_float(
             self.average_random_plies,
             "average_random_plies",
         )
         if average_random_plies < 0.0:
             raise ValueError("average_random_plies must be non-negative")
+        average_mcts_plies = _require_finite_float(
+            self.average_mcts_plies,
+            "average_mcts_plies",
+        )
+        if average_mcts_plies < 0.0:
+            raise ValueError("average_mcts_plies must be non-negative")
         terminal_reasons = self._validated_terminal_reasons(self.terminal_reasons)
+        mcts_terminal_reasons = self._validated_terminal_reasons(
+            self.mcts_terminal_reasons
+        )
         object.__setattr__(self, "family", family)
         object.__setattr__(self, "name", name)
         object.__setattr__(self, "valid", valid)
@@ -229,8 +250,20 @@ class ValidationReport:
         )
         object.__setattr__(self, "random_role_win_rates", random_role_win_rates)
         object.__setattr__(self, "mcts_role_win_rates", mcts_role_win_rates)
+        object.__setattr__(
+            self,
+            "random_first_player_win_rate",
+            random_first_player_win_rate,
+        )
+        object.__setattr__(
+            self,
+            "mcts_first_player_win_rate",
+            mcts_first_player_win_rate,
+        )
         object.__setattr__(self, "average_random_plies", average_random_plies)
+        object.__setattr__(self, "average_mcts_plies", average_mcts_plies)
         object.__setattr__(self, "terminal_reasons", terminal_reasons)
+        object.__setattr__(self, "mcts_terminal_reasons", mcts_terminal_reasons)
 
     @staticmethod
     def _validated_win_rates(value: Any, field_name: str) -> dict[str, float]:
@@ -241,6 +274,13 @@ class ValidationReport:
                 raise ValueError(f"{field_name} win rate must be in [0.0, 1.0]")
             rates[key] = rate
         return _freeze_json(rates)
+
+    @staticmethod
+    def _validated_probability(value: Any, field_name: str) -> float:
+        probability = _require_finite_float(value, field_name)
+        if probability < 0.0 or probability > 1.0:
+            raise ValueError(f"{field_name} must be in [0.0, 1.0]")
+        return probability
 
     @staticmethod
     def _validated_terminal_reasons(value: Any) -> dict[str, int]:
@@ -261,8 +301,12 @@ class ValidationReport:
             "initial_branching_factor": int(self.initial_branching_factor),
             "random_role_win_rates": _thaw_json(self.random_role_win_rates),
             "mcts_role_win_rates": _thaw_json(self.mcts_role_win_rates),
+            "random_first_player_win_rate": float(self.random_first_player_win_rate),
+            "mcts_first_player_win_rate": float(self.mcts_first_player_win_rate),
             "average_random_plies": float(self.average_random_plies),
+            "average_mcts_plies": float(self.average_mcts_plies),
             "terminal_reasons": _thaw_json(self.terminal_reasons),
+            "mcts_terminal_reasons": _thaw_json(self.mcts_terminal_reasons),
         }
 
     @classmethod
@@ -275,6 +319,10 @@ class ValidationReport:
             initial_branching_factor=data.get("initial_branching_factor", 0),
             random_role_win_rates=data.get("random_role_win_rates", {}),
             mcts_role_win_rates=data.get("mcts_role_win_rates", {}),
+            random_first_player_win_rate=data.get("random_first_player_win_rate", 0.0),
+            mcts_first_player_win_rate=data.get("mcts_first_player_win_rate", 0.0),
             average_random_plies=data.get("average_random_plies", 0.0),
+            average_mcts_plies=data.get("average_mcts_plies", 0.0),
             terminal_reasons=data.get("terminal_reasons", {}),
+            mcts_terminal_reasons=data.get("mcts_terminal_reasons", {}),
         )

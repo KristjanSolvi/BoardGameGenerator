@@ -181,10 +181,33 @@ def test_validation_report_round_trips_and_records_rejections():
         initial_branching_factor=0,
         random_role_win_rates={"0": 0.0, "1": 1.0},
         mcts_role_win_rates={},
+        random_first_player_win_rate=0.25,
+        mcts_first_player_win_rate=0.5,
         average_random_plies=3.5,
+        average_mcts_plies=4.5,
         terminal_reasons={"builder_connection": 4},
+        mcts_terminal_reasons={"max_plies": 2},
     )
     assert ValidationReport.from_dict(report.to_dict()) == report
+
+
+def test_validation_report_from_dict_accepts_reports_without_mcts_diagnostics():
+    report = ValidationReport.from_dict(
+        {
+            "family": "connection_disruption",
+            "name": "old_report",
+            "valid": True,
+            "random_role_win_rates": {"0": 0.5, "1": 0.5},
+            "average_random_plies": 12.0,
+            "terminal_reasons": {"builder_connection": 2},
+        }
+    )
+
+    assert report.mcts_role_win_rates == {}
+    assert report.random_first_player_win_rate == 0.0
+    assert report.mcts_first_player_win_rate == 0.0
+    assert report.average_mcts_plies == 0.0
+    assert report.mcts_terminal_reasons == {}
 
 
 def test_generated_game_spec_rejects_bool_numeric_fields():
@@ -240,8 +263,12 @@ def test_validation_report_rejects_invalid_values():
     cases = [
         ({**base, "family": "unknown"}, "unknown family"),
         ({**base, "random_role_win_rates": {"0": 1.1}}, "win rate"),
+        ({**base, "random_first_player_win_rate": -0.1}, "first_player"),
+        ({**base, "mcts_first_player_win_rate": 1.1}, "first_player"),
         ({**base, "terminal_reasons": {"builder_connection": -1}}, "terminal"),
+        ({**base, "mcts_terminal_reasons": {"max_plies": -1}}, "terminal"),
         ({**base, "average_random_plies": float("nan")}, "average_random_plies"),
+        ({**base, "average_mcts_plies": float("nan")}, "average_mcts_plies"),
         ({**base, "reasons": ()}, "reason"),
     ]
     for kwargs, match in cases:
@@ -1331,6 +1358,9 @@ def test_validate_generated_game_populates_mcts_role_win_rates_when_requested():
 
     assert set(report.mcts_role_win_rates) == {"0", "1"}
     assert sum(report.mcts_role_win_rates.values()) <= 1.0
+    assert 0.0 <= report.mcts_first_player_win_rate <= 1.0
+    assert report.average_mcts_plies > 0.0
+    assert sum(report.mcts_terminal_reasons.values()) == 2
 
 
 def test_validate_generated_game_rejects_terminal_initial_connection():
@@ -1446,6 +1476,7 @@ def test_validate_generated_game_marks_all_max_plies_rollouts_invalid(monkeypatc
         "evaluate_matchup",
         lambda *args, **kwargs: {
             "role_win_rates": {"0": 0.5, "1": 0.5},
+            "first_player_win_rate": 0.5,
             "avg_plies": 12.5,
             "termination_reasons": {"max_plies": 4, "key_capture": 1},
         },

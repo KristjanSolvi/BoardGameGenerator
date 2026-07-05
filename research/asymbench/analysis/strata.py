@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import argparse
 import json
-from dataclasses import dataclass
+import sys
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -44,6 +46,26 @@ class ClassifiedValidation:
             "mcts_max_ply_rate": self.mcts_max_ply_rate,
             "role_inversion_score": self.role_inversion_score,
         }
+
+
+@dataclass(frozen=True)
+class ClassifiedValidationEntry:
+    record: ClassifiedValidation
+    spec_path: Path
+    validation_path: Path
+    source_root: Path
+
+    def to_manifest_entry(self, *, rank: int) -> dict[str, Any]:
+        entry = self.record.to_dict()
+        entry.update(
+            {
+                "rank": rank,
+                "source_root": str(self.source_root),
+                "spec_path": str(self.spec_path),
+                "validation_path": str(self.validation_path),
+            }
+        )
+        return entry
 
 
 @dataclass(frozen=True)
@@ -131,15 +153,80 @@ def classify_generated_validation(
 
 
 def load_classified_validations(root: Path) -> list[ClassifiedValidation]:
+    return [
+        entry.record
+        for entry in load_classified_validation_entries([root], require_mcts=False)
+    ]
+
+
+def load_classified_validation_entries(
+    roots: Iterable[Path],
+    *,
+    require_mcts: bool = True,
+    thresholds: StrataThresholds = StrataThresholds(),
+) -> list[ClassifiedValidationEntry]:
     records = []
-    for spec_path in sorted(root.glob("*/spec.json")):
-        validation_path = spec_path.with_name("validation.json")
-        if not validation_path.is_file():
-            continue
-        spec = json.loads(spec_path.read_text())
-        report = json.loads(validation_path.read_text())
-        records.append(classify_generated_validation(spec=spec, report=report))
+    for root in roots:
+        root = Path(root)
+        if not root.is_dir():
+            raise FileNotFoundError(f"input root is not a directory: {root}")
+        for spec_path in sorted(root.glob("*/spec.json")):
+            validation_path = spec_path.with_name("validation.json")
+            if not validation_path.is_file():
+                continue
+            spec = json.loads(spec_path.read_text())
+            report = json.loads(validation_path.read_text())
+            if require_mcts and not _has_mcts_diagnostics(report):
+                continue
+            records.append(
+                ClassifiedValidationEntry(
+                    record=classify_generated_validation(
+                        spec=spec,
+                        report=report,
+                        thresholds=thresholds,
+                    ),
+                    spec_path=spec_path,
+                    validation_path=validation_path,
+                    source_root=root,
+                )
+            )
     return records
+
+
+def build_selection_manifest(
+    *,
+    input_roots: Iterable[Path],
+    limit_per_stratum: int = 10,
+    thresholds: StrataThresholds = StrataThresholds(),
+    require_mcts: bool = True,
+) -> dict[str, Any]:
+    input_roots = [Path(root) for root in input_roots]
+    entries = load_classified_validation_entries(
+        input_roots,
+        require_mcts=require_mcts,
+        thresholds=thresholds,
+    )
+    if not entries:
+        raise ValueError("no classified validation records found")
+    entries_by_record_id = {id(entry.record): entry for entry in entries}
+    ranked = rank_strata(
+        (entry.record for entry in entries),
+        limit_per_stratum=limit_per_stratum,
+    )
+    return {
+        "schema_version": 1,
+        "input_roots": [str(root) for root in input_roots],
+        "thresholds": asdict(thresholds),
+        "limit_per_stratum": limit_per_stratum,
+        "require_mcts": require_mcts,
+        "strata": {
+            stratum: [
+                entries_by_record_id[id(record)].to_manifest_entry(rank=rank)
+                for rank, record in enumerate(records, start=1)
+            ]
+            for stratum, records in ranked.items()
+        },
+    }
 
 
 def rank_strata(
@@ -181,6 +268,130 @@ def _rank_key(stratum: str, record: ClassifiedValidation) -> tuple[float, ...]:
     if stratum == "role_collapse":
         return (-record.mcts_role_bias, record.mcts_seat_bias, float(record.seed))
     return (float(record.seed),)
+
+
+def write_role_head_configs(
+    *,
+    manifest: dict[str, Any],
+    template_path: Path,
+    output_root: Path,
+) -> None:
+    template = json.loads(Path(template_path).read_text())
+    if not isinstance(template, dict):
+        raise ValueError("role config template must be a JSON object")
+    output_root = Path(output_root)
+    for stratum, entries in manifest["strata"].items():
+        stratum_dir = output_root / stratum
+        for entry in entries:
+            config = json.loads(json.dumps(template))
+            config.pop("game", None)
+            config["game_source"] = {
+                "type": "generated_spec",
+                "path": entry["spec_path"],
+            }
+            filename = _safe_filename(f"{entry['rank']:03d}_{entry['name']}.json")
+            config_path = stratum_dir / filename
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            config_path.write_text(
+                json.dumps(config, indent=2, sort_keys=True) + "\n"
+            )
+            entry["role_config_path"] = str(config_path)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Select ranked AsymBench validation strata."
+    )
+    parser.add_argument(
+        "--input",
+        action="append",
+        required=True,
+        type=Path,
+        dest="inputs",
+        help="Generated-game output root containing */spec.json and */validation.json.",
+    )
+    parser.add_argument(
+        "--limit-per-stratum",
+        type=_positive_int,
+        default=10,
+        help="Maximum number of entries to export per stratum.",
+    )
+    parser.add_argument("--output", type=Path, help="Optional manifest JSON path.")
+    parser.add_argument(
+        "--include-random-only",
+        action="store_true",
+        help="Allow reports without MCTS diagnostics.",
+    )
+    parser.add_argument(
+        "--role-config-template",
+        type=Path,
+        help="Optional role-head runner config template to clone per selected entry.",
+    )
+    parser.add_argument(
+        "--role-config-output",
+        type=Path,
+        help="Output directory for generated role-head configs.",
+    )
+    args = parser.parse_args(argv)
+
+    try:
+        if bool(args.role_config_template) != bool(args.role_config_output):
+            raise ValueError(
+                "--role-config-template and --role-config-output must be provided together"
+            )
+        manifest = build_selection_manifest(
+            input_roots=args.inputs,
+            limit_per_stratum=args.limit_per_stratum,
+            require_mcts=not args.include_random_only,
+        )
+        if args.role_config_template is not None:
+            write_role_head_configs(
+                manifest=manifest,
+                template_path=args.role_config_template,
+                output_root=args.role_config_output,
+            )
+        output = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+        if args.output is None:
+            print(output, end="")
+        else:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(output)
+    except (OSError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def _positive_int(value: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be an integer") from exc
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("must be positive")
+    return parsed
+
+
+def _has_mcts_diagnostics(report: Mapping[str, Any]) -> bool:
+    mcts_rates = report.get("mcts_role_win_rates")
+    mcts_reasons = report.get("mcts_terminal_reasons")
+    return (
+        isinstance(mcts_rates, Mapping)
+        and "0" in mcts_rates
+        and "1" in mcts_rates
+        and isinstance(mcts_reasons, Mapping)
+        and bool(mcts_reasons)
+    )
+
+
+def _safe_filename(value: str) -> str:
+    safe = []
+    for char in value:
+        if char.isalnum() or char in {"-", "_", "."}:
+            safe.append(char)
+        else:
+            safe.append("_")
+    return "".join(safe)
 
 
 def _role_inversion_score(random_role0: float, mcts_role0: float) -> float:
@@ -232,3 +443,7 @@ def _require_int(value: Any, field: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{field} must be an int")
     return value
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -11,10 +11,14 @@ from research.asymbench.analysis.disagreement import (
     role_inversion,
     role_seat_separation,
 )
-from research.asymbench.analysis.summarize import main, summarize_metrics
+from research.asymbench.analysis.summarize import main as summarize_main
+from research.asymbench.analysis.summarize import summarize_metrics
 from research.asymbench.analysis.strata import (
+    build_selection_manifest,
     classify_generated_validation,
+    load_classified_validation_entries,
     load_classified_validations,
+    main as strata_main,
     rank_strata,
 )
 
@@ -197,6 +201,164 @@ def test_load_and_rank_classified_validations(tmp_path: Path):
     assert [record.name for record in records] == ["clean", "collapse"]
     assert ranked["clean_control"][0].name == "clean"
     assert ranked["hidden_collapse"][0].name == "collapse"
+
+
+def test_build_selection_manifest_exports_ranked_paths_and_thresholds(tmp_path: Path):
+    first_root = tmp_path / "first"
+    second_root = tmp_path / "second"
+    _write_generated_validation(
+        first_root / "clean",
+        spec={"family": "connection_disruption", "name": "clean", "seed": 1},
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_first_player_win_rate": 0.5,
+            "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+            "mcts_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+        },
+    )
+    _write_generated_validation(
+        second_root / "collapse",
+        spec={"family": "connection_disruption", "name": "collapse", "seed": 2},
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_role_win_rates": {"0": 1.0, "1": 0.0},
+            "mcts_first_player_win_rate": 0.5,
+            "terminal_reasons": {"builder_connection": 16},
+            "mcts_terminal_reasons": {"builder_connection": 12},
+        },
+    )
+
+    manifest = build_selection_manifest(
+        input_roots=[second_root, first_root],
+        limit_per_stratum=1,
+    )
+
+    assert manifest["schema_version"] == 1
+    assert manifest["limit_per_stratum"] == 1
+    assert manifest["input_roots"] == [str(second_root), str(first_root)]
+    assert manifest["thresholds"]["main_band_role_bias"] == 0.6
+    assert manifest["strata"]["clean_control"][0]["name"] == "clean"
+    assert manifest["strata"]["clean_control"][0]["rank"] == 1
+    assert manifest["strata"]["clean_control"][0]["spec_path"].endswith(
+        str(Path("clean") / "spec.json")
+    )
+    assert manifest["strata"]["hidden_collapse"][0]["name"] == "collapse"
+
+
+def test_load_classified_validation_entries_requires_mcts_fields(tmp_path: Path):
+    root = tmp_path / "root"
+    _write_generated_validation(
+        root / "random_only",
+        spec={"family": "connection_disruption", "name": "random_only", "seed": 1},
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.5, "1": 0.5},
+            "terminal_reasons": {"builder_connection": 8},
+        },
+    )
+
+    assert load_classified_validation_entries([root]) == []
+    assert (
+        load_classified_validation_entries([root], require_mcts=False)[0].record.name
+        == "random_only"
+    )
+
+
+def test_strata_cli_writes_selection_json_and_role_configs(
+    tmp_path: Path,
+    capsys,
+):
+    root = tmp_path / "root"
+    _write_generated_validation(
+        root / "clean",
+        spec={"family": "connection_disruption", "name": "clean", "seed": 1},
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_first_player_win_rate": 0.5,
+            "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+            "mcts_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+        },
+    )
+    template = tmp_path / "template.json"
+    template.write_text(
+        json.dumps(
+            {
+                "game": "breaker_builder",
+                "device": "cuda",
+                "seeds": [1],
+                "model_variants": ["shared_heads", "role_heads"],
+                "iterations": 1,
+                "selfplay_games_per_iteration": 1,
+                "train_steps_per_iteration": 1,
+                "batch_size": 1,
+                "replay_capacity": 8,
+                "mcts_simulations": 1,
+                "eval_games": 1,
+                "eval_simulations": 1,
+                "learning_rate": 0.001,
+                "output_root": "research_runs/asymbench",
+            }
+        )
+    )
+    output = tmp_path / "selection.json"
+    config_root = tmp_path / "configs"
+
+    assert (
+        strata_main(
+            [
+                "--input",
+                str(root),
+                "--limit-per-stratum",
+                "1",
+                "--output",
+                str(output),
+                "--role-config-template",
+                str(template),
+                "--role-config-output",
+                str(config_root),
+            ]
+        )
+        == 0
+    )
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == ""
+    manifest = json.loads(output.read_text())
+    config_path = Path(manifest["strata"]["clean_control"][0]["role_config_path"])
+    config = json.loads(config_path.read_text())
+    assert "game" not in config
+    assert config["game_source"] == {
+        "type": "generated_spec",
+        "path": str(root / "clean" / "spec.json"),
+    }
+    assert config_path.parent == config_root / "clean_control"
+
+
+def test_strata_cli_missing_input_prints_concise_error(tmp_path: Path, capsys):
+    missing = tmp_path / "missing"
+
+    assert strata_main(["--input", str(missing)]) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "error:" in captured.err
+    assert missing.name in captured.err
+
+
+def _write_generated_validation(
+    directory: Path,
+    *,
+    spec: dict[str, object],
+    report: dict[str, object],
+) -> None:
+    directory.mkdir(parents=True)
+    (directory / "spec.json").write_text(json.dumps(spec))
+    (directory / "validation.json").write_text(json.dumps(report))
 
 
 def test_outcome_vector_rejects_invalid_probability_mass():
@@ -474,7 +636,7 @@ def test_cli_success_prints_json_summary(tmp_path: Path, capsys):
         + "\n"
     )
 
-    assert main([str(metrics)]) == 0
+    assert summarize_main([str(metrics)]) == 0
     captured = capsys.readouterr()
     assert json.loads(captured.out)["shared_heads"]["rows"] == 1
     assert captured.err == ""
@@ -484,7 +646,7 @@ def test_cli_error_prints_concise_message(tmp_path: Path, capsys):
     metrics = tmp_path / "metrics.jsonl"
     metrics.write_text("")
 
-    assert main([str(metrics)]) == 1
+    assert summarize_main([str(metrics)]) == 1
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "error: metrics file is empty" in captured.err
@@ -493,7 +655,7 @@ def test_cli_error_prints_concise_message(tmp_path: Path, capsys):
 def test_cli_os_error_prints_concise_message(tmp_path: Path, capsys):
     missing_metrics = tmp_path / "missing.jsonl"
 
-    assert main([str(missing_metrics)]) == 1
+    assert summarize_main([str(missing_metrics)]) == 1
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "error:" in captured.err

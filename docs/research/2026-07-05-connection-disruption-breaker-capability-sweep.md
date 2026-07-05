@@ -167,9 +167,55 @@ On the official `wall_breaker` output, the helper ranks
 `connection_disruption_wall_breaker_5x5_seed_8003` as the top clean-control
 candidate, matching the manual analysis above.
 
+The helper is now also executable as a repeatable selection/export workflow:
+
+```bash
+python -m research.asymbench.analysis.strata \
+  --input research_runs/asymbench/profile_split_20260704/matched_sweep/wall_breaker \
+  --input research_runs/asymbench/profile_split_20260704/wall_breaker_large_20260705 \
+  --limit-per-stratum 10 \
+  --output research_runs/asymbench/profile_split_20260704/strata_selection_20260705/wall_combined_selection.json \
+  --role-config-template research/asymbench/experiments/configs/breaker_builder_smoke.json \
+  --role-config-output research_runs/asymbench/profile_split_20260704/strata_selection_20260705/wall_combined_role_head_configs
+```
+
+The export requires MCTS diagnostics by default, so older random-only validation
+reports are not accidentally selected as clean controls. The manifest records
+the ranked stratum entries, paths to `spec.json` and `validation.json`, metric
+values, thresholds, and generated role-head runner configs.
+
+## Partial Larger Sweep
+
+A larger `wall_breaker` run starting at seed `9000` was interrupted after 63
+accepted games. That partial sweep found no additional clean-control candidates,
+but it did provide useful stress strata:
+
+| Stratum | Count Selected | Top Candidate |
+| --- | ---: | --- |
+| `hidden_collapse` | 10 | `connection_disruption_wall_breaker_7x7_seed_9029` |
+| `role_collapse` | 10 | `connection_disruption_wall_breaker_5x5_seed_9001` |
+| `role_inversion` | 10 | `connection_disruption_wall_breaker_7x7_seed_9020` |
+| `seat_confound` | 3 | `connection_disruption_wall_breaker_6x6_seed_9074` |
+| `horizon_stress` | 10 | `connection_disruption_wall_breaker_6x6_seed_9004` |
+
+When combined with the earlier 30-game `8000` sweep, the selector produced:
+
+| Stratum | Count Selected | Top Candidate |
+| --- | ---: | --- |
+| `clean_control` | 1 | `connection_disruption_wall_breaker_5x5_seed_8003` |
+| `hidden_collapse` | 10 | `connection_disruption_wall_breaker_7x7_seed_9029` |
+| `role_collapse` | 10 | `connection_disruption_wall_breaker_5x5_seed_8000` |
+| `role_inversion` | 10 | `connection_disruption_wall_breaker_7x7_seed_8002` |
+| `seat_confound` | 5 | `connection_disruption_wall_breaker_6x6_seed_8011` |
+| `horizon_stress` | 10 | `connection_disruption_wall_breaker_7x7_seed_8002` |
+
+This is a better benchmark construction story than taking accepted games
+uniformly at random: clean controls are rare, stress cases are plentiful, and
+both are selected by explicit role/seat/horizon criteria.
+
 ## Next Implementation Step
 
-Run a larger `wall_breaker` sweep and select:
+Run a completed larger `wall_breaker` sweep and select:
 
 - 10 clean controls,
 - 10 hidden-collapse stress games,

@@ -66,14 +66,35 @@ class ConnectionDisruptionGame:
         if spec.actions.get("builder") != "place":
             raise ValueError("connection_disruption builder only supports place")
         breaker_actions = spec.actions.get("breaker")
-        if type(breaker_actions) not in (tuple, list) or tuple(breaker_actions) != (
-            "orthogonal_step",
-            "adjacent_remove",
+        if type(breaker_actions) not in (tuple, list):
+            raise ValueError("connection_disruption breaker actions must be a sequence")
+        self._breaker_actions = tuple(breaker_actions)
+        if self._breaker_actions not in (
+            (
+                "orthogonal_step",
+                "adjacent_remove",
+            ),
+            (
+                "orthogonal_step",
+                "adjacent_remove",
+                "range2_remove",
+            ),
+            (
+                "orthogonal_step",
+                "adjacent_remove",
+                "line_remove",
+            ),
         ):
             raise ValueError(
                 "connection_disruption breaker actions must be "
-                "('orthogonal_step', 'adjacent_remove')"
+                "('orthogonal_step', 'adjacent_remove') or "
+                "('orthogonal_step', 'adjacent_remove', 'range2_remove') or "
+                "('orthogonal_step', 'adjacent_remove', 'line_remove')"
             )
+        self._breaker_remove_range = (
+            2 if "range2_remove" in self._breaker_actions else 1
+        )
+        self._breaker_line_remove = "line_remove" in self._breaker_actions
         connect = spec.terminal_rules.get("connect")
         if type(connect) not in (tuple, list) or tuple(connect) != ("west", "east"):
             raise ValueError(
@@ -179,6 +200,7 @@ class ConnectionDisruptionGame:
             ]
 
         actions: list[int] = []
+        seen_actions: set[int] = set()
         for from_index, piece in enumerate(state.board):
             if piece != BLOCKER:
                 continue
@@ -192,9 +214,22 @@ class ConnectionDisruptionGame:
                 target = coord_to_index(to_row, to_col, rows=self._rows, cols=self._cols)
                 target_piece = state.board[target]
                 if target_piece == EMPTY and target not in self._protected:
-                    actions.append(self.encode_move(from_index, target))
-                elif target_piece == BUILDER and target not in self._protected:
-                    actions.append(self.encode_remove(from_index, target))
+                    action = self.encode_move(from_index, target)
+                    if action not in seen_actions:
+                        actions.append(action)
+                        seen_actions.add(action)
+            for target, target_piece in enumerate(state.board):
+                if target_piece != BUILDER or target in self._protected:
+                    continue
+                if self._can_remove_builder(
+                    board=state.board,
+                    from_index=from_index,
+                    target=target,
+                ):
+                    action = self.encode_remove(from_index, target)
+                    if action not in seen_actions:
+                        actions.append(action)
+                        seen_actions.add(action)
         return actions
 
     def apply_action(
@@ -420,6 +455,50 @@ class ConnectionDisruptionGame:
         if type(index) is not int or index < 0 or index >= self._cell_count:
             raise ValueError(f"cell index outside board: {index!r}")
 
+    def _manhattan_distance(self, left: int, right: int) -> int:
+        left_row, left_col = index_to_coord(left, cols=self._cols)
+        right_row, right_col = index_to_coord(right, cols=self._cols)
+        return abs(left_row - right_row) + abs(left_col - right_col)
+
+    def _can_remove_builder(
+        self,
+        *,
+        board: tuple[int, ...],
+        from_index: int,
+        target: int,
+    ) -> bool:
+        if self._manhattan_distance(from_index, target) <= self._breaker_remove_range:
+            return True
+        return self._breaker_line_remove and self._has_clear_orthogonal_line(
+            board=board,
+            from_index=from_index,
+            target=target,
+        )
+
+    def _has_clear_orthogonal_line(
+        self,
+        *,
+        board: tuple[int, ...],
+        from_index: int,
+        target: int,
+    ) -> bool:
+        from_row, from_col = index_to_coord(from_index, cols=self._cols)
+        target_row, target_col = index_to_coord(target, cols=self._cols)
+        if from_row != target_row and from_col != target_col:
+            return False
+
+        row_step = 0 if from_row == target_row else (1 if target_row > from_row else -1)
+        col_step = 0 if from_col == target_col else (1 if target_col > from_col else -1)
+        row = from_row + row_step
+        col = from_col + col_step
+        while (row, col) != (target_row, target_col):
+            index = coord_to_index(row, col, rows=self._rows, cols=self._cols)
+            if board[index] != EMPTY or index in self._protected:
+                return False
+            row += row_step
+            col += col_step
+        return True
+
     def _player_with_role(self, state: ConnectionDisruptionState, role: int) -> int:
         return state.seat_roles.index(role)
 
@@ -439,7 +518,13 @@ class ConnectionDisruptionGame:
 
 class ConnectionDisruptionGenerator:
     family = "connection_disruption"
-    _SUPPORTED_PROFILES = {"stress", "fair_agent"}
+    _SUPPORTED_PROFILES = {
+        "stress",
+        "fair_agent",
+        "ranged_breaker",
+        "line_breaker",
+        "wall_breaker",
+    }
 
     def __init__(self, profile: str = "stress") -> None:
         if type(profile) is not str or profile not in self._SUPPORTED_PROFILES:
@@ -508,6 +593,12 @@ class ConnectionDisruptionGenerator:
         )
         blocker_count = rng.randint(min_blockers, max_blockers)
         blockers = sorted(rng.sample(candidates, blocker_count))
+        protected = self._protected_cells(
+            rows=rows,
+            cols=cols,
+            blockers=set(blockers),
+            rng=rng,
+        )
         name_prefix = "connection_disruption"
         if self.profile != "stress":
             name_prefix = f"{name_prefix}_{self.profile}"
@@ -518,10 +609,10 @@ class ConnectionDisruptionGenerator:
             seed=seed,
             board={"rows": rows, "cols": cols},
             roles=("builder", "breaker"),
-            setup={"blockers": blockers, "protected": []},
+            setup={"blockers": blockers, "protected": protected},
             actions={
                 "builder": "place",
-                "breaker": ["orthogonal_step", "adjacent_remove"],
+                "breaker": list(self._breaker_actions()),
             },
             terminal_rules={"connect": ["west", "east"]},
             max_plies=max_plies_value,
@@ -580,6 +671,44 @@ class ConnectionDisruptionGenerator:
         min_blockers = min(max(rows - 2, 3), candidate_count)
         max_blockers = min(min_blockers + 3, candidate_count)
         return min_blockers, max_blockers
+
+    def _breaker_actions(self) -> tuple[str, ...]:
+        if self.profile == "ranged_breaker":
+            return ("orthogonal_step", "adjacent_remove", "range2_remove")
+        if self.profile == "line_breaker":
+            return ("orthogonal_step", "adjacent_remove", "line_remove")
+        if self.profile == "wall_breaker":
+            return ("orthogonal_step", "adjacent_remove", "line_remove")
+        return ("orthogonal_step", "adjacent_remove")
+
+    def _protected_cells(
+        self,
+        *,
+        rows: int,
+        cols: int,
+        blockers: set[int],
+        rng: random.Random,
+    ) -> list[int]:
+        if self.profile != "wall_breaker":
+            return []
+
+        middle_col = cols // 2
+        middle_row = rows // 2
+        if rows >= 6 and rng.random() < 0.35:
+            gap_rows = {
+                max(0, middle_row - 1),
+                min(rows - 1, middle_row + 1),
+            }
+        else:
+            gap_rows = {middle_row}
+
+        protected = []
+        for row in range(rows):
+            index = coord_to_index(row, middle_col, rows=rows, cols=cols)
+            if row in gap_rows or index in blockers:
+                continue
+            protected.append(index)
+        return protected
 
     @staticmethod
     def _minimum_connection_plies(cols: int) -> int:

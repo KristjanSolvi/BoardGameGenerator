@@ -791,6 +791,7 @@ def _connection_disruption_spec(
     max_plies=20,
     family="connection_disruption",
     terminal_rules=None,
+    breaker_actions=None,
 ):
     return GeneratedGameSpec(
         family=family,
@@ -799,7 +800,12 @@ def _connection_disruption_spec(
         board=board if board is not None else {"rows": 5, "cols": 5},
         roles=roles,
         setup=setup if setup is not None else {"blockers": [6], "protected": []},
-        actions={"builder": "place", "breaker": ["orthogonal_step", "adjacent_remove"]},
+        actions={
+            "builder": "place",
+            "breaker": breaker_actions
+            if breaker_actions is not None
+            else ["orthogonal_step", "adjacent_remove"],
+        },
         terminal_rules=terminal_rules
         if terminal_rules is not None
         else {"connect": ["west", "east"]},
@@ -869,6 +875,60 @@ def test_connection_disruption_fair_agent_profile_uses_denser_breaker_starts():
     assert all(spec.name.startswith("connection_disruption_fair_agent_") for spec in specs)
     assert all(5 <= len(spec.setup["blockers"]) <= 8 for spec in specs)
     assert all(spec.setup["protected"] == () for spec in specs)
+
+
+def test_connection_disruption_ranged_breaker_profile_adds_range2_remove():
+    generator = ConnectionDisruptionGenerator(profile="ranged_breaker")
+    constraints = GenerationConstraints(board_sizes=((7, 7),), max_plies_range=(40, 40))
+
+    spec = generator.generate(seed=8000, constraints=constraints)
+
+    assert spec.name.startswith("connection_disruption_ranged_breaker_")
+    assert spec.actions["breaker"] == (
+        "orthogonal_step",
+        "adjacent_remove",
+        "range2_remove",
+    )
+    assert 5 <= len(spec.setup["blockers"]) <= 8
+
+
+def test_connection_disruption_line_breaker_profile_adds_line_remove():
+    generator = ConnectionDisruptionGenerator(profile="line_breaker")
+    constraints = GenerationConstraints(board_sizes=((7, 7),), max_plies_range=(40, 40))
+
+    spec = generator.generate(seed=33, constraints=constraints)
+
+    assert spec.name.startswith("connection_disruption_line_breaker_")
+    assert spec.actions["breaker"] == (
+        "orthogonal_step",
+        "adjacent_remove",
+        "line_remove",
+    )
+    assert 5 <= len(spec.setup["blockers"]) <= 8
+
+
+def test_connection_disruption_wall_breaker_profile_adds_chokepoint_terrain():
+    generator = ConnectionDisruptionGenerator(profile="wall_breaker")
+    constraints = GenerationConstraints(board_sizes=((7, 7),), max_plies_range=(40, 40))
+
+    spec = generator.generate(seed=8000, constraints=constraints)
+    rows = spec.board["rows"]
+    cols = spec.board["cols"]
+    blockers = set(spec.setup["blockers"])
+    protected = set(spec.setup["protected"])
+
+    assert spec.name.startswith("connection_disruption_wall_breaker_")
+    assert spec.actions["breaker"] == (
+        "orthogonal_step",
+        "adjacent_remove",
+        "line_remove",
+    )
+    assert 5 <= len(blockers) <= 8
+    assert protected
+    assert not blockers & protected
+    assert all(index_to_coord(index, cols=cols)[1] == cols // 2 for index in protected)
+    assert generator._has_structural_connection_path(spec)
+    assert len(protected) < rows
 
 
 def test_connection_disruption_generator_rejects_unknown_profile():
@@ -947,6 +1007,63 @@ def test_connection_disruption_breaker_remove_action_removes_adjacent_builder_ma
     state = game.apply_action(state, remove)
     assert state.board[11] == 0
     assert state.board[6] == 2
+
+
+def test_connection_disruption_range2_remove_reaches_non_adjacent_builder_marker():
+    game = ConnectionDisruptionGame(
+        _connection_disruption_spec(
+            setup={"blockers": [6], "protected": []},
+            breaker_actions=["orthogonal_step", "adjacent_remove", "range2_remove"],
+        )
+    )
+    state = game.initial_state()
+    state = game.apply_action(state, game.encode_place(8))
+    remove = game.encode_remove(6, 8)
+
+    assert remove in game.legal_actions(state)
+    state = game.apply_action(state, remove)
+    assert state.board[8] == 0
+    assert state.board[6] == 2
+
+
+def test_connection_disruption_adjacent_remove_does_not_reach_range2_marker():
+    game = ConnectionDisruptionGame(
+        _connection_disruption_spec(setup={"blockers": [6], "protected": []})
+    )
+    state = game.initial_state()
+    state = game.apply_action(state, game.encode_place(8))
+
+    assert game.encode_remove(6, 8) not in game.legal_actions(state)
+
+
+def test_connection_disruption_line_remove_reaches_clear_orthogonal_marker():
+    game = ConnectionDisruptionGame(
+        _connection_disruption_spec(
+            setup={"blockers": [6], "protected": []},
+            breaker_actions=["orthogonal_step", "adjacent_remove", "line_remove"],
+        )
+    )
+    state = game.initial_state()
+    state = game.apply_action(state, game.encode_place(9))
+    remove = game.encode_remove(6, 9)
+
+    assert remove in game.legal_actions(state)
+    state = game.apply_action(state, remove)
+    assert state.board[9] == 0
+    assert state.board[6] == 2
+
+
+def test_connection_disruption_line_remove_is_blocked_by_intervening_piece():
+    game = ConnectionDisruptionGame(
+        _connection_disruption_spec(
+            setup={"blockers": [6], "protected": [], "builders": [8]},
+            breaker_actions=["orthogonal_step", "adjacent_remove", "line_remove"],
+        )
+    )
+    state = game.initial_state()
+    state = game.apply_action(state, game.encode_place(9))
+
+    assert game.encode_remove(6, 9) not in game.legal_actions(state)
 
 
 def test_connection_disruption_encode_decode_round_trips():
@@ -1173,7 +1290,7 @@ def test_generate_grid_games_cli_passes_connection_profile_and_mcts_options(
             "--random-games",
             "2",
             "--connection-profile",
-            "fair_agent",
+            "wall_breaker",
             "--mcts-games",
             "3",
             "--mcts-simulations",
@@ -1183,7 +1300,7 @@ def test_generate_grid_games_cli_passes_connection_profile_and_mcts_options(
 
     assert exit_code == 0
     assert calls == {
-        "generator_profile": "fair_agent",
+        "generator_profile": "wall_breaker",
         "validation": {
             "random_games": 2,
             "seed": 0,

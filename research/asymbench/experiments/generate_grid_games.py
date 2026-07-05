@@ -40,7 +40,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--random-games", type=_positive_int, default=8)
     parser.add_argument(
         "--connection-profile",
-        choices=("stress", "fair_agent"),
+        choices=(
+            "stress",
+            "fair_agent",
+            "ranged_breaker",
+            "line_breaker",
+            "wall_breaker",
+        ),
         default="stress",
         help="Sampling profile for generated connection_disruption games.",
     )

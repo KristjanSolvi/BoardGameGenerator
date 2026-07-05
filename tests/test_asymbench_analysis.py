@@ -12,6 +12,11 @@ from research.asymbench.analysis.disagreement import (
     role_seat_separation,
 )
 from research.asymbench.analysis.summarize import main, summarize_metrics
+from research.asymbench.analysis.strata import (
+    classify_generated_validation,
+    load_classified_validations,
+    rank_strata,
+)
 
 
 def test_evaluator_disagreement_uses_largest_pairwise_outcome_distance():
@@ -89,6 +94,109 @@ def test_architecture_delta_is_role_heads_minus_shared_heads():
         role_heads_win_rate=0.611,
         shared_heads_win_rate=0.389,
     ) == pytest.approx(0.222)
+
+
+def test_classify_generated_validation_marks_clean_control():
+    classified = classify_generated_validation(
+        spec={
+            "family": "connection_disruption",
+            "name": "wall_seed_8003",
+            "seed": 8003,
+        },
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.688, "1": 0.312},
+            "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_first_player_win_rate": 0.5,
+            "terminal_reasons": {"builder_connection": 11, "max_plies": 5},
+            "mcts_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+        },
+    )
+
+    assert "clean_control" in classified.labels
+    assert classified.mcts_role_bias == pytest.approx(0.0)
+    assert classified.mcts_seat_bias == pytest.approx(0.0)
+    assert classified.mcts_max_ply_rate == pytest.approx(0.5)
+
+
+def test_classify_generated_validation_marks_diagnostic_stress_labels():
+    classified = classify_generated_validation(
+        spec={
+            "family": "connection_disruption",
+            "name": "collapse_seed",
+            "seed": 1,
+        },
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.25, "1": 0.75},
+            "mcts_role_win_rates": {"0": 1.0, "1": 0.0},
+            "mcts_first_player_win_rate": 0.5,
+            "terminal_reasons": {"max_plies": 12, "builder_connection": 4},
+            "mcts_terminal_reasons": {"builder_connection": 12},
+        },
+    )
+
+    assert "hidden_collapse" in classified.labels
+    assert "role_inversion" in classified.labels
+    assert "role_collapse" in classified.labels
+    assert "horizon_stress" in classified.labels
+
+
+def test_classify_generated_validation_marks_seat_confounds():
+    classified = classify_generated_validation(
+        spec={"family": "connection_disruption", "name": "seat_seed", "seed": 2},
+        report={
+            "valid": True,
+            "random_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+            "mcts_first_player_win_rate": 0.875,
+            "terminal_reasons": {"builder_connection": 16},
+            "mcts_terminal_reasons": {"builder_connection": 12},
+        },
+    )
+
+    assert "seat_confound" in classified.labels
+    assert classified.mcts_seat_bias == pytest.approx(0.75)
+
+
+def test_load_and_rank_classified_validations(tmp_path: Path):
+    for dirname, spec, report in [
+        (
+            "clean",
+            {"family": "connection_disruption", "name": "clean", "seed": 1},
+            {
+                "valid": True,
+                "random_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_first_player_win_rate": 0.5,
+                "terminal_reasons": {"builder_connection": 8, "max_plies": 8},
+                "mcts_terminal_reasons": {"builder_connection": 6, "max_plies": 6},
+            },
+        ),
+        (
+            "collapse",
+            {"family": "connection_disruption", "name": "collapse", "seed": 2},
+            {
+                "valid": True,
+                "random_role_win_rates": {"0": 0.5, "1": 0.5},
+                "mcts_role_win_rates": {"0": 1.0, "1": 0.0},
+                "mcts_first_player_win_rate": 0.5,
+                "terminal_reasons": {"builder_connection": 16},
+                "mcts_terminal_reasons": {"builder_connection": 12},
+            },
+        ),
+    ]:
+        run_dir = tmp_path / dirname
+        run_dir.mkdir()
+        (run_dir / "spec.json").write_text(json.dumps(spec))
+        (run_dir / "validation.json").write_text(json.dumps(report))
+
+    records = load_classified_validations(tmp_path)
+    ranked = rank_strata(records, limit_per_stratum=1)
+
+    assert [record.name for record in records] == ["clean", "collapse"]
+    assert ranked["clean_control"][0].name == "clean"
+    assert ranked["hidden_collapse"][0].name == "collapse"
 
 
 def test_outcome_vector_rejects_invalid_probability_mass():

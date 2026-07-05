@@ -213,9 +213,58 @@ This is a better benchmark construction story than taking accepted games
 uniformly at random: clean controls are rare, stress cases are plentiful, and
 both are selected by explicit role/seat/horizon criteria.
 
+## Fresh 9100 Sweep
+
+A second larger `wall_breaker` run started at seed `9100` with target count 120.
+The generator attempted its default 100-seed window, accepted 98 games, then
+exited nonzero because it did not reach the requested 120 accepted games. The
+98 accepted games are still valid for analysis.
+
+This batch produced 6 clean-control candidates under the 12-game, 16-simulation
+MCTS screen:
+
+| Rank | Seed | Board | 16-Sim MCTS Bias | Seat Bias | MCTS Max-Ply |
+| ---: | ---: | --- | ---: | ---: | ---: |
+| 1 | `9124` | 6x6 | 0.000 | 0.000 | 0.500 |
+| 2 | `9109` | 6x6 | 0.334 | 0.000 | 0.333 |
+| 3 | `9142` | 5x5 | 0.334 | 0.000 | 0.333 |
+| 4 | `9180` | 6x6 | 0.334 | 0.000 | 0.333 |
+| 5 | `9193` | 6x6 | 0.334 | 0.000 | 0.333 |
+| 6 | `9198` | 6x6 | 0.334 | 0.000 | 0.333 |
+
+Those six candidates were re-evaluated with 12 equal-MCTS games at 64
+simulations:
+
+| Seed | 64-Sim MCTS Outcome | Bias | Seat Bias | MCTS Max-Ply | Interpretation |
+| ---: | --- | ---: | ---: | ---: | --- |
+| `9124` | `(0.417, 0.583)` | 0.166 | 0.166 | 0.583 | Role-balanced, but slightly above the original seat/max-ply clean thresholds. |
+| `9109` | `(0.667, 0.333)` | 0.334 | 0.000 | 0.333 | Survives as a clean control. |
+| `9142` | `(0.667, 0.333)` | 0.334 | 0.334 | 0.333 | Role-balanced but seat-sensitive. |
+| `9180` | `(0.667, 0.333)` | 0.334 | 0.334 | 0.333 | Role-balanced but seat-sensitive. |
+| `9193` | `(0.583, 0.417)` | 0.166 | 0.166 | 0.417 | Good near-clean candidate. |
+| `9198` | `(1.000, 0.000)` | 1.000 | 0.000 | 0.000 | Collapses under stronger MCTS. |
+
+Combining the `8000`, partial `9000`, and `9100` batches gives 7 clean-screen
+candidates and fills every stress stratum to the current limit of 10:
+
+| Stratum | Count Selected | Top Candidate |
+| --- | ---: | --- |
+| `clean_control` | 7 | `connection_disruption_wall_breaker_6x6_seed_9124` |
+| `hidden_collapse` | 10 | `connection_disruption_wall_breaker_7x7_seed_9029` |
+| `role_collapse` | 10 | `connection_disruption_wall_breaker_5x5_seed_8000` |
+| `role_inversion` | 10 | `connection_disruption_wall_breaker_7x7_seed_8002` |
+| `seat_confound` | 10 | `connection_disruption_wall_breaker_6x6_seed_9181` |
+| `horizon_stress` | 10 | `connection_disruption_wall_breaker_7x7_seed_8002` |
+
+This strengthens the benchmark-selection claim: clean controls are uncommon but
+recoverable, while diagnostic stress cases are abundant. The next filter should
+probably split `clean_control` into strict clean, near-clean with mild seat
+sensitivity, and high-simulation survivors.
+
 ## Next Implementation Step
 
-Run a completed larger `wall_breaker` sweep and select:
+Run a completed larger `wall_breaker` sweep or continue the 9100-series search
+to select:
 
 - 10 clean controls,
 - 10 hidden-collapse stress games,

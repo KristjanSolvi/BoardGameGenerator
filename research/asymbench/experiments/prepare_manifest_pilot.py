@@ -74,6 +74,7 @@ def build_manifest_pilot(
     per_bucket_per_family: int = 1,
     buckets: Iterable[str] = BUCKETS,
     cells: Iterable[str] | None = None,
+    candidate_seeds: Iterable[int] | None = None,
 ) -> dict[str, Any]:
     if per_bucket_per_family <= 0:
         raise ValueError("per_bucket_per_family must be positive")
@@ -85,6 +86,7 @@ def build_manifest_pilot(
         if selected_cells is not None
         else buckets
     )
+    selected_candidate_seeds = _normalize_candidate_seeds(candidate_seeds)
     candidates = _load_candidates([Path(path) for path in manifest_paths])
     if not candidates:
         raise ValueError("no manifest candidates found")
@@ -94,6 +96,7 @@ def build_manifest_pilot(
         per_bucket_per_family=per_bucket_per_family,
         buckets=selected_buckets,
         cells=selected_cells,
+        candidate_seeds=selected_candidate_seeds,
     )
     if not selected:
         raise ValueError("no pilot entries matched the configured buckets")
@@ -113,6 +116,7 @@ def build_manifest_pilot(
         "schema_version": 1,
         "buckets": list(selected_buckets),
         "cells": _cell_strings(selected_cells) if selected_cells is not None else [],
+        "candidate_seeds": list(selected_candidate_seeds or ()),
         "per_bucket_per_family": per_bucket_per_family,
         "input_manifests": [str(Path(path)) for path in manifest_paths],
         "output_root": str(output_root),
@@ -169,6 +173,16 @@ def main(argv: list[str] | None = None) -> int:
             "collapse::escape_capture. Repeat to build a stability probe."
         ),
     )
+    parser.add_argument(
+        "--candidate-seed",
+        action="append",
+        type=int,
+        dest="candidate_seeds",
+        help=(
+            "Restrict selected generated-game candidates to this seed. "
+            "Repeat to define an exact probe subset."
+        ),
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -180,6 +194,7 @@ def main(argv: list[str] | None = None) -> int:
             per_bucket_per_family=args.per_bucket_per_family,
             buckets=args.buckets or BUCKETS,
             cells=args.cells,
+            candidate_seeds=args.candidate_seeds,
         )
     except (OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -254,6 +269,7 @@ def _select_candidates(
     per_bucket_per_family: int,
     buckets: tuple[str, ...],
     cells: tuple[tuple[str, str], ...] | None,
+    candidate_seeds: tuple[int, ...] | None,
 ) -> list[tuple[str, ManifestCandidate]]:
     families = sorted({candidate.family for candidate in candidates})
     requested_cells = cells or tuple(
@@ -272,6 +288,9 @@ def _select_candidates(
             for candidate in candidates
             if candidate.family == family and _matches_bucket(candidate, bucket)
         ]
+        if candidate_seeds is not None:
+            seed_set = set(candidate_seeds)
+            matches = [candidate for candidate in matches if candidate.seed in seed_set]
         picked = 0
         for candidate in sorted(matches, key=lambda item: _rank_key(bucket, item)):
             if candidate.key in used:
@@ -308,6 +327,19 @@ def _normalize_cells(cells: Iterable[str] | None) -> tuple[tuple[str, str], ...]
         normalized.append((bucket, family))
     if not normalized:
         raise ValueError("at least one cell must be selected")
+    return tuple(dict.fromkeys(normalized))
+
+
+def _normalize_candidate_seeds(seeds: Iterable[int] | None) -> tuple[int, ...] | None:
+    if seeds is None:
+        return None
+    normalized = []
+    for seed in seeds:
+        if type(seed) is not int:
+            raise ValueError(f"candidate seed must be an int: {seed!r}")
+        normalized.append(seed)
+    if not normalized:
+        raise ValueError("at least one candidate seed must be selected")
     return tuple(dict.fromkeys(normalized))
 
 

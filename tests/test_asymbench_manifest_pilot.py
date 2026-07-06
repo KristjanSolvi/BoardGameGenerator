@@ -233,6 +233,57 @@ def test_build_manifest_pilot_can_target_exact_cells(tmp_path: Path):
     ]
 
 
+def test_build_manifest_pilot_can_target_candidate_seeds(tmp_path: Path):
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            _manifest(
+                "escape_capture",
+                [
+                    _entry(
+                        name="escape_collapse_a",
+                        seed=11,
+                        stratum="role_collapse",
+                        labels=["high_sim_collapsed"],
+                        role_bias=1.0,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    ),
+                    _entry(
+                        name="escape_collapse_b",
+                        seed=12,
+                        stratum="role_collapse",
+                        labels=["high_sim_collapsed"],
+                        role_bias=0.9,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    ),
+                    _entry(
+                        name="escape_collapse_c",
+                        seed=13,
+                        stratum="role_collapse",
+                        labels=["high_sim_collapsed"],
+                        role_bias=0.8,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    ),
+                ],
+            )
+        )
+    )
+
+    pilot = build_manifest_pilot(
+        manifest_paths=[manifest_path],
+        output_root=tmp_path / "pilot",
+        cells=("collapse::escape_capture",),
+        candidate_seeds=(13, 11),
+        per_bucket_per_family=3,
+    )
+
+    assert pilot["candidate_seeds"] == [13, 11]
+    assert [entry["seed"] for entry in pilot["entries"]] == [11, 13]
+
+
 def test_manifest_pilot_cli_writes_output(tmp_path: Path, capsys):
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text(
@@ -317,6 +368,59 @@ def test_manifest_pilot_cli_writes_cell_probe(tmp_path: Path, capsys):
     pilot = json.loads((tmp_path / "pilot" / "pilot_manifest.json").read_text())
     assert pilot["cells"] == ["collapse::connection_disruption"]
     assert pilot["entries"][0]["name"] == "connection_collapse"
+
+
+def test_manifest_pilot_cli_writes_seed_restricted_probe(tmp_path: Path, capsys):
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            _manifest(
+                "escape_capture",
+                [
+                    _entry(
+                        name="escape_collapse_a",
+                        seed=11,
+                        stratum="role_collapse",
+                        labels=["high_sim_collapsed"],
+                        role_bias=1.0,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    ),
+                    _entry(
+                        name="escape_collapse_b",
+                        seed=12,
+                        stratum="role_collapse",
+                        labels=["high_sim_collapsed"],
+                        role_bias=0.9,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    ),
+                ],
+            )
+        )
+    )
+
+    assert (
+        pilot_main(
+            [
+                "--manifest",
+                str(manifest_path),
+                "--output-root",
+                str(tmp_path / "pilot"),
+                "--cell",
+                "collapse::escape_capture",
+                "--candidate-seed",
+                "12",
+            ]
+        )
+        == 0
+    )
+
+    captured = capsys.readouterr()
+    assert "configs=1" in captured.out
+    pilot = json.loads((tmp_path / "pilot" / "pilot_manifest.json").read_text())
+    assert pilot["candidate_seeds"] == [12]
+    assert [entry["seed"] for entry in pilot["entries"]] == [12]
 
 
 def _manifest(family: str, entries: list[dict[str, object]]) -> dict[str, object]:

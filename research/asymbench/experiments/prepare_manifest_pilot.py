@@ -73,12 +73,18 @@ def build_manifest_pilot(
     template: Mapping[str, Any] | None = None,
     per_bucket_per_family: int = 1,
     buckets: Iterable[str] = BUCKETS,
+    cells: Iterable[str] | None = None,
 ) -> dict[str, Any]:
     if per_bucket_per_family <= 0:
         raise ValueError("per_bucket_per_family must be positive")
     output_root = Path(output_root)
     template_data = _template_copy(template or DEFAULT_TEMPLATE)
-    selected_buckets = _normalize_buckets(buckets)
+    selected_cells = _normalize_cells(cells) if cells is not None else None
+    selected_buckets = _normalize_buckets(
+        [bucket for bucket, _ in selected_cells]
+        if selected_cells is not None
+        else buckets
+    )
     candidates = _load_candidates([Path(path) for path in manifest_paths])
     if not candidates:
         raise ValueError("no manifest candidates found")
@@ -87,6 +93,7 @@ def build_manifest_pilot(
         candidates,
         per_bucket_per_family=per_bucket_per_family,
         buckets=selected_buckets,
+        cells=selected_cells,
     )
     if not selected:
         raise ValueError("no pilot entries matched the configured buckets")
@@ -105,6 +112,7 @@ def build_manifest_pilot(
     pilot = {
         "schema_version": 1,
         "buckets": list(selected_buckets),
+        "cells": _cell_strings(selected_cells) if selected_cells is not None else [],
         "per_bucket_per_family": per_bucket_per_family,
         "input_manifests": [str(Path(path)) for path in manifest_paths],
         "output_root": str(output_root),
@@ -152,6 +160,15 @@ def main(argv: list[str] | None = None) -> int:
         dest="buckets",
         help="Pilot bucket to include. Repeat to build a targeted pilot.",
     )
+    parser.add_argument(
+        "--cell",
+        action="append",
+        dest="cells",
+        help=(
+            "Exact bucket::family cell to include, for example "
+            "collapse::escape_capture. Repeat to build a stability probe."
+        ),
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -162,6 +179,7 @@ def main(argv: list[str] | None = None) -> int:
             template=template,
             per_bucket_per_family=args.per_bucket_per_family,
             buckets=args.buckets or BUCKETS,
+            cells=args.cells,
         )
     except (OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -235,26 +253,34 @@ def _select_candidates(
     *,
     per_bucket_per_family: int,
     buckets: tuple[str, ...],
+    cells: tuple[tuple[str, str], ...] | None,
 ) -> list[tuple[str, ManifestCandidate]]:
     families = sorted({candidate.family for candidate in candidates})
+    requested_cells = cells or tuple(
+        (bucket, family) for bucket in buckets for family in families
+    )
+    unknown_families = sorted(
+        {family for _, family in requested_cells} - set(families)
+    )
+    if unknown_families:
+        raise ValueError(f"unknown cell families: {unknown_families}")
     selected: list[tuple[str, ManifestCandidate]] = []
     used: set[tuple[str, str, int]] = set()
-    for bucket in buckets:
-        for family in families:
-            matches = [
-                candidate
-                for candidate in candidates
-                if candidate.family == family and _matches_bucket(candidate, bucket)
-            ]
-            picked = 0
-            for candidate in sorted(matches, key=lambda item: _rank_key(bucket, item)):
-                if candidate.key in used:
-                    continue
-                selected.append((bucket, candidate))
-                used.add(candidate.key)
-                picked += 1
-                if picked >= per_bucket_per_family:
-                    break
+    for bucket, family in requested_cells:
+        matches = [
+            candidate
+            for candidate in candidates
+            if candidate.family == family and _matches_bucket(candidate, bucket)
+        ]
+        picked = 0
+        for candidate in sorted(matches, key=lambda item: _rank_key(bucket, item)):
+            if candidate.key in used:
+                continue
+            selected.append((bucket, candidate))
+            used.add(candidate.key)
+            picked += 1
+            if picked >= per_bucket_per_family:
+                break
     return selected
 
 
@@ -267,6 +293,26 @@ def _normalize_buckets(buckets: Iterable[str]) -> tuple[str, ...]:
         raise ValueError(f"unknown buckets: {unknown}")
     ordered = tuple(bucket for bucket in BUCKETS if bucket in set(normalized))
     return ordered
+
+
+def _normalize_cells(cells: Iterable[str] | None) -> tuple[tuple[str, str], ...]:
+    normalized: list[tuple[str, str]] = []
+    for raw_cell in cells or ():
+        cell = str(raw_cell)
+        parts = cell.split("::")
+        if len(parts) != 2 or not parts[0] or not parts[1]:
+            raise ValueError(f"cell must be formatted bucket::family: {cell!r}")
+        bucket, family = parts
+        if bucket not in BUCKETS:
+            raise ValueError(f"unknown cell bucket: {bucket}")
+        normalized.append((bucket, family))
+    if not normalized:
+        raise ValueError("at least one cell must be selected")
+    return tuple(dict.fromkeys(normalized))
+
+
+def _cell_strings(cells: Iterable[tuple[str, str]]) -> list[str]:
+    return [f"{bucket}::{family}" for bucket, family in cells]
 
 
 def _matches_bucket(candidate: ManifestCandidate, bucket: str) -> bool:

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import random
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -9,6 +11,7 @@ from typing import Any, Iterable, Mapping
 
 
 VARIANTS = ("shared_heads", "role_heads")
+BOOTSTRAP_SAMPLES = 2000
 SUMMARY_FIELDS = {
     "final_eval_model_win_rate_mean": "win_rate",
     "final_eval_random_win_rate_mean": "random_win_rate",
@@ -190,6 +193,9 @@ def _summarize_entry(
                 variant_summary.get(source_field),
                 f"{variant_name} {source_field}",
             )
+    seed_deltas = _paired_seed_deltas(summary)
+    result["seed_architecture_deltas"] = seed_deltas
+    result.update(_seed_delta_summary(seed_deltas))
     return result
 
 
@@ -232,6 +238,13 @@ def _aggregate_entries(entries: list[Mapping[str, Any]]) -> dict[str, Any]:
         "missing": len(entries) - len(completed),
     }
     if completed:
+        entry_deltas = [float(entry["architecture_delta"]) for entry in completed]
+        seed_deltas = [
+            float(row["architecture_delta"])
+            for entry in completed
+            for row in entry.get("seed_architecture_deltas", [])
+            if isinstance(row, Mapping) and "architecture_delta" in row
+        ]
         aggregate.update(
             {
                 "mean_architecture_delta": _mean(
@@ -249,9 +262,196 @@ def _aggregate_entries(entries: list[Mapping[str, Any]]) -> dict[str, Any]:
                 "mean_role_heads_draw_rate": _mean(
                     entry["role_heads_draw_rate"] for entry in completed
                 ),
+                "positive_entry_delta_count": sum(
+                    1 for value in entry_deltas if value > 0.0
+                ),
+                "negative_entry_delta_count": sum(
+                    1 for value in entry_deltas if value < 0.0
+                ),
+                "zero_entry_delta_count": sum(
+                    1 for value in entry_deltas if value == 0.0
+                ),
+                "entry_sign_stability": _sign_stability(entry_deltas),
             }
         )
+        aggregate.update(
+            _value_delta_summary(
+                seed_deltas,
+                count_key="pooled_seed_delta_count",
+                mean_key="mean_pooled_seed_architecture_delta",
+                stdev_key="pooled_seed_architecture_delta_stdev",
+                ci_key="pooled_seed_architecture_delta_ci95",
+                positive_key="pooled_positive_seed_delta_count",
+                negative_key="pooled_negative_seed_delta_count",
+                zero_key="pooled_zero_seed_delta_count",
+                stability_key="pooled_seed_sign_stability",
+            )
+        )
     return aggregate
+
+
+def _paired_seed_deltas(summary: Mapping[str, Any]) -> list[dict[str, float | int]]:
+    shared_rows = _final_rows(_variant(summary, "shared_heads"), "shared_heads")
+    role_rows = _final_rows(_variant(summary, "role_heads"), "role_heads")
+    shared_by_seed = {
+        _int(row.get("seed"), "shared_heads final row seed"): row
+        for row in shared_rows
+    }
+    role_by_seed = {
+        _int(row.get("seed"), "role_heads final row seed"): row
+        for row in role_rows
+    }
+    paired = []
+    for seed in sorted(set(shared_by_seed) & set(role_by_seed)):
+        shared = shared_by_seed[seed]
+        role = role_by_seed[seed]
+        shared_win = _number(
+            shared.get("eval_model_win_rate"),
+            "shared_heads final row eval_model_win_rate",
+        )
+        role_win = _number(
+            role.get("eval_model_win_rate"),
+            "role_heads final row eval_model_win_rate",
+        )
+        paired.append(
+            {
+                "seed": seed,
+                "shared_heads_win_rate": shared_win,
+                "role_heads_win_rate": role_win,
+                "architecture_delta": round(role_win - shared_win, 6),
+                "shared_heads_draw_rate": _number(
+                    shared.get("eval_draw_rate"),
+                    "shared_heads final row eval_draw_rate",
+                ),
+                "role_heads_draw_rate": _number(
+                    role.get("eval_draw_rate"),
+                    "role_heads final row eval_draw_rate",
+                ),
+            }
+        )
+    return paired
+
+
+def _final_rows(
+    variant_summary: Mapping[str, Any],
+    variant_name: str,
+) -> list[Mapping[str, Any]]:
+    rows = variant_summary.get("final_rows", [])
+    if rows is None:
+        return []
+    if not isinstance(rows, list):
+        raise ValueError(f"{variant_name} final_rows must be a list")
+    final_rows = []
+    for index, row in enumerate(rows, start=1):
+        if not isinstance(row, Mapping):
+            raise ValueError(f"{variant_name} final_rows entry {index} must be an object")
+        final_rows.append(row)
+    return final_rows
+
+
+def _seed_delta_summary(
+    seed_deltas: list[Mapping[str, Any]],
+) -> dict[str, Any]:
+    return _value_delta_summary(
+        [
+            _number(row.get("architecture_delta"), "seed architecture_delta")
+            for row in seed_deltas
+        ],
+        count_key="seed_delta_count",
+        mean_key="mean_seed_architecture_delta",
+        stdev_key="seed_architecture_delta_stdev",
+        ci_key="seed_architecture_delta_ci95",
+        positive_key="positive_seed_delta_count",
+        negative_key="negative_seed_delta_count",
+        zero_key="zero_seed_delta_count",
+        stability_key="seed_sign_stability",
+    )
+
+
+def _value_delta_summary(
+    values: Iterable[float],
+    *,
+    count_key: str,
+    mean_key: str,
+    stdev_key: str,
+    ci_key: str,
+    positive_key: str,
+    negative_key: str,
+    zero_key: str,
+    stability_key: str,
+) -> dict[str, Any]:
+    deltas = [float(value) for value in values]
+    if not deltas:
+        return {
+            count_key: 0,
+            mean_key: None,
+            stdev_key: None,
+            ci_key: None,
+            positive_key: 0,
+            negative_key: 0,
+            zero_key: 0,
+            stability_key: None,
+        }
+    return {
+        count_key: len(deltas),
+        mean_key: _mean(deltas),
+        stdev_key: _stdev(deltas),
+        ci_key: _bootstrap_mean_ci(deltas),
+        positive_key: sum(1 for value in deltas if value > 0.0),
+        negative_key: sum(1 for value in deltas if value < 0.0),
+        zero_key: sum(1 for value in deltas if value == 0.0),
+        stability_key: _sign_stability(deltas),
+    }
+
+
+def _stdev(values: Iterable[float]) -> float:
+    values = [float(value) for value in values]
+    if len(values) < 2:
+        return 0.0
+    mean = sum(values) / len(values)
+    variance = sum((value - mean) ** 2 for value in values) / (len(values) - 1)
+    return round(math.sqrt(variance), 6)
+
+
+def _bootstrap_mean_ci(values: Iterable[float]) -> list[float]:
+    values = [float(value) for value in values]
+    if not values:
+        return []
+    if len(values) == 1:
+        value = round(values[0], 6)
+        return [value, value]
+    rng = random.Random(0)
+    means = []
+    for _ in range(BOOTSTRAP_SAMPLES):
+        sample = [values[rng.randrange(len(values))] for _ in values]
+        means.append(sum(sample) / len(sample))
+    means.sort()
+    return [
+        round(_quantile(means, 0.025), 6),
+        round(_quantile(means, 0.975), 6),
+    ]
+
+
+def _quantile(values: list[float], probability: float) -> float:
+    if not values:
+        return 0.0
+    position = probability * (len(values) - 1)
+    lower = int(math.floor(position))
+    upper = int(math.ceil(position))
+    if lower == upper:
+        return values[lower]
+    weight = position - lower
+    return values[lower] * (1.0 - weight) + values[upper] * weight
+
+
+def _sign_stability(values: Iterable[float]) -> float | None:
+    values = [float(value) for value in values]
+    if not values:
+        return None
+    positive = sum(1 for value in values if value > 0.0)
+    negative = sum(1 for value in values if value < 0.0)
+    zero = len(values) - positive - negative
+    return round(max(positive, negative, zero) / len(values), 6)
 
 
 def _mean(values: Iterable[float]) -> float:

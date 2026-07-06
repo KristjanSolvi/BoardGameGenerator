@@ -100,6 +100,56 @@ def test_summarize_manifest_pilot_marks_missing_runs(tmp_path: Path):
     assert summary["by_bucket"]["clean"]["missing"] == 1
 
 
+def test_summarize_manifest_pilot_reports_seed_stability(tmp_path: Path):
+    pilot = {
+        "schema_version": 1,
+        "output_root": str(tmp_path / "pilot"),
+        "entries": [
+            _pilot_entry(
+                bucket="role_inversion",
+                family="connection_disruption",
+                name="connection_inversion",
+                seed=9,
+            )
+        ],
+    }
+    pilot_path = tmp_path / "pilot_manifest.json"
+    pilot_path.write_text(json.dumps(pilot))
+    _write_role_summary(
+        tmp_path / "pilot" / "runs" / "connection",
+        family="connection_disruption",
+        name="connection_inversion",
+        seed=9,
+        shared_win=0.416667,
+        role_win=0.416667,
+        seed_wins=[
+            (101, 0.25, 0.50),
+            (202, 0.75, 0.25),
+            (303, 0.25, 0.50),
+        ],
+    )
+
+    summary = summarize_manifest_pilot(pilot_path)
+
+    entry = summary["entries"][0]
+    assert entry["seed_delta_count"] == 3
+    assert entry["mean_seed_architecture_delta"] == 0.0
+    assert entry["positive_seed_delta_count"] == 2
+    assert entry["negative_seed_delta_count"] == 1
+    assert entry["seed_sign_stability"] == 0.666667
+    assert len(entry["seed_architecture_delta_ci95"]) == 2
+    assert [row["architecture_delta"] for row in entry["seed_architecture_deltas"]] == [
+        0.25,
+        -0.5,
+        0.25,
+    ]
+    bucket = summary["by_bucket"]["role_inversion"]
+    assert bucket["pooled_seed_delta_count"] == 3
+    assert bucket["mean_pooled_seed_architecture_delta"] == 0.0
+    assert bucket["pooled_positive_seed_delta_count"] == 2
+    assert bucket["pooled_seed_sign_stability"] == 0.666667
+
+
 def test_summarize_manifest_pilot_resolves_relative_output_root_from_cwd(
     tmp_path: Path,
     monkeypatch,
@@ -197,6 +247,7 @@ def _write_role_summary(
     seed: int,
     shared_win: float,
     role_win: float,
+    seed_wins: list[tuple[int, float, float]] | None = None,
     mtime: float | None = None,
 ) -> None:
     directory.mkdir(parents=True)
@@ -215,12 +266,14 @@ def _write_role_summary(
                         "final_eval_random_win_rate_mean": 1.0 - shared_win,
                         "final_eval_draw_rate_mean": 0.0,
                         "final_eval_avg_plies_mean": 10.0,
+                        "final_rows": _final_rows(seed_wins, variant="shared_heads"),
                     },
                     "role_heads": {
                         "final_eval_model_win_rate_mean": role_win,
                         "final_eval_random_win_rate_mean": 1.0 - role_win,
                         "final_eval_draw_rate_mean": 0.0,
                         "final_eval_avg_plies_mean": 8.0,
+                        "final_rows": _final_rows(seed_wins, variant="role_heads"),
                     },
                 },
             }
@@ -228,3 +281,25 @@ def _write_role_summary(
     )
     if mtime is not None:
         os.utime(summary_path, (mtime, mtime))
+
+
+def _final_rows(
+    seed_wins: list[tuple[int, float, float]] | None,
+    *,
+    variant: str,
+) -> list[dict[str, object]]:
+    if seed_wins is None:
+        return []
+    rows = []
+    for seed, shared_win, role_win in seed_wins:
+        win = shared_win if variant == "shared_heads" else role_win
+        rows.append(
+            {
+                "seed": seed,
+                "eval_model_win_rate": win,
+                "eval_random_win_rate": 1.0 - win,
+                "eval_draw_rate": 0.0,
+                "eval_avg_plies": 10.0,
+            }
+        )
+    return rows

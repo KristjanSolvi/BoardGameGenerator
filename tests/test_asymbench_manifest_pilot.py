@@ -174,6 +174,65 @@ def test_build_manifest_pilot_can_target_buckets(tmp_path: Path):
     assert pilot["entries"][0]["name"] == "escape_clean"
 
 
+def test_build_manifest_pilot_can_target_exact_cells(tmp_path: Path):
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            _manifest(
+                "mixed",
+                [
+                    _entry(
+                        name="escape_clean",
+                        seed=1,
+                        stratum="clean_control",
+                        labels=["strict_clean"],
+                        role_bias=0.0,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    ),
+                    _entry(
+                        name="connection_clean",
+                        seed=2,
+                        stratum="clean_control",
+                        labels=["strict_clean"],
+                        role_bias=0.0,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    ),
+                    _entry(
+                        name="connection_collapse",
+                        seed=3,
+                        stratum="role_collapse",
+                        labels=["high_sim_collapsed"],
+                        role_bias=1.0,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    ),
+                ],
+            )
+        )
+    )
+
+    pilot = build_manifest_pilot(
+        manifest_paths=[manifest_path],
+        output_root=tmp_path / "pilot",
+        cells=(
+            "clean::connection_disruption",
+            "collapse::connection_disruption",
+        ),
+    )
+
+    assert pilot["buckets"] == ["clean", "collapse"]
+    assert pilot["cells"] == [
+        "clean::connection_disruption",
+        "collapse::connection_disruption",
+    ]
+    assert [(entry["bucket"], entry["name"]) for entry in pilot["entries"]] == [
+        ("clean", "connection_clean"),
+        ("collapse", "connection_collapse"),
+    ]
+
+
 def test_manifest_pilot_cli_writes_output(tmp_path: Path, capsys):
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text(
@@ -216,6 +275,48 @@ def test_manifest_pilot_cli_writes_output(tmp_path: Path, capsys):
     assert captured.err == ""
     pilot = json.loads((tmp_path / "pilot" / "pilot_manifest.json").read_text())
     assert pilot["buckets"] == ["clean"]
+
+
+def test_manifest_pilot_cli_writes_cell_probe(tmp_path: Path, capsys):
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            _manifest(
+                "connection_disruption",
+                [
+                    _entry(
+                        name="connection_collapse",
+                        seed=3,
+                        stratum="role_collapse",
+                        labels=["high_sim_collapsed"],
+                        role_bias=1.0,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    )
+                ],
+            )
+        )
+    )
+
+    assert (
+        pilot_main(
+            [
+                "--manifest",
+                str(manifest_path),
+                "--output-root",
+                str(tmp_path / "pilot"),
+                "--cell",
+                "collapse::connection_disruption",
+            ]
+        )
+        == 0
+    )
+
+    captured = capsys.readouterr()
+    assert "configs=1" in captured.out
+    pilot = json.loads((tmp_path / "pilot" / "pilot_manifest.json").read_text())
+    assert pilot["cells"] == ["collapse::connection_disruption"]
+    assert pilot["entries"][0]["name"] == "connection_collapse"
 
 
 def _manifest(family: str, entries: list[dict[str, object]]) -> dict[str, object]:

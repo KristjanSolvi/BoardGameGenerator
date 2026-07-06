@@ -72,11 +72,13 @@ def build_manifest_pilot(
     output_root: Path,
     template: Mapping[str, Any] | None = None,
     per_bucket_per_family: int = 1,
+    buckets: Iterable[str] = BUCKETS,
 ) -> dict[str, Any]:
     if per_bucket_per_family <= 0:
         raise ValueError("per_bucket_per_family must be positive")
     output_root = Path(output_root)
     template_data = _template_copy(template or DEFAULT_TEMPLATE)
+    selected_buckets = _normalize_buckets(buckets)
     candidates = _load_candidates([Path(path) for path in manifest_paths])
     if not candidates:
         raise ValueError("no manifest candidates found")
@@ -84,6 +86,7 @@ def build_manifest_pilot(
     selected = _select_candidates(
         candidates,
         per_bucket_per_family=per_bucket_per_family,
+        buckets=selected_buckets,
     )
     if not selected:
         raise ValueError("no pilot entries matched the configured buckets")
@@ -101,7 +104,7 @@ def build_manifest_pilot(
 
     pilot = {
         "schema_version": 1,
-        "buckets": list(BUCKETS),
+        "buckets": list(selected_buckets),
         "per_bucket_per_family": per_bucket_per_family,
         "input_manifests": [str(Path(path)) for path in manifest_paths],
         "output_root": str(output_root),
@@ -142,6 +145,13 @@ def main(argv: list[str] | None = None) -> int:
         default=1,
         help="Maximum entries to select per bucket and family.",
     )
+    parser.add_argument(
+        "--bucket",
+        action="append",
+        choices=BUCKETS,
+        dest="buckets",
+        help="Pilot bucket to include. Repeat to build a targeted pilot.",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -151,6 +161,7 @@ def main(argv: list[str] | None = None) -> int:
             output_root=args.output_root,
             template=template,
             per_bucket_per_family=args.per_bucket_per_family,
+            buckets=args.buckets or BUCKETS,
         )
     except (OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -223,11 +234,12 @@ def _select_candidates(
     candidates: list[ManifestCandidate],
     *,
     per_bucket_per_family: int,
+    buckets: tuple[str, ...],
 ) -> list[tuple[str, ManifestCandidate]]:
     families = sorted({candidate.family for candidate in candidates})
     selected: list[tuple[str, ManifestCandidate]] = []
     used: set[tuple[str, str, int]] = set()
-    for bucket in BUCKETS:
+    for bucket in buckets:
         for family in families:
             matches = [
                 candidate
@@ -244,6 +256,17 @@ def _select_candidates(
                 if picked >= per_bucket_per_family:
                     break
     return selected
+
+
+def _normalize_buckets(buckets: Iterable[str]) -> tuple[str, ...]:
+    normalized = tuple(str(bucket) for bucket in buckets)
+    if not normalized:
+        raise ValueError("at least one bucket must be selected")
+    unknown = sorted(set(normalized) - set(BUCKETS))
+    if unknown:
+        raise ValueError(f"unknown buckets: {unknown}")
+    ordered = tuple(bucket for bucket in BUCKETS if bucket in set(normalized))
+    return ordered
 
 
 def _matches_bucket(candidate: ManifestCandidate, bucket: str) -> bool:

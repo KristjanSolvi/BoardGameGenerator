@@ -133,6 +133,47 @@ def test_manifest_pilot_rejects_entries_without_embedded_specs(tmp_path: Path):
         )
 
 
+def test_build_manifest_pilot_can_target_buckets(tmp_path: Path):
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            _manifest(
+                "escape_capture",
+                [
+                    _entry(
+                        name="escape_clean",
+                        seed=1,
+                        stratum="clean_control",
+                        labels=["strict_clean"],
+                        role_bias=0.0,
+                        seat_bias=0.0,
+                        max_ply_rate=0.0,
+                    ),
+                    _entry(
+                        name="escape_seat",
+                        seed=2,
+                        stratum="seat_confound",
+                        labels=["seat_sensitive"],
+                        role_bias=0.1,
+                        seat_bias=0.9,
+                        max_ply_rate=0.2,
+                    ),
+                ],
+            )
+        )
+    )
+
+    pilot = build_manifest_pilot(
+        manifest_paths=[manifest_path],
+        output_root=tmp_path / "pilot",
+        buckets=("clean",),
+    )
+
+    assert pilot["buckets"] == ["clean"]
+    assert [entry["bucket"] for entry in pilot["entries"]] == ["clean"]
+    assert pilot["entries"][0]["name"] == "escape_clean"
+
+
 def test_manifest_pilot_cli_writes_output(tmp_path: Path, capsys):
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text(
@@ -163,6 +204,8 @@ def test_manifest_pilot_cli_writes_output(tmp_path: Path, capsys):
                 str(tmp_path / "pilot"),
                 "--per-bucket-per-family",
                 "1",
+                "--bucket",
+                "clean",
             ]
         )
         == 0
@@ -171,7 +214,8 @@ def test_manifest_pilot_cli_writes_output(tmp_path: Path, capsys):
     captured = capsys.readouterr()
     assert "pilot_manifest=" in captured.out
     assert captured.err == ""
-    assert (tmp_path / "pilot" / "pilot_manifest.json").is_file()
+    pilot = json.loads((tmp_path / "pilot" / "pilot_manifest.json").read_text())
+    assert pilot["buckets"] == ["clean"]
 
 
 def _manifest(family: str, entries: list[dict[str, object]]) -> dict[str, object]:

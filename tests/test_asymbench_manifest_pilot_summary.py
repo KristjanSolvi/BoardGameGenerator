@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 from research.asymbench.analysis.summarize_manifest_pilot import (
@@ -36,6 +37,7 @@ def test_summarize_manifest_pilot_computes_architecture_delta(tmp_path: Path):
         seed=1,
         shared_win=0.25,
         role_win=0.50,
+        mtime=1.0,
     )
     latest_escape = runs_root / "latest_escape"
     _write_role_summary(
@@ -45,6 +47,7 @@ def test_summarize_manifest_pilot_computes_architecture_delta(tmp_path: Path):
         seed=1,
         shared_win=0.25,
         role_win=0.75,
+        mtime=2.0,
     )
     _write_role_summary(
         runs_root / "connection",
@@ -194,9 +197,11 @@ def _write_role_summary(
     seed: int,
     shared_win: float,
     role_win: float,
+    mtime: float | None = None,
 ) -> None:
     directory.mkdir(parents=True)
-    (directory / "role_summary.json").write_text(
+    summary_path = directory / "role_summary.json"
+    summary_path.write_text(
         json.dumps(
             {
                 "generated_family": family,
@@ -221,3 +226,5 @@ def _write_role_summary(
             }
         )
     )
+    if mtime is not None:
+        os.utime(summary_path, (mtime, mtime))

@@ -55,6 +55,17 @@ We now have a working research pipeline with four main parts.
    In plain terms: we are testing whether an agent benefits from having
    role-specific decision machinery in asymmetric games.
 
+The whole pipeline as one picture:
+
+```mermaid
+flowchart LR
+    A["1. Generate<br/>asymmetric game specs"] --> B["2. Validate<br/>playable, non-trivial"]
+    B --> C["3. Stratify<br/>clean, role_inversion, collapse,<br/>seat_sensitive, horizon_stress"]
+    C --> D["4. Evaluate<br/>AlphaZero-lite:<br/>shared_heads vs role_heads"]
+    D --> E["5. Stability analysis<br/>more seeds, more instances"]
+    E -.->|"informs what to generate next"| A
+```
+
 ## How The Games Work
 
 Right now we have two generated game families.
@@ -84,6 +95,16 @@ opposite sides, similar to tafl-like capture logic. If the key reaches an exit,
 the defender wins. If the key is captured, the attacker wins. If the maximum
 ply limit is reached, the game can end in a draw or timeout-style result.
 
+An illustrative sketch (not a specific generated instance):
+
+```text
+. . E . .     E = exit square
+. G K G .     K = key        (defender wins if K reaches an E)
+. . G . .     G = guard      (defender piece)
+A . . . A     A = attacker   (attacker wins by trapping K)
+A . . . A
+```
+
 Why this is useful:
 
 Escape-capture games naturally create asymmetric objectives. One side is trying
@@ -107,12 +128,137 @@ removal.
 
 The board can also contain protected cells, which behave like blocked terrain.
 
+An illustrative sketch (not a specific generated instance):
+
+```text
+W . B B . E     W/E = west and east edges the builder must connect
+W B B . . E     B   = builder marker
+W . . d . E     d   = breaker disruptor (blocks or removes markers)
+W . # . . E     #   = protected cell, behaves like blocked terrain
+```
+
 Why this is useful:
 
 Connection-disruption games give us a different kind of asymmetry. One role is
 constructive: make a path. The other is destructive: block or remove parts of
 that path. This is quite different from escape-capture, so it helps test whether
 an evaluator result is general or family-specific.
+
+## Background: What AlphaZero-Lite Is
+
+AlphaZero (DeepMind, 2017) is a system that learns board games from scratch
+through self-play. It is given only the rules, no human game data. It combines
+two parts that improve each other:
+
+1. **A neural network** that looks at a board position and outputs a *policy*
+   ("which moves look promising here") and a *value* ("who is probably
+   winning").
+
+2. **Monte Carlo Tree Search (MCTS)**, a look-ahead search that simulates
+   possible continuations before each move. The network's policy tells the
+   search which branches are worth exploring; the network's value judges
+   positions without playing them out to the end.
+
+The training loop is self-play: the agent plays games against itself using
+MCTS at every move, then the network is trained on those games. The policy
+head learns to predict what the search concluded (search is smarter than the
+raw network, so it is a useful teacher), and the value head learns to predict
+who actually won. The improved network makes the search stronger, which
+produces better training games, and so on.
+
+```mermaid
+flowchart TD
+    N["Neural network<br/>policy: which moves look good<br/>value: who is winning"]
+    M["MCTS<br/>simulates continuations<br/>before each move"]
+    S["Self-play games<br/>agent plays both roles<br/>against itself"]
+    R["Replay buffer<br/>positions, search policies,<br/>final outcomes"]
+    T["Training step<br/>policy imitates search,<br/>value predicts winner"]
+    N -->|"guides search"| M
+    M -->|"picks moves"| S
+    S -->|"stores examples"| R
+    R -->|"training batches"| T
+    T -->|"improved weights"| N
+```
+
+Our version is "lite" because every knob is shrunk: the network is two conv
+layers plus one small dense layer (`research/asymbench/learning/model.py`),
+the search is a compact PUCT-style MCTS with a small simulation budget
+(`research/asymbench/search/mcts.py`), and training is plain Adam on a single
+GPU. Real AlphaZero used dozens of residual blocks and thousands of TPUs.
+
+The smallness is deliberate, not a compromise. The point is a tractable
+GPU-local evaluator that can be retrained many times, so we can ask "does this
+conclusion survive 8 seeds and 4 generated games?" on an RTX 4080. AlphaZero-
+lite is the measurement instrument in AsymBench, not the product.
+
+## Background: What "Role Heads" Means
+
+In neural network jargon, a *head* is a final output layer. An AlphaZero-style
+network has two: a policy head and a value head. The experiment compares two
+ways of wiring them:
+
+- `shared_heads`: one policy head and one value head, used no matter which
+  role the agent is playing. Both roles' strategies must share the same
+  output weights.
+
+- `role_heads`: the same shared trunk (the layers that read the board), but a
+  separate policy head and value head per role. When the agent moves as
+  attacker, its features go through the attacker's heads; as defender,
+  through the defender's heads.
+
+```mermaid
+flowchart TD
+    subgraph SH["shared_heads"]
+        O1["Board observation"] --> T1["Shared conv trunk"]
+        T1 --> P1["Policy head<br/>used by both roles"]
+        T1 --> V1["Value head<br/>used by both roles"]
+    end
+    subgraph RH["role_heads"]
+        O2["Board observation"] --> T2["Shared conv trunk"]
+        T2 --> RT{"Route by<br/>role id"}
+        RT --> P2A["Policy head<br/>role 0"]
+        RT --> V2A["Value head<br/>role 0"]
+        RT --> P2B["Policy head<br/>role 1"]
+        RT --> V2B["Value head<br/>role 1"]
+    end
+```
+
+The intuition being tested: in an asymmetric game, "escape with the key" and
+"trap the key" are such different objectives that forcing one output layer to
+serve both might hurt. Role heads give each side its own decision machinery.
+In the code this is a single boolean flag on `PolicyValueNet`; everything else
+(trunk size, compute, seeds, MCTS budget) is held identical, so any measured
+difference is attributable to role conditioning.
+
+## Background: Why We Chose The Role-Head Probe
+
+This choice has a paper trail worth remembering in the meeting.
+
+1. **Two nearby papers closed off the obvious angles.** RuleSmith covers LLM
+   balancing of an asymmetric game and MeepleLM covers virtual playtesting
+   (see `ASYMBENCH_NOVELTY_RESEARCH_2026-07-03.md`). What survived was the
+   gap neither touches: generate asymmetric games and measure how agents
+   learn and misunderstand the two roles.
+
+2. **We needed an evaluator manipulation that maps one-to-one to asymmetry.**
+   Shared heads versus role heads is the minimal contrast: same trunk, same
+   compute, same everything except role-specific output layers. Any delta is
+   about asymmetry itself.
+
+3. **There was a prior-art hook.** An AlphaZero-on-Tablut result showed
+   role-specific heads on a highly asymmetric historical game, including
+   instability and role forgetting. So the effect was known to exist; the
+   question was whether it appears in small generated games.
+
+4. **It is tractable.** A run takes hours on the RTX 4080, which is what
+   makes the seed- and strata-level robustness analysis affordable at all.
+
+5. **It was always framed as a probe, not the contribution.** The novelty
+   deep dive explicitly lists "role heads are novel" and "role heads are
+   generally better" as unsafe claims, and defines the metric as
+   architecture *sensitivity*. The probe's job was to demonstrate that the
+   benchmark can detect evaluator-dependent conclusions, and that is exactly
+   what happened.
 
 ## What We Have Actually Tested
 
@@ -176,6 +322,14 @@ The main experiment sequence was:
    positive seed deltas = 18
    negative seed deltas = 8
    zero seed deltas = 6
+   ```
+
+   ```mermaid
+   pie showData
+       title Seed deltas in collapse::escape_capture, role_heads minus shared_heads
+       "positive" : 18
+       "negative" : 8
+       "zero" : 6
    ```
 
    Plain interpretation:
@@ -276,6 +430,53 @@ show when that effect is stable or unstable.
 
 5. The natural next step is to make paper-facing analysis tables/plots and then
    add a small LLM-agent evaluation on selected exemplar games.
+
+## A Likely Question: LLMs Have No Role Heads, So What Then?
+
+If the professor asks this, it is the right question, and the answer supports
+the second framing.
+
+The role-head comparison does not transfer to LLM agents. An LLM has no
+policy/value heads to split per role, so the architecture delta is a
+measurement that only exists for the RL evaluator. But it was never supposed
+to transfer:
+
+- The strata (`clean`, `role_inversion`, `collapse`, ...) are properties of
+  the *games*, defined by random/MCTS behavior. No neural architecture is
+  involved in their definition.
+
+- Role bias, seat bias, per-role win rates, and evaluator disagreement are
+  defined over *any* agent that can play the game. An LLM slots into the
+  evaluator set exactly like MCTS did.
+
+- The underlying question was never "do separate linear layers help." It was
+  "does role-conditioned decision machinery matter in asymmetric games?" For
+  an RL network the conditioning knob is architecture. For an LLM the
+  conditioning knob is the prompt.
+
+| | RL evaluator | LLM evaluator |
+| --- | --- | --- |
+| Role conditioning knob | network heads | prompt |
+| Controlled comparison | `shared_heads` vs `role_heads` | generic prompt vs role-specific prompt |
+| Everything held fixed | trunk, compute, seeds, MCTS budget | model, rules text, board encoding |
+| Sensitivity metric | architecture delta | prompting delta (same definition) |
+
+So the LLM analogue of the role-head experiment is role-conditioned
+prompting: a generic "here are the rules, pick a legal move" prompt versus a
+role-framed prompt that foregrounds that role's objective. Same experimental
+shape, different conditioning knob.
+
+This is also an argument for the framing decision above. A paper framed
+around role-head architecture would not connect to the LLM chapter at all.
+A paper framed around stratified evaluator stress testing treats the
+role-head result as completed case study one and the LLM as case study two:
+
+- If LLM failures line up with the same strata, that validates the strata as
+  real game properties.
+
+- If LLMs fail in different places, that shows evaluator conclusions are
+  agent-class-dependent, which is arguably an even better result for the
+  benchmark story.
 
 ## Suggested Next Experiment
 
